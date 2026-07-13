@@ -1,0 +1,19 @@
+{
+  "name": "O Rolê+ — o que tá rolando perto de você",
+  "short_name": "O Rolê+",
+  "description": "O que tá rolando perto de você, agora. Mapa ao vivo de rolês, bares e eventos.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#e8365b",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Crect width='512' height='512' rx='112' fill='%23171717'/%3E%3Ctext x='50%25' y='53%25' font-family='Arial,sans-serif' font-size='120' font-weight='900' fill='%23e8365b' text-anchor='middle' dominant-baseline='middle' letter-spacing='-4'%3ERol%C3%AA+%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
