@@ -2073,7 +2073,7 @@ function renderPins(){
     const html=`<div class="zpin ${cls}"><div class="drop"><span>${s.priv?'🔒':s.emoji}</span></div></div>`;
     const icon=L.divIcon({className:'',html,iconSize:[40,40],iconAnchor:[20,40]});
     const m=L.marker([s.lat,s.lng],{icon}).addTo(map);
-    m._zid=s.id;m.on('click',()=>openRoom(s.id));markers.push(m);
+    m._zid=s.id;m.on('click',()=>{followUser=false;openRoom(s.id);});markers.push(m);
   });
   document.getElementById('live-count').textContent=rooms.length;
 }
@@ -2097,6 +2097,7 @@ function cardHTML(s){
 }
 function focusCard(s){
   if(!map)return;
+  followUser=false;
   if(window.innerWidth<1024)setSheet('peek');
   setTimeout(()=>{
     map.setView([s.lat,s.lng],17,{animate:true});
