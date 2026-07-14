@@ -33,9 +33,15 @@ Deno.serve(async (req: Request) => {
     // busca o pedido que o app já criou em payment_intents — nunca confia
     // em valor/descrição vindos direto do navegador nessa chamada
     const { data: intent, error: intentErr } = await supabase
-      .from('payment_intents').select('*').eq('order_nsu', order_nsu).single();
-    if (intentErr || !intent || intent.user_id !== user.id) {
-      return new Response(JSON.stringify({ error: 'pedido não encontrado' }), { status: 404, headers: CORS });
+      .from('payment_intents').select('*').eq('order_nsu', order_nsu).maybeSingle();
+    if (intentErr) {
+      return new Response(JSON.stringify({ error: 'erro ao buscar pedido: ' + intentErr.message, order_nsu }), { status: 500, headers: CORS });
+    }
+    if (!intent) {
+      return new Response(JSON.stringify({ error: 'pedido não encontrado no banco (order_nsu=' + order_nsu + ')' }), { status: 404, headers: CORS });
+    }
+    if (intent.user_id !== user.id) {
+      return new Response(JSON.stringify({ error: 'pedido pertence a outro usuário', intent_user: intent.user_id, caller: user.id }), { status: 403, headers: CORS });
     }
 
     const descByKind: Record<string, string> = {
