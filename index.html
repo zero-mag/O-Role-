@@ -3027,7 +3027,7 @@ function updateVitrineHiddenUI(){
   const btn=document.getElementById('vitrine-hide-btn');if(btn)btn.textContent=hidden?'Mostrar vitrine':'Ocultar vitrine';
   const chip=document.getElementById('vitrine-live-chip');if(chip)chip.innerHTML=hidden?'oculta':'<span class="pulse"></span> no ar';
 }
-function delVitrine(i){
+async function delVitrine(i){
   const item=user.vitrine[i];
   user.vitrine.splice(i,1);syncBizRoom();save();renderBizVitrine();applyClubUI();toast('Item removido');
   if(SUPABASE_READY&&item&&item.id){
