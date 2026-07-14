@@ -460,7 +460,7 @@
   .msg.them{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px;}
   .msg.me{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:5px;}
   .composer{display:flex;gap:8px;padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);background:var(--card);border-top:1px solid var(--line);}
-  .composer input{flex:1;padding:13px 16px;border-radius:100px;border:1px solid var(--line-2);background:var(--bg);font-size:14px;}
+  .composer input{flex:1;min-width:0;padding:13px 16px;border-radius:100px;border:1px solid var(--line-2);background:var(--bg);font-size:14px;color:var(--ink);}
   .composer input:focus{outline:none;border-color:var(--accent);}
   .composer .send{width:46px;height:46px;border-radius:50%;background:var(--accent);color:#fff;font-size:19px;flex:none;display:grid;place-items:center;}
 
@@ -635,7 +635,8 @@
   .bpanel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow-sm);}
   .bpanel h3{font-size:15px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
   .bpanel h3 .live-chip{position:static;margin-left:auto;padding:5px 11px;box-shadow:none;border:1px solid var(--line);}
-  .vitrine-hide-btn{font-size:11.5px;font-weight:700;color:var(--ink-3);text-decoration:underline;white-space:nowrap;}
+  .vitrine-hide-btn{font-size:11.5px;font-weight:800;color:var(--accent-dark);background:var(--accent-soft);border:1px solid var(--accent-soft-2);border-radius:100px;padding:6px 12px;white-space:nowrap;}
+  .vitrine-hide-btn.on{color:var(--ink-2);background:var(--card);border-color:var(--line);}
   .bchart{display:flex;align-items:flex-end;gap:10px;height:180px;padding-top:10px;}
   .bchart .bar{flex:1;background:linear-gradient(180deg,var(--accent),var(--accent-dark));border-radius:7px 7px 0 0;position:relative;min-height:6px;}
   .bchart .bar span{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:11px;color:var(--ink-3);}
@@ -649,7 +650,7 @@
   .prod-x{width:26px;height:26px;border-radius:50%;background:var(--bg);color:var(--ink-3);font-size:11px;flex:none;display:grid;place-items:center;margin-left:2px;}
   .prod-x:hover{background:var(--red-soft);color:var(--red-ink);}
   .add-prod{display:grid;grid-template-columns:60px 1fr 170px;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line-2);}
-  .add-prod select,.add-prod input{padding:11px;border:1px solid var(--line-2);border-radius:10px;font-size:13px;background:var(--card);outline:none;min-width:0;}
+  .add-prod select,.add-prod input{padding:11px;border:1px solid var(--line-2);border-radius:10px;font-size:13px;background:var(--card);color:var(--ink);outline:none;min-width:0;}
   .add-prod input::placeholder{font-size:12.5px;}
   .add-prod select:focus,.add-prod input:focus{border-color:var(--accent);}
   .add-prod .np-add{grid-column:1/-1;background:var(--accent);color:#fff;font-weight:800;padding:11px;border-radius:11px;font-size:13.5px;}
@@ -1185,9 +1186,9 @@
         <div class="bhead">
           <div><h1 id="biz-hi">Boa noite 🍺</h1><p>Aqui está o pulso do seu negócio nas últimas 24h.</p></div>
           <div class="bhead-right">
-            <div class="biz-open-toggle" id="biz-open-toggle" onclick="toggleBizOpen()">
-              <span id="biz-open-label">Aberto</span>
-              <div class="switch on" id="biz-open-switch"></div>
+            <div class="biz-open-toggle js-biz-open" onclick="toggleBizOpen()">
+              <span class="js-biz-open-label">Aberto</span>
+              <div class="switch on js-biz-open-switch"></div>
             </div>
             <div class="bav"><div class="ph">🏪</div><div class="nm" id="biz-nm">Empresa<small>Premium</small></div></div>
           </div>
@@ -1287,7 +1288,7 @@
             <button class="btn" onclick="saveBizContacts()">Salvar alterações</button>
           </div>
           <div class="bpanel">
-            <h3><span class="hico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span> Horário de funcionamento</h3>
+            <h3><span class="hico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span> Horário de funcionamento<div class="biz-open-toggle js-biz-open" style="margin-left:auto;" onclick="toggleBizOpen()"><span class="js-biz-open-label">Aberto</span><div class="switch on js-biz-open-switch"></div></div></h3>
             <div id="config-horario"></div>
           </div>
           <div class="bpanel">
@@ -2942,10 +2943,9 @@ function updateBizOpenToggle(){
   if(!user.horario)user.horario=defaultHorario();
   const st=statusHorario({horario:user.horario});
   const open=st.state!=='fechado';
-  const box=document.getElementById('biz-open-toggle');if(!box)return;
-  box.classList.toggle('closed',!open);
-  document.getElementById('biz-open-label').textContent=open?'Aberto':'Fechado';
-  document.getElementById('biz-open-switch').classList.toggle('on',open);
+  document.querySelectorAll('.js-biz-open').forEach(box=>box.classList.toggle('closed',!open));
+  document.querySelectorAll('.js-biz-open-label').forEach(el=>el.textContent=open?'Aberto':'Fechado');
+  document.querySelectorAll('.js-biz-open-switch').forEach(el=>el.classList.toggle('on',open));
 }
 function toggleBizOpen(){
   if(!user)return;
@@ -3028,7 +3028,7 @@ async function toggleVitrineHidden(){
 function updateVitrineHiddenUI(){
   if(!user)return;
   const hidden=!!(user.horario&&user.horario._vitrineHidden);
-  const btn=document.getElementById('vitrine-hide-btn');if(btn)btn.textContent=hidden?'Mostrar vitrine':'Ocultar vitrine';
+  const btn=document.getElementById('vitrine-hide-btn');if(btn){btn.textContent=hidden?'Mostrar vitrine':'Ocultar vitrine';btn.classList.toggle('on',hidden);}
   const chip=document.getElementById('vitrine-live-chip');if(chip)chip.innerHTML=hidden?'oculta':'<span class="pulse"></span> no ar';
 }
 async function delVitrine(i){
