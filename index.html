@@ -30,11 +30,13 @@
     --blue-soft:#eff6ff;--blue-soft-2:#dbeafe;--blue-ink:#1d4ed8;
     --radius:18px;--shadow-sm:0 1px 3px rgba(20,24,35,.06),0 1px 2px rgba(20,24,35,.04);
     --shadow:0 6px 24px rgba(20,24,35,.08);--shadow-lg:0 -8px 40px rgba(20,24,35,.10);
+    --ink-solid:#171717;
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
   }
   html[data-theme="dark"]{
     --accent:#e8365b;--accent-dark:#ff5678;--accent-soft:#3a1620;--accent-soft-2:#52202c;
     --bg:#121212;--card:#1c1c1e;--ink:#f2f2f2;--ink-2:#b8b8b8;--ink-3:#7d7d7d;
+    --ink-solid:#151517;
     --line:#2b2b2b;--line-2:#383838;--green:#22c55e;--amber:#fbbf24;
     --green-soft:#132a1d;--green-soft-2:#1f4a30;
     --amber-soft:#2e2410;--amber-soft-2:#4a3a18;--amber-ink:#f0b93d;
@@ -288,7 +290,7 @@
   .badge-open.abrindo{background:#2563eb;}
   .badge-open.fechado{background:var(--ink-3);}
   /* route banner sobre o mapa */
-  .route-banner{position:absolute;z-index:28;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));display:none;flex-direction:column;background:var(--ink);color:#fff;padding:15px 16px 14px;box-shadow:0 -8px 30px rgba(0,0,0,.28);border-radius:20px 20px 0 0;}
+  .route-banner{position:absolute;z-index:28;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));display:none;flex-direction:column;background:var(--ink-solid);color:#fff;padding:15px 16px 14px;box-shadow:0 -8px 30px rgba(0,0,0,.28);border-radius:20px 20px 0 0;}
   .route-banner.show{display:flex;animation:slideup .32s cubic-bezier(.32,.72,0,1);}
   @keyframes slideup{from{transform:translateY(110%);}to{transform:translateY(0);}}
   .rb-main{display:flex;align-items:center;gap:12px;}
@@ -301,7 +303,7 @@
   /* modo navegação: some feed/chips/etc, sobra o mapa + rota */
   #s-app.nav-mode .chips,#s-app.nav-mode .live-chip,#s-app.nav-mode .sheet,#s-app.nav-mode .show-feed-btn{display:none !important;}
   /* botão flutuante pra reabrir feed no modo só-mapa */
-  .show-feed-btn{position:absolute;z-index:22;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom));display:none;align-items:center;gap:8px;background:var(--ink);color:#fff;font-weight:800;font-size:13px;padding:11px 18px;border-radius:100px;box-shadow:var(--shadow);}
+  .show-feed-btn{position:absolute;z-index:22;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom));display:none;align-items:center;gap:8px;background:var(--ink-solid);color:#fff;font-weight:800;font-size:13px;padding:11px 18px;border-radius:100px;box-shadow:var(--shadow);}
   .show-feed-btn.show{display:flex;animation:fade .25s;}
   .card{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow-sm);}
   .card:active{background:var(--bg);}
@@ -488,9 +490,17 @@
   .club-benefits li:last-child{border:none;}
   .club-benefits li .ic{font-size:18px;flex:none;}
 
-  /* toast */
-  #toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;background:var(--ink);color:#fff;padding:12px 20px;border-radius:100px;font-size:13.5px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;}
+  /* toast (avisos rápidos, não-críticos) */
+  #toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;background:var(--ink-solid);color:#fff;padding:12px 20px;border-radius:18px;font-size:13.5px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;max-width:82%;text-align:center;line-height:1.4;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* alerta de erro — grande, centralizado, não passa despercebido */
+  #err-modal{position:absolute;inset:0;z-index:350;background:rgba(15,17,23,.6);display:none;align-items:center;justify-content:center;padding:30px;backdrop-filter:blur(2px);}
+  #err-modal.show{display:flex;}
+  #err-modal .err-box{background:var(--card);border-radius:20px;padding:28px 24px 22px;max-width:300px;text-align:center;box-shadow:var(--shadow-lg);animation:modalIn .22s cubic-bezier(.32,.72,0,1);}
+  #err-modal .err-ic{font-size:38px;margin-bottom:12px;}
+  #err-modal .err-text{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.55;margin-bottom:20px;}
+  #err-modal .err-close{background:var(--accent);color:#fff;font-weight:800;font-size:14px;padding:12px 30px;border-radius:100px;width:auto;}
 
   /* loading overlay (login/cadastro/pagamento/criar rolê) — mesma cara da splash */
   #loading-overlay{position:absolute;inset:0;z-index:300;background:linear-gradient(160deg,var(--accent),var(--accent-dark));display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;}
@@ -1456,6 +1466,7 @@
 
   <div id="toast"></div>
   <div id="loading-overlay"><div class="lo-logo">O Rolê<span>+</span></div><div class="lo-text" id="lo-text">Aguarde…</div><div class="lo-spin"></div></div>
+  <div id="err-modal"><div class="err-box"><div class="err-ic">⚠️</div><div class="err-text" id="err-text"></div><button class="btn err-close" onclick="closeErrModal()">Entendi</button></div></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1635,6 +1646,8 @@ function resetNav(){navHistory=[];}
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
 function showLoading(text){document.getElementById('lo-text').textContent=text||'Aguarde…';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
+function toastError(t){document.getElementById('err-text').textContent=t;document.getElementById('err-modal').classList.add('show');}
+function closeErrModal(){document.getElementById('err-modal').classList.remove('show');}
 
 /* ============ AUTH ============ */
 async function doLogin(){
@@ -1650,7 +1663,7 @@ async function doLogin(){
       user=profileToUser(profile);
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();routeAfterAuth();
-    }catch(e){toast('E-mail ou senha incorretos');}
+    }catch(e){toastError('E-mail ou senha incorretos');}
     finally{hideLoading();}
     return;
   }
@@ -1932,7 +1945,7 @@ async function doSignup(){
       user.id=authUser.id;
       toast('Conta criada! 🎉 Confira seu e-mail pra confirmar.');
       save();openInstallScreen();
-    }catch(e){toast('Não deu pra criar a conta: '+(e.message||'tente de novo'));}
+    }catch(e){toastError('Não deu pra criar a conta: '+(e.message||'tente de novo'));}
     finally{hideLoading();}
     return;
   }
@@ -2613,7 +2626,7 @@ async function publishPending(){
         boost_until:pendingRoom.boost?new Date(Date.now()+durH*3600e3).toISOString():null
       });
       await loadRoomsFromSupabase();
-    }catch(e){toast('Não deu pra publicar no servidor — salvo só localmente');rooms.unshift(pendingRoom);}
+    }catch(e){toastError('Não deu pra publicar no servidor — salvo só localmente');rooms.unshift(pendingRoom);}
     finally{hideLoading();}
   }else{
     rooms.unshift(pendingRoom);save();
@@ -2649,7 +2662,7 @@ async function startInfinitePayCheckout(kind,amountCents,description,payload){
     const {data,error}=await sb.functions.invoke('create-checkout',{body:{order_nsu:orderNsu,redirect_url:location.origin+location.pathname}});
     if(error||!data||!data.url)throw new Error((data&&data.error)||(error&&error.message)||'Não deu pra iniciar o pagamento');
     location.href=data.url;
-  }catch(e){toast('Erro ao iniciar pagamento: '+(e.message||'tente de novo'));}
+  }catch(e){toastError('Erro ao iniciar pagamento: '+(e.message||'tente de novo'));}
   finally{hideLoading();}
 }
 async function checkPaymentReturn(){
@@ -2660,12 +2673,12 @@ async function checkPaymentReturn(){
   toast('Confirmando pagamento…');
   try{
     const {data,error}=await sb.functions.invoke('verify-payment',{body:{order_nsu,transaction_nsu,slug}});
-    if(error||!data||!data.ok){toast('Não conseguimos confirmar o pagamento 😕');return;}
+    if(error||!data||!data.ok){toastError('Não conseguimos confirmar o pagamento 😕');return;}
     toast(data.already?'Pagamento já confirmado ✓':'Pagamento confirmado! 🎉');
     if(user){const profile=await sbGetProfile(user.id);user=profileToUser(profile);save();}
     await loadRoomsFromSupabase();
     if(user&&user.type==='business')fillBiz();
-  }catch(e){toast('Erro ao confirmar pagamento');}
+  }catch(e){toastError('Erro ao confirmar pagamento');}
 }
 
 /* ============ ROOM / PRIVATE / CHAT ============ */
@@ -2795,7 +2808,7 @@ async function enterChat(r){
     try{
       const history=await sbLoadMessages(r.id);
       history.forEach(msg=>addMsg(msg.texto,(user&&msg.sender_id===user.id)?'me':'them',msg.sender_name));
-    }catch(e){/* sala sem histórico ainda */}
+    }catch(e){console.error('Falha ao carregar histórico do chat',e);addMsg('Não consegui carregar as mensagens antigas dessa sala.','them','Sistema');}
     chatChannel=sbSubscribeMessages(r.id,msg=>{
       if(user&&msg.sender_id===user.id)return; // já mostramos a nossa mensagem na hora de enviar
       addMsg(msg.texto,'them',msg.sender_name);
@@ -2814,7 +2827,7 @@ async function sendMsg(){
   addMsg(t,'me');i.value='';
   if(SUPABASE_READY&&chatRoom){
     try{await sbSendMessage(chatRoom.id,(user&&user.name)||'Você',t);}
-    catch(e){toast('Mensagem não foi salva — verifique sua conexão');}
+    catch(e){toastError('Mensagem não foi salva — verifique sua conexão');}
   }
 }
 
