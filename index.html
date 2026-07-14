@@ -1205,7 +1205,7 @@
         </div>
         <div class="bgrid">
           <div class="bpanel"><h3>Visitas ao perfil por hora</h3><div class="bchart" id="bchart"></div></div>
-          <div class="bpanel" id="biz-vitrine-panel"><h3>Minha Vitrine <span class="live-chip" id="vitrine-live-chip"><span class="pulse"></span> no ar</span><button class="vitrine-hide-btn" id="vitrine-hide-btn" onclick="toggleVitrineHidden()">Ocultar vitrine</button></h3>
+          <div class="bpanel" id="biz-vitrine-panel"><h3>Minha Vitrine <span class="live-chip" id="vitrine-live-chip"><span class="pulse"></span> no ar</span><button class="vitrine-hide-btn" onclick="shareOwnRoom()" title="Compartilhar"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:3px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.8M8.6 13.5l6.8 3.8"/></svg>Compartilhar</button><button class="vitrine-hide-btn" id="vitrine-hide-btn" onclick="toggleVitrineHidden()">Ocultar vitrine</button></h3>
             <div id="biz-vitrine"></div>
             <p id="biz-vitrine-hint" style="font-size:12px;color:var(--ink-3);margin-top:8px;"></p>
             <div class="add-prod" id="vitrine-add-form">
@@ -2763,24 +2763,78 @@ function openRoom(id){
   if(r.isBusiness){openBizProfile(r);return;}
   openRoleProfile(r);
 }
+function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight,maxLines){
+  const words=(text||'').split(' ');let line='';const lines=[];
+  for(const w of words){
+    const test=line+w+' ';
+    if(ctx.measureText(test).width>maxWidth&&line){lines.push(line.trim());line=w+' ';}
+    else line=test;
+  }
+  if(line)lines.push(line.trim());
+  const capped=maxLines?lines.slice(0,maxLines):lines;
+  capped.forEach((l,i)=>ctx.fillText(l,x,y+i*lineHeight));
+  return capped.length*lineHeight;
+}
+// gera uma imagem do card na hora (funciona com ou sem foto de capa cadastrada)
+async function generateShareCard(r){
+  const W=640,H=800;
+  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  const photoUrl=r.cover||r.avatar;
+  let bgImg=null;
+  if(photoUrl){
+    try{bgImg=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=photoUrl;});}catch(e){bgImg=null;}
+  }
+  if(bgImg){
+    const scale=Math.max(W/bgImg.width,H/bgImg.height);
+    const w=bgImg.width*scale,h=bgImg.height*scale;
+    ctx.drawImage(bgImg,(W-w)/2,(H-h)/2,w,h);
+    ctx.fillStyle='rgba(15,17,23,.55)';ctx.fillRect(0,0,W,H);
+  }else{
+    const grad=ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#e8365b');grad.addColorStop(1,'#8a1030');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  }
+  ctx.textAlign='center';
+  ctx.font='130px sans-serif';ctx.fillStyle='#fff';
+  ctx.fillText(r.priv?'🔒':(r.emoji||'🎉'),W/2,270);
+  ctx.font='bold 48px sans-serif';ctx.fillStyle='#fff';
+  let y=350+wrapCanvasText(ctx,r.nome,W/2,350,W-100,56,2);
+  ctx.font='28px sans-serif';ctx.fillStyle='rgba(255,255,255,.88)';
+  const statusTxt=r.isBusiness?statusBadgeTxt(statusHorario(r).state):(r.cat||'');
+  ctx.fillText((r.cat||'')+(r.isBusiness&&r.cat?' · ':'')+statusTxt,W/2,y+30);
+  if(r.address){
+    ctx.font='22px sans-serif';ctx.fillStyle='rgba(255,255,255,.72)';
+    wrapCanvasText(ctx,'📍 '+r.address,W/2,y+80,W-140,28,2);
+  }
+  ctx.font='bold 34px sans-serif';ctx.fillStyle='#fff';
+  ctx.fillText('O Rolê+',W/2,H-64);
+  ctx.font='19px sans-serif';ctx.fillStyle='rgba(255,255,255,.75)';
+  ctx.fillText('Toque no link pra participar',W/2,H-34);
+  return new Promise(res=>canvas.toBlob(b=>res(b),'image/png'));
+}
 async function shareRoom(r){
   if(!r)return;
   const url=location.origin+location.pathname+'?room='+r.id;
-  const text=(r.isBusiness?'Dá uma olhada no '+r.nome+' no O Rolê+! ':'Bora pro '+r.nome+' no O Rolê+! ')+(r.cat?'('+r.cat+') ':'')+'👇';
-  const imgUrl=r.cover||r.avatar;
-  let shareData={title:r.nome,text:text+' '+url};
-  if(imgUrl&&navigator.canShare){
-    try{
-      const blob=await(await fetch(imgUrl)).blob();
-      const file=new File([blob],'role.jpg',{type:blob.type||'image/jpeg'});
-      if(navigator.canShare({files:[file]}))shareData={title:r.nome,text:text+' '+url,files:[file]};
-    }catch(e){}
-  }
+  const text=(r.isBusiness?'Dá uma olhada no '+r.nome+' no O Rolê+! ':'Bora pro '+r.nome+' no O Rolê+! ')+(r.cat?'('+r.cat+') ':'')+'👇 '+url;
+  let shareData={title:r.nome,text};
+  try{
+    const blob=await generateShareCard(r);
+    if(blob){
+      const file=new File([blob],'role.png',{type:'image/png'});
+      if(!navigator.canShare||navigator.canShare({files:[file]}))shareData={title:r.nome,text,files:[file]};
+    }
+  }catch(e){}
   if(navigator.share){
     try{await navigator.share(shareData);}catch(e){}
   }else{
-    try{await navigator.clipboard.writeText(text+' '+url);toast('Link copiado ✓');}catch(e){toast(url);}
+    try{await navigator.clipboard.writeText(text);toast('Link copiado ✓');}catch(e){toast(url);}
   }
+}
+function shareOwnRoom(){
+  if(!user||!user.roomId)return;
+  const r=rooms.find(x=>x.id===user.roomId);
+  if(r)shareRoom(r);
 }
 // abre direto um negócio/rolê quando alguém entra pelo link compartilhado (?room=ID)
 function openSharedRoomFromUrl(){
