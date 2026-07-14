@@ -87,6 +87,7 @@
   .splash-tag{font-size:14px;opacity:.9;margin-top:4px;letter-spacing:1.5px;animation:splashpop .6s .1s backwards;}
   .splash-dot{width:34px;height:34px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;margin-top:34px;animation:spin .8s linear infinite;}
   @keyframes splashpop{from{transform:scale(.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+  @keyframes centerPop{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
   @keyframes plusPop{from{transform:scale(0) rotate(-45deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
 
   /* ---------- ONBOARDING ---------- */
@@ -476,7 +477,7 @@
   /* modal */
   .modal-bg{position:absolute;inset:0;z-index:100;background:rgba(20,24,35,.5);display:none;align-items:center;justify-content:center;padding:26px;backdrop-filter:blur(2px);}
   .modal-bg.active{display:flex;animation:fade .2s;}
-  .modal{background:var(--card);border-radius:22px;padding:24px;width:100%;max-width:340px;text-align:center;box-shadow:var(--shadow);}
+  .modal{background:var(--card);border-radius:22px;padding:24px;width:100%;max-width:340px;text-align:center;box-shadow:var(--shadow);animation:centerPop .22s cubic-bezier(.32,.72,0,1);}
   .modal .mem{font-size:44px;margin-bottom:8px;}
   .modal h3{font-size:18px;font-weight:800;margin-bottom:6px;}
   .modal p{font-size:13.5px;color:var(--ink-2);margin-bottom:18px;line-height:1.4;}
@@ -497,7 +498,7 @@
   /* alerta de erro — grande, centralizado, não passa despercebido */
   #err-modal{position:absolute;inset:0;z-index:350;background:rgba(15,17,23,.6);display:none;align-items:center;justify-content:center;padding:30px;backdrop-filter:blur(2px);}
   #err-modal.show{display:flex;}
-  #err-modal .err-box{background:var(--card);border-radius:20px;padding:28px 24px 22px;max-width:300px;text-align:center;box-shadow:var(--shadow-lg);animation:modalIn .22s cubic-bezier(.32,.72,0,1);}
+  #err-modal .err-box{background:var(--card);border-radius:20px;padding:28px 24px 22px;max-width:300px;text-align:center;box-shadow:var(--shadow-lg);animation:centerPop .22s cubic-bezier(.32,.72,0,1);}
   #err-modal .err-ic{font-size:38px;margin-bottom:12px;}
   #err-modal .err-text{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.55;margin-bottom:20px;}
   #err-modal .err-close{background:var(--accent);color:#fff;font-weight:800;font-size:14px;padding:12px 30px;border-radius:100px;width:auto;}
@@ -1385,7 +1386,7 @@
         <div class="list-item" onclick="openTerms('privacidade')"><span class="ic">🔒</span> Política de Privacidade <span class="ch">›</span></div>
       </div>
       <div style="padding:18px 4px;"><button class="btn ghost" onclick="logout()">Sair da conta</button></div>
-      <p style="text-align:center;color:var(--ink-3);font-size:12px;">O Rolê+ · protótipo v0.9</p>
+      <p style="text-align:center;color:var(--ink-3);font-size:12px;">O Rolê+ · v1.0</p>
     </div>
   </section>
 
@@ -2420,8 +2421,6 @@ function acceptTerms(){
 function closeTerms(){goBack();}
 const TERMS_HTML=`
 <div class="legal">
-  <div class="legal-note">📄 Documento modelo em construção. Antes do lançamento público, deve ser revisado por um advogado. Última atualização: julho/2026.</div>
-
   <h4>1. Sobre o Rolê+</h4>
   <p>O Rolê+ é uma plataforma de descoberta local que mostra, em um mapa ao vivo, rolês, eventos e estabelecimentos acontecendo perto de você. Ao criar uma conta e usar o app, você concorda com estes Termos de Uso e com a Política de Privacidade abaixo.</p>
 
