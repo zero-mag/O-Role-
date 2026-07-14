@@ -2057,7 +2057,11 @@ function startLocationWatch(){
   userWatchId=navigator.geolocation.watchPosition(
     p=>{
       userPos={lat:p.coords.latitude,lng:p.coords.longitude};hasRealLocation=true;
-      if(map){renderUserDot();if(followUser)map.setView([userPos.lat,userPos.lng],Math.max(map.getZoom(),15));}
+      if(map){
+        renderUserDot();
+        if(navTarget){map.setView([userPos.lat,userPos.lng],18);updateNavProgress();}
+        else if(followUser)map.setView([userPos.lat,userPos.lng],Math.max(map.getZoom(),15));
+      }
     },
     e=>{if(e.code===1)toast('Ative a localização pra ver os rolês perto de você');},
     {enableHighAccuracy:true,timeout:15000,maximumAge:10000}
@@ -2230,11 +2234,15 @@ const NAV_MSGS=[
   '📍 Ao chegar, confira o local e fique atento aos seus pertences.'
 ];
 let navMsgTimer=null;
+let navTarget=null,navSpeedMs=1.4;
 function showRoute(r){go('s-app',true);setTimeout(()=>enterNav(r),140);}
 function enterNav(r){
+  navTarget=r;
   document.getElementById('s-app').classList.add('nav-mode');
   markers.forEach(m=>{if(m._zid!==r.id&&map.hasLayer(m))map.removeLayer(m);});
   drawRoute(r);
+  followUser=true;
+  if(hasRealLocation)map.setView([userPos.lat,userPos.lng],18);
   let i=0;const msg=document.getElementById('route-msg');msg.textContent=NAV_MSGS[0];
   clearInterval(navMsgTimer);
   navMsgTimer=setInterval(()=>{i=(i+1)%NAV_MSGS.length;msg.style.opacity='0';
@@ -2250,18 +2258,32 @@ async function drawRoute(r){
     const res=await fetch(u);const d=await res.json();
     if(d.routes&&d.routes[0]){coords=d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);dist=d.routes[0].distance;dur=d.routes[0].duration;}
   }catch(e){}
+  navSpeedMs=dist>0?(dist/Math.max(dur,1)):1.4;
   routeLine=L.polyline(coords,{color:'#e8365b',weight:5,opacity:.9,lineJoin:'round'}).addTo(map);
-  map.fitBounds(routeLine.getBounds(),{paddingTopLeft:[40,130],paddingBottomRight:[40,180]});
-  const km=(dist/1000).toFixed(1).replace('.',','),min=Math.max(1,Math.round(dur/60));
-  document.getElementById('route-eta').textContent=min+' min';
-  document.getElementById('route-dist').textContent=km+' km de distância';
+  if(!navTarget)map.fitBounds(routeLine.getBounds(),{paddingTopLeft:[40,130],paddingBottomRight:[40,180]});
   document.getElementById('route-dest').textContent='Rota até '+r.nome;
+  updateNavProgress();
   document.getElementById('route-banner').classList.add('show');
+}
+// chamado a cada atualização de GPS (startLocationWatch) enquanto a navegação está ativa —
+// é isso que faz a rota se comportar tipo GPS de verdade, em vez de um preview parado
+function updateNavProgress(){
+  if(!navTarget||!hasRealLocation)return;
+  const dist=haversine(userPos,{lat:navTarget.lat,lng:navTarget.lng});
+  if(dist<30){
+    toast('Você chegou em '+navTarget.nome+' 🎉');
+    clearRoute();
+    return;
+  }
+  const km=(dist/1000).toFixed(1).replace('.',','),min=Math.max(1,Math.round(dist/navSpeedMs/60));
+  document.getElementById('route-eta').textContent=min+' min';
+  document.getElementById('route-dist').textContent=(dist<1000?Math.round(dist)+' m':km+' km')+' de distância';
 }
 function clearRoute(keepBanner){
   if(routeLine){map.removeLayer(routeLine);routeLine=null;}
   if(routeMarker){map.removeLayer(routeMarker);routeMarker=null;}
   if(!keepBanner){
+    navTarget=null;
     document.getElementById('route-banner').classList.remove('show');
     clearInterval(navMsgTimer);
     document.getElementById('s-app').classList.remove('nav-mode');
