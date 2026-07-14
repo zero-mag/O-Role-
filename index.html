@@ -312,9 +312,11 @@
   .card{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow-sm);}
   .card:active{background:var(--bg);}
   .card .thumb{position:relative;width:52px;height:52px;border-radius:14px;flex:none;display:grid;place-items:center;font-size:24px;background:var(--accent-soft);}
-  .save-btn{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);display:grid;place-items:center;font-size:11px;filter:grayscale(1);opacity:.55;}
+  .save-btn{position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);display:grid;place-items:center;color:var(--ink-2);}
+  .save-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .save-btn:active{transform:scale(.92);}
-  .save-btn.saved{filter:none;opacity:1;background:var(--accent-soft);border-color:var(--accent-soft-2);}
+  .save-btn.saved{color:#fff;background:var(--accent);border-color:var(--accent);}
+  .save-btn.saved svg{fill:currentColor;}
   .card .info{flex:1;min-width:0;}
   .card .info .name{font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px;}
   .card .info .meta{font-size:12.5px;color:var(--ink-2);margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
@@ -377,6 +379,7 @@
   .zpin .drop{width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--accent);border:2.5px solid #fff;box-shadow:0 4px 10px rgba(20,24,35,.28);display:grid;place-items:center;}
   .zpin .drop span{transform:rotate(45deg);font-size:18px;}
   .zpin.priv .drop{background:#4b5563;}
+  .zpin.closed .drop{background:#9a9a9a;opacity:.75;filter:grayscale(1);}
   /* bolinha do usuário (você está aqui) */
   .userdot{position:relative;width:22px;height:22px;}
   .userdot .udot{position:absolute;left:50%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
@@ -520,7 +523,8 @@
   /* ---------- BUSINESS PUBLIC PROFILE ---------- */
   #s-bizprofile{background:var(--bg);}
   .bp-cover{position:relative;background:linear-gradient(155deg,var(--ink),#2c2c2c);background-size:cover;background-position:center;padding:calc(env(safe-area-inset-top) + 12px) 18px 0;color:#fff;}
-  .bp-save-btn{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:18px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:16px;display:grid;place-items:center;z-index:2;}
+  .bp-save-btn{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:18px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;display:grid;place-items:center;z-index:2;border:none;}
+  .bp-save-btn svg{width:16px;height:16px;}
   .bp-save-btn.saved{background:var(--accent);}
   .bp-cover.has-cover{position:relative;}
   .bp-cover.has-cover::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55));}
@@ -605,10 +609,13 @@
   .bmain .bhead{display:flex;align-items:center;margin-bottom:24px;}
   .bmain .bhead h1{font-size:24px;font-weight:800;}
   .bmain .bhead p{color:var(--ink-2);font-size:13.5px;margin-top:4px;}
-  .bmain .bhead .bav{margin-left:auto;display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 14px;box-shadow:var(--shadow-sm);}
+  .bmain .bhead .bhead-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  .bmain .bhead .bav{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 14px;box-shadow:var(--shadow-sm);}
   .bmain .bhead .bav .ph{width:38px;height:38px;border-radius:11px;background:var(--accent-soft);display:grid;place-items:center;font-size:18px;}
   .bmain .bhead .bav .nm{font-size:13.5px;font-weight:800;}
   .bmain .bhead .bav .nm small{display:block;color:var(--accent);font-weight:700;font-size:11px;}
+  .biz-open-toggle{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:100px;padding:7px 8px 7px 14px;box-shadow:var(--shadow-sm);font-size:12.5px;font-weight:800;cursor:pointer;color:var(--ink);}
+  .biz-open-toggle.closed{color:var(--ink-3);}
   .bstats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
   .bstat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow-sm);position:relative;}
   .bstat .spark{position:absolute;right:16px;top:16px;font-size:20px;}
@@ -1168,7 +1175,13 @@
         <input type="file" id="file-avatar" accept="image/*" style="display:none" onchange="onPhoto(event,'avatar')" />
         <div class="bhead">
           <div><h1 id="biz-hi">Boa noite 🍺</h1><p>Aqui está o pulso do seu negócio nas últimas 24h.</p></div>
-          <div class="bav"><div class="ph">🏪</div><div class="nm" id="biz-nm">Empresa<small>Premium</small></div></div>
+          <div class="bhead-right">
+            <div class="biz-open-toggle" id="biz-open-toggle" onclick="toggleBizOpen()">
+              <span id="biz-open-label">Aberto</span>
+              <div class="switch on" id="biz-open-switch"></div>
+            </div>
+            <div class="bav"><div class="ph">🏪</div><div class="nm" id="biz-nm">Empresa<small>Premium</small></div></div>
+          </div>
         </div>
         <div class="bstats">
           <div class="bstat" id="bstat-alcance"><span class="spark"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span><div class="lbl">Alcance no mapa</div><div class="val">0</div><div class="trend">Sem dados ainda</div></div>
@@ -1296,7 +1309,7 @@
   <section class="screen" id="s-bizprofile">
     <div class="bp-cover">
       <button class="bp-back" onclick="goBack()">‹</button>
-      <button class="save-btn bp-save-btn" id="bp-save-btn" title="Salvar local">🔖</button>
+      <button class="save-btn bp-save-btn" id="bp-save-btn" title="Salvar local"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg></button>
       <div class="bp-top">
         <div class="bp-av" id="bp-av">🏪</div>
         <div class="bp-tt"><div class="bp-name" id="bp-name"></div><div class="bp-seg" id="bp-seg"></div></div>
@@ -2080,7 +2093,8 @@ function isFeatured(r){return isBoosted(r)||isClub(r);}
 function renderPins(){
   if(!map)return;markers.forEach(m=>map.removeLayer(m));markers=[];
   filtered().forEach(s=>{
-    const cls=(s.priv?'priv ':'')+(isClub(s)?'club':(isBoosted(s)?'boost':''));
+    const fechado=s.isBusiness&&statusHorario(s).state==='fechado';
+    const cls=(s.priv?'priv ':'')+(fechado?'closed':(isClub(s)?'club':(isBoosted(s)?'boost':'')));
     const html=`<div class="zpin ${cls}"><div class="drop"><span>${s.priv?'🔒':s.emoji}</span></div></div>`;
     const icon=L.divIcon({className:'',html,iconSize:[40,40],iconAnchor:[20,40]});
     const m=L.marker([s.lat,s.lng],{icon}).addTo(map);
@@ -2097,7 +2111,7 @@ function cardHTML(s){
   const destaque=club?' <span class="badge-club">⭐ ROLÊ+</span>':(boosted?' <span class="badge-boost">🚀 EM DESTAQUE</span>':'');
   const nameExtra=(isB?' <span class="verified">◆</span>':'')+destaque;
   const timerEl=isB?'':`<span class="timer" data-exp="${s.expiresAt}">⏱ ${fmtRemaining(s.expiresAt)}</span>`;
-  const saveBtn=isB?`<button class="save-btn${savedPlaces.includes(s.id)?' saved':''}" data-id="${s.id}" title="Salvar local">🔖</button>`:'';
+  const saveBtn=isB?`<button class="save-btn${savedPlaces.includes(s.id)?' saved':''}" data-id="${s.id}" title="Salvar local"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg></button>`:'';
   el.innerHTML=`<div class="thumb">${s.priv?'🔒':s.emoji}${saveBtn}</div>
     <div class="info"><div class="name">${s.nome}${nameExtra}</div>
       <div class="meta"><span>${s.cat}</span><span class="sep">·</span>${isB?(()=>{const st=statusHorario(s);return `<span class="badge-open ${st.state}">${statusBadgeTxt(st.state)}</span>`;})():`<span class="on">${s.membros} online</span>`}<span class="sep">·</span><span>${s.dist}m</span></div></div>
@@ -2880,10 +2894,29 @@ function fillBiz(){
   renderAllHorarios();
   updateBoostStat();
   applyClubUI();
+  updateBizOpenToggle();
   bizTab('dash');
   const bc=document.getElementById('bchart');if(bc.childElementCount)return;
   // Sem coleta de métricas ainda — mostra estado vazio honesto em vez de números inventados.
   bc.innerHTML='<p style="color:var(--ink-3);font-size:13px;padding:20px 0;text-align:center;width:100%;">Ainda sem visitas registradas.</p>';
+}
+function updateBizOpenToggle(){
+  if(!user)return;
+  if(!user.horario)user.horario=defaultHorario();
+  const st=statusHorario({horario:user.horario});
+  const open=st.state!=='fechado';
+  const box=document.getElementById('biz-open-toggle');if(!box)return;
+  box.classList.toggle('closed',!open);
+  document.getElementById('biz-open-label').textContent=open?'Aberto':'Fechado';
+  document.getElementById('biz-open-switch').classList.toggle('on',open);
+}
+function toggleBizOpen(){
+  if(!user)return;
+  if(!user.horario)user.horario=defaultHorario();
+  const st=statusHorario({horario:user.horario});
+  user.horario._forced=(st.state!=='fechado')?'fechado':'aberto';
+  syncBizRoom();save();updateBizOpenToggle();
+  toast(user.horario._forced==='fechado'?'Marcado como fechado':'Marcado como aberto');
 }
 function bizTab(name){
   document.querySelectorAll('#s-biz .bview').forEach(v=>v.classList.remove('show'));
@@ -3118,6 +3151,8 @@ function fmtHojeResumo(r){
 }
 // status pro cliente: 'aberto' | 'fechando' (<=60min pra fechar) | 'abrindo' (<=60min pra abrir) | 'fechado'
 function statusHorario(r){
+  if(r.horario&&r.horario._forced==='fechado')return {state:'fechado',label:'Fechado agora',sub:'',forced:true};
+  if(r.horario&&r.horario._forced==='aberto')return {state:'aberto',label:'Aberto agora',sub:'',forced:true};
   if(!r.horario)return {state:'aberto',label:'Aberto agora',sub:''};
   const now=new Date(),k=DIA_KEYS[now.getDay()],d=r.horario[k];
   const cur=now.getHours()*60+now.getMinutes();
