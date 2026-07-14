@@ -1664,7 +1664,16 @@ async function doLogin(){
       user=profileToUser(profile);
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();routeAfterAuth();
-    }catch(e){toastError('E-mail ou senha incorretos');}
+    }catch(e){
+      const msg=(e&&e.message)||'';
+      if(/email not confirmed/i.test(msg)){
+        toastError('Seu e-mail ainda não foi confirmado. Veja sua caixa de entrada (e o spam) e toque no link de confirmação antes de entrar.');
+      }else if(/invalid login credentials/i.test(msg)){
+        toastError('E-mail ou senha incorretos.');
+      }else{
+        toastError('Não deu pra entrar: '+(msg||'tente de novo'));
+      }
+    }
     finally{hideLoading();}
     return;
   }
