@@ -2768,7 +2768,7 @@ async function shareRoom(r){
   const url=location.origin+location.pathname+'?room='+r.id;
   const text=(r.isBusiness?'Dá uma olhada no '+r.nome+' no O Rolê+! ':'Bora pro '+r.nome+' no O Rolê+! ')+(r.cat?'('+r.cat+') ':'')+'👇';
   const imgUrl=r.cover||r.avatar;
-  let shareData={title:r.nome,text:text+' '+url,url};
+  let shareData={title:r.nome,text:text+' '+url};
   if(imgUrl&&navigator.canShare){
     try{
       const blob=await(await fetch(imgUrl)).blob();
