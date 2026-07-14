@@ -2725,7 +2725,13 @@ async function startInfinitePayCheckout(kind,amountCents,description,payload){
     // a API do InfinitePay bloqueia chamada direta do navegador (CORS) — passa pela
     // Edge Function create-checkout, que roda no servidor e não tem essa restrição
     const {data,error}=await sb.functions.invoke('create-checkout',{body:{order_nsu:orderNsu,redirect_url:location.origin+location.pathname}});
-    if(error||!data||!data.url)throw new Error((data&&data.error)||(error&&error.message)||'Não deu pra iniciar o pagamento');
+    if(error||!data||!data.url){
+      let detail=(data&&data.error)||(error&&error.message)||'sem detalhes';
+      if(error&&error.context&&typeof error.context.text==='function'){
+        try{detail+=' | corpo: '+(await error.context.text()).slice(0,200);}catch(e2){}
+      }
+      throw new Error(detail);
+    }
     location.href=data.url;
   }catch(e){toastError('Erro ao iniciar pagamento: '+(e.message||'tente de novo'));}
   finally{hideLoading();}
