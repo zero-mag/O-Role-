@@ -524,6 +524,8 @@
   #s-bizprofile{background:var(--bg);}
   .bp-cover{position:relative;background:linear-gradient(155deg,var(--ink),#2c2c2c);background-size:cover;background-position:center;padding:calc(env(safe-area-inset-top) + 12px) 18px 0;color:#fff;}
   .bp-save-btn{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:18px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;display:grid;place-items:center;z-index:2;border:none;}
+  .bp-share-btn{position:absolute;top:calc(env(safe-area-inset-top) + 54px);right:18px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;display:grid;place-items:center;z-index:2;border:none;}
+  .bp-share-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .bp-save-btn svg{width:16px;height:16px;}
   .bp-save-btn.saved{background:var(--accent);}
   .bp-cover.has-cover{position:relative;}
@@ -1319,6 +1321,7 @@
     <div class="bp-cover">
       <button class="bp-back" onclick="goBack()">‹</button>
       <button class="save-btn bp-save-btn" id="bp-save-btn" title="Salvar local"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg></button>
+      <button class="bp-share-btn" onclick="shareRoom(currentBiz)" title="Compartilhar"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.8M8.6 13.5l6.8 3.8"/></svg></button>
       <div class="bp-top">
         <div class="bp-av" id="bp-av">🏪</div>
         <div class="bp-tt"><div class="bp-name" id="bp-name"></div><div class="bp-seg" id="bp-seg"></div></div>
@@ -1343,6 +1346,7 @@
   <section class="screen" id="s-roleprofile">
     <div class="bp-cover">
       <button class="bp-back" onclick="goBack()">‹</button>
+      <button class="bp-share-btn" style="top:calc(env(safe-area-inset-top) + 12px);" onclick="shareRoom(currentRole)" title="Compartilhar"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.8M8.6 13.5l6.8 3.8"/></svg></button>
       <div class="bp-top">
         <div class="bp-av" id="rp-av">🎉</div>
         <div class="bp-tt"><div class="bp-name" id="rp-name">Rolê</div><div class="bp-seg" id="rp-meta">Categoria</div></div>
@@ -2726,10 +2730,11 @@ async function startInfinitePayCheckout(kind,amountCents,description,payload){
     // Edge Function create-checkout, que roda no servidor e não tem essa restrição
     const {data,error}=await sb.functions.invoke('create-checkout',{body:{order_nsu:orderNsu,redirect_url:location.origin+location.pathname}});
     if(error||!data||!data.url){
-      let detail=(data&&data.error)||(error&&error.message)||'sem detalhes';
+      let detail=(data&&data.error)||(error&&error.message)||'';
       if(error&&error.context&&typeof error.context.text==='function'){
         try{detail+=' | corpo: '+(await error.context.text()).slice(0,200);}catch(e2){}
       }
+      if(!detail)detail='sem detalhes | raw: '+JSON.stringify({data,error:error?{name:error.name,message:error.message,status:error.status||(error.context&&error.context.status)}:null}).slice(0,300);
       throw new Error(detail);
     }
     location.href=data.url;
@@ -2757,6 +2762,24 @@ function openRoom(id){
   const r=rooms.find(x=>x.id===id);if(!r)return;
   if(r.isBusiness){openBizProfile(r);return;}
   openRoleProfile(r);
+}
+async function shareRoom(r){
+  if(!r)return;
+  const url=location.origin+location.pathname+'?room='+r.id;
+  const text=(r.isBusiness?'Dá uma olhada no '+r.nome+' no O Rolê+! ':'Bora pro '+r.nome+' no O Rolê+! ')+(r.cat?'('+r.cat+') ':'')+'👇';
+  if(navigator.share){
+    try{await navigator.share({title:r.nome,text,url});}catch(e){}
+  }else{
+    try{await navigator.clipboard.writeText(text+' '+url);toast('Link copiado ✓');}catch(e){toast(url);}
+  }
+}
+// abre direto um negócio/rolê quando alguém entra pelo link compartilhado (?room=ID)
+function openSharedRoomFromUrl(){
+  const p=new URLSearchParams(location.search);
+  const roomId=p.get('room');
+  if(!roomId)return;
+  const r=rooms.find(x=>String(x.id)===roomId);
+  if(r)openRoom(r.id);
 }
 function askChat(r){
   if(r.priv){targetRoom=r;document.getElementById('pass-input').value='';document.getElementById('pass-modal').classList.add('active');}
@@ -3350,7 +3373,7 @@ async function bootSequence(){
   setTimeout(()=>{
     hideSplash();
     try{
-      if(user){routeAfterAuth();}
+      if(user){routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);}
       else if(!localStorage.getItem('zona_onboarded')){go('s-onboard',true);}
       else{go('s-login',true);}
     }catch(e){go('s-login',true);}
