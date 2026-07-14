@@ -3157,7 +3157,9 @@ function sbRoomToLocal(r){
     boostUntil:r.boost_until?new Date(r.boost_until).getTime():null,
     clubUntil:r.club_until?new Date(r.club_until).getTime():null,
     expiresAt:r.expires_at?new Date(r.expires_at).getTime():null,
-    creator:r.owner_id,desc:r.desc_txt,cover:r.cover_url,avatar:r.avatar_url
+    creator:(r.profiles&&r.profiles.name)||'Anônimo',creatorAvatar:(r.profiles&&r.profiles.avatar_url)||'',
+    mine:!!(user&&user.id===r.owner_id),
+    desc:r.desc_txt,cover:r.cover_url,avatar:r.avatar_url
   };
 }
 async function loadRoomsFromSupabase(){

@@ -49,7 +49,7 @@ async function sbUpdateProfile(userId, fields) {
 async function sbLoadRooms() {
   const { data, error } = await sb
     .from('rooms')
-    .select('*, vitrine_items(*), promocoes(*)')
+    .select('*, vitrine_items(*), promocoes(*), profiles(name, avatar_url)')
     .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString()); // esconde rolê pessoal já expirado
   if (error) throw error;
   return data;
