@@ -71,6 +71,11 @@ async function sbDeleteRoom(roomId) {
   if (error) throw error;
 }
 
+async function sbIncrementProfileViews(roomId) {
+  const { error } = await sb.rpc('increment_profile_views', { p_room_id: roomId });
+  if (error) throw error;
+}
+
 // chama cb() toda vez que qualquer room muda (criada/editada/apagada) — é o "mapa ao vivo" de verdade
 function sbSubscribeRooms(cb) {
   return sb
