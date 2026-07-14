@@ -71,6 +71,9 @@
   .field input,.field select,.field textarea{width:100%;padding:14px;border-radius:13px;border:1px solid var(--line-2);background:var(--card);font-size:15px;color:var(--ink);font-family:inherit;}
   .field textarea{resize:none;line-height:1.45;}
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
+  .pw-wrap{position:relative;}
+  .pw-wrap input{padding-right:44px;}
+  .pw-eye{position:absolute;right:4px;top:0;bottom:0;width:40px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;opacity:.6;}
   .appbar{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 14px) 16px 12px;background:var(--card);border-bottom:1px solid var(--line);}
   .appbar .back{font-size:22px;width:34px;}
   .appbar h2{font-size:17px;font-weight:800;}
@@ -855,7 +858,7 @@
         <div class="brand">O Rolê</div>
         <div class="tag">O que tá <b>rolando perto de você</b>, agora.</div>
         <div class="field"><label>E-mail</label><input id="login-email" type="email" placeholder="voce@email.com" /></div>
-        <div class="field"><label>Senha</label><input id="login-pass" type="password" placeholder="••••••••" /></div>
+        <div class="field"><label>Senha</label><div class="pw-wrap"><input id="login-pass" type="password" placeholder="••••••••" /><span class="pw-eye" onclick="togglePw('login-pass',this)">👁️</span></div></div>
         <button class="btn" onclick="doLogin()">Entrar</button>
         <div class="alt">Não tem conta? <b onclick="go('s-type')">Criar agora</b></div>
       </div>
@@ -921,7 +924,7 @@
         </div>
       </div>
       <div class="field"><label>E-mail</label><input id="su-email" type="email" placeholder="voce@email.com" /></div>
-      <div class="field"><label>Senha</label><input id="su-pass" type="password" placeholder="Crie uma senha" /></div>
+      <div class="field"><label>Senha</label><div class="pw-wrap"><input id="su-pass" type="password" placeholder="Crie uma senha" /><span class="pw-eye" onclick="togglePw('su-pass',this)">👁️</span></div></div>
 
       <!-- BUSINESS: tipo de estabelecimento -->
       <div id="biz-segment" class="hide">
@@ -1004,7 +1007,7 @@
       <div class="icon-btn" onclick="openNotif()"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="badge"></span></div>
     </div>
     <div class="chips" id="chips"></div>
-    <div class="live-chip"><span class="pulse"></span> <span id="live-count">47</span> rolês ativos agora</div>
+    <div class="live-chip"><span class="pulse"></span> <span id="live-count">0</span> rolês ativos agora</div>
     <div class="route-banner" id="route-banner">
       <div class="rb-main">
         <div class="eta" id="route-eta">—</div>
@@ -1152,7 +1155,6 @@
       <div class="navitem" data-tab="chats" onclick="bizTab('chats')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg></span> Meus Chats</div>
       <div class="navitem" data-tab="boost" onclick="bizTab('boost')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3 3-3-3c-1-1-2-3-2-5 0-4 2-8 5-10Z"/><circle cx="12" cy="10" r="2"/><path d="M9 17l-2 4M15 17l2 4"/></svg></span> Boost & Destaque</div>
       <div class="navitem" data-tab="config" onclick="bizTab('config')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg></span> Configurações</div>
-      <div class="navitem" onclick="logout()"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></span> Sair</div>
       <div class="upgrade" id="biz-upgrade-box"><h4>⚡ Rolê+</h4><p>Destaque no mapa, vitrine sem limite e métricas reais.</p><button onclick="openClubModal()">Assinar por R$ 69,90/mês</button></div>
     </aside>
     <main class="bmain">
@@ -1275,6 +1277,9 @@
             <h3>Dados verificados</h3>
             <p style="font-size:13px;color:var(--ink-2);line-height:1.8;">Status: <b id="cfg-verified"></b><br>CNPJ: <b id="cfg-cnpj" style="color:var(--ink);"></b><br>Razão social: <span id="cfg-razao"></span></p>
           </div>
+          <div class="bpanel">
+            <button class="btn ghost" onclick="logout()">Sair da conta</button>
+          </div>
         </div>
       </div>
     </main>
@@ -1284,7 +1289,6 @@
       <a data-tab="chats" onclick="bizTab('chats')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg></span>Chats</a>
       <a data-tab="boost" onclick="bizTab('boost')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3 3-3-3c-1-1-2-3-2-5 0-4 2-8 5-10Z"/><circle cx="12" cy="10" r="2"/><path d="M9 17l-2 4M15 17l2 4"/></svg></span>Boost</a>
       <a data-tab="config" onclick="bizTab('config')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg></span>Config</a>
-      <a onclick="logout()"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></span>Sair</a>
     </nav>
   </section>
 
@@ -1346,7 +1350,7 @@
       <div class="feed-bar">
         <button class="back" onclick="goBack()">‹</button>
         <div class="searchbar">🔍 <input id="feed-search" placeholder="Buscar rolê, bar, evento…" autocomplete="off" oninput="onFeedSearch(this.value)" /></div>
-        <div class="live-pill"><span class="pulse"></span><b id="feed-live">54</b></div>
+        <div class="live-pill"><span class="pulse"></span><b id="feed-live">0</b></div>
       </div>
       <div class="chips" id="feed-chips"></div>
       <div class="feed-subbar"><h3>Feed de rolês</h3><button class="sort-pill" onclick="cycleSort();renderFeedTab();">↕ <span id="sort-label-2">Mais perto</span></button></div>
@@ -1649,6 +1653,12 @@ function showLoading(text){document.getElementById('lo-text').textContent=text||
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
 function toastError(t){document.getElementById('err-text').textContent=t;document.getElementById('err-modal').classList.add('show');}
 function closeErrModal(){document.getElementById('err-modal').classList.remove('show');}
+function togglePw(id,el){
+  const inp=document.getElementById(id);
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  el.textContent=show?'🙈':'👁️';
+}
 
 /* ============ AUTH ============ */
 async function doLogin(){
@@ -1662,6 +1672,7 @@ async function doLogin(){
       const authUser=await sbSignIn({email:em,password:pass});
       const profile=await sbGetProfile(authUser.id);
       user=profileToUser(profile);
+      if(user.type==='business')await loadRoomsFromSupabase();
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();routeAfterAuth();
     }catch(e){
@@ -2349,7 +2360,7 @@ function renderFeedTab(){
   const box=document.getElementById('feed-list');box.innerHTML='';
   document.getElementById('sort-label-2').textContent=sortLabels[sortMode];
   const list=sortList(filtered());
-  document.getElementById('feed-live').textContent=rooms.length*8+rooms.length;
+  document.getElementById('feed-live').textContent=rooms.length;
   if(!list.length){box.innerHTML=`<div class="feed-empty"><span class="em">🔍</span>Nada encontrado${searchQuery?' para "'+searchQuery+'"':''}.</div>`;return;}
   const negocios=list.filter(r=>r.isBusiness);
   const clube=negocios.filter(isClub).sort(bizSort);
@@ -2919,18 +2930,31 @@ function renderBizVitrine(){
   box.innerHTML=items.length?items.map((p,i)=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${p.nome}</b><small>${p.desc||''}</small></div><div class="pp">${p.preco}</div><button class="prod-x" title="Remover" onclick="delVitrine(${i})">✕</button></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhum item ainda. Adicione produtos e promoções abaixo 👇</p>';
 }
-function addVitrine(){
+async function addVitrine(){
   const em=document.getElementById('np-em').value;
   const nome=document.getElementById('np-nome').value.trim();
   const preco=document.getElementById('np-preco').value.trim()||'—';
   if(!nome){toast('Dê um nome ao item');return;}
   if(!user.vitrine)user.vitrine=[];
   if(!isClub(user)&&user.vitrine.length>=3){toast('Conta grátis permite até 3 itens. Assine o Rolê+ pra vitrine ilimitada 🔓');openClubModal();return;}
-  user.vitrine.push({em,nome,desc:'',preco});
+  const item={em,nome,desc:'',preco};
+  user.vitrine.push(item);
   document.getElementById('np-nome').value='';document.getElementById('np-preco').value='';
   syncBizRoom();save();renderBizVitrine();applyClubUI();toast('Item adicionado à vitrine ✓');
+  if(SUPABASE_READY&&user.roomId){
+    try{
+      const row=await sbAddVitrineItem(user.roomId,{emoji:em,nome,desc_txt:'',preco});
+      item.id=row.id;
+    }catch(e){toastError('Não deu pra salvar esse item no servidor — verifique sua conexão.');}
+  }
 }
-function delVitrine(i){user.vitrine.splice(i,1);syncBizRoom();save();renderBizVitrine();applyClubUI();toast('Item removido');}
+async function delVitrine(i){
+  const item=user.vitrine[i];
+  user.vitrine.splice(i,1);syncBizRoom();save();renderBizVitrine();applyClubUI();toast('Item removido');
+  if(SUPABASE_READY&&item&&item.id){
+    try{await sbDeleteVitrineItem(item.id);}catch(e){toastError('Não deu pra remover esse item no servidor.');}
+  }
+}
 function activePromos(arr){return (arr||[]).filter(p=>p.validade>Date.now());}
 function syncBizRoom(){
   if(!user||!user.roomId)return;
@@ -2945,6 +2969,18 @@ function syncBizRoom(){
     r.boost=!!(user.boostUntil&&user.boostUntil>Date.now());
     r.boostUntil=user.boostUntil;
   }
+  persistBizRoom();
+}
+async function persistBizRoom(){
+  if(!SUPABASE_READY||!user||!user.roomId)return;
+  try{
+    await sbUpdateRoom(user.roomId,{
+      horario:user.horario,whatsapp:user.whatsapp||null,instagram:user.instagram||null,site:user.site||null,
+      oferece:user.oferece||[],cover_url:user.cover||null,avatar_url:user.avatar||null,
+      club_until:user.clubUntil?new Date(user.clubUntil).toISOString():null,
+      boost_until:user.boostUntil?new Date(user.boostUntil).toISOString():null
+    });
+  }catch(e){console.error('Falha ao salvar no servidor',e);toastError('Não deu pra salvar essa alteração no servidor. Verifique sua conexão e tente de novo.');}
 }
 
 /* ---- Promoções ---- */
@@ -2954,21 +2990,32 @@ function renderBizPromo(){
   box.innerHTML=items.length?items.map((p,i)=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${p.titulo}</b><small>Expira em ${fmtRemaining(p.validade)}</small></div><button class="prod-x" title="Remover" onclick="delPromo(${i})">✕</button></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhuma promoção ativa. Crie uma abaixo 👇</p>';
 }
-function addPromo(){
+async function addPromo(){
   const em=document.getElementById('pm-em').value;
   const titulo=document.getElementById('pm-titulo').value.trim();
   const h=+document.getElementById('pm-dur').value;
   if(!titulo){toast('Dê um título à promoção');return;}
   if(!user.promocoes)user.promocoes=[];
-  user.promocoes.push({em,titulo,validade:Date.now()+h*3600e3});
+  const validade=Date.now()+h*3600e3;
+  const promo={em,titulo,validade};
+  user.promocoes.push(promo);
   document.getElementById('pm-titulo').value='';
   syncBizRoom();save();renderBizPromo();toast('Promoção publicada ✓');
+  if(SUPABASE_READY&&user.roomId){
+    try{
+      const row=await sbAddPromocao(user.roomId,{emoji:em,titulo,validade:new Date(validade).toISOString()});
+      promo.id=row.id;
+    }catch(e){toastError('Não deu pra salvar essa promoção no servidor — verifique sua conexão.');}
+  }
 }
-function delPromo(i){
+async function delPromo(i){
   const items=activePromos(user.promocoes);
   const target=items[i];
   user.promocoes=(user.promocoes||[]).filter(p=>p!==target);
   syncBizRoom();save();renderBizPromo();toast('Promoção removida');
+  if(SUPABASE_READY&&target&&target.id){
+    try{await sbDeletePromocao(target.id);}catch(e){toastError('Não deu pra remover essa promoção no servidor.');}
+  }
 }
 
 /* ---- Meus Chats ---- */
@@ -3151,14 +3198,14 @@ function sbRoomToLocal(r){
     priv:r.priv,pass:r.pass_hash,isBusiness:r.is_business,address:r.address,
     whatsapp:r.whatsapp,instagram:r.instagram,site:r.site,verified:r.verified,
     oferece:r.oferece||[],horario:r.horario,lat:r.lat,lng:r.lng,
-    vitrine:(r.vitrine_items||[]).map(v=>({em:v.emoji,nome:v.nome,desc:v.desc_txt,preco:v.preco})),
-    promocoes:(r.promocoes||[]).map(p=>({em:p.emoji,titulo:p.titulo,validade:new Date(p.validade).getTime()})),
+    vitrine:(r.vitrine_items||[]).map(v=>({id:v.id,em:v.emoji,nome:v.nome,desc:v.desc_txt,preco:v.preco})),
+    promocoes:(r.promocoes||[]).map(p=>({id:p.id,em:p.emoji,titulo:p.titulo,validade:new Date(p.validade).getTime()})),
     boost:!!(r.boost_until&&new Date(r.boost_until).getTime()>Date.now()),
     boostUntil:r.boost_until?new Date(r.boost_until).getTime():null,
     clubUntil:r.club_until?new Date(r.club_until).getTime():null,
     expiresAt:r.expires_at?new Date(r.expires_at).getTime():null,
     creator:(r.profiles&&r.profiles.name)||'Anônimo',creatorAvatar:(r.profiles&&r.profiles.avatar_url)||'',
-    mine:!!(user&&user.id===r.owner_id),
+    mine:!!(user&&user.id===r.owner_id),ownerId:r.owner_id,
     desc:r.desc_txt,cover:r.cover_url,avatar:r.avatar_url
   };
 }
@@ -3166,8 +3213,28 @@ async function loadRoomsFromSupabase(){
   try{
     const data=await sbLoadRooms();
     rooms=data.map(sbRoomToLocal);
+    hydrateBizUserFromRoom();
     if(document.getElementById('s-app').classList.contains('active')){renderPins();renderFeed();}
   }catch(e){console.error('Falha ao carregar rooms do Supabase',e);}
+}
+// login "puro" (sem passar pelo cadastro) não sabe qual room é do negócio — sem isso,
+// toda edição (foto, vitrine, horário) falhava em silêncio por falta de user.roomId
+function hydrateBizUserFromRoom(){
+  if(!user||user.type!=='business')return;
+  const r=rooms.find(x=>x.mine&&x.isBusiness);
+  if(!r)return;
+  user.roomId=r.id;
+  user.vitrine=(r.vitrine||[]).map(v=>({...v}));
+  user.promocoes=(r.promocoes||[]).map(p=>({...p}));
+  user.horario=r.horario||user.horario;
+  user.whatsapp=r.whatsapp||user.whatsapp;
+  user.instagram=r.instagram||user.instagram;
+  user.site=r.site||user.site;
+  user.oferece=r.oferece||user.oferece;
+  user.cover=r.cover||user.cover;
+  user.verified=!!r.verified;
+  user.clubUntil=r.clubUntil||null;
+  user.boostUntil=r.boostUntil||null;
 }
 async function bootSequence(){
   if(SUPABASE_READY){

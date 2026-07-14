@@ -81,8 +81,9 @@ function sbSubscribeRooms(cb) {
 
 /* ---------- VITRINE ---------- */
 async function sbAddVitrineItem(roomId, item) {
-  const { error } = await sb.from('vitrine_items').insert({ room_id: roomId, ...item });
+  const { data, error } = await sb.from('vitrine_items').insert({ room_id: roomId, ...item }).select().single();
   if (error) throw error;
+  return data;
 }
 async function sbDeleteVitrineItem(itemId) {
   const { error } = await sb.from('vitrine_items').delete().eq('id', itemId);
@@ -91,7 +92,12 @@ async function sbDeleteVitrineItem(itemId) {
 
 /* ---------- PROMOÇÕES ---------- */
 async function sbAddPromocao(roomId, promo) {
-  const { error } = await sb.from('promocoes').insert({ room_id: roomId, ...promo });
+  const { data, error } = await sb.from('promocoes').insert({ room_id: roomId, ...promo }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function sbDeletePromocao(promoId) {
+  const { error } = await sb.from('promocoes').delete().eq('id', promoId);
   if (error) throw error;
 }
 
