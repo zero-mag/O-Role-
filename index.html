@@ -489,6 +489,14 @@
   #toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;background:var(--ink);color:#fff;padding:12px 20px;border-radius:100px;font-size:13.5px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* loading overlay (login/cadastro/pagamento/criar rolê) */
+  #loading-overlay{position:absolute;inset:0;z-index:300;background:rgba(20,24,35,.45);display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+  #loading-overlay.show{display:flex;}
+  #loading-overlay .lo-box{background:var(--card);border-radius:16px;padding:22px 30px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:var(--shadow-lg);max-width:80%;}
+  #loading-overlay .lo-spin{width:30px;height:30px;border:3px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:lo-spin .8s linear infinite;}
+  #loading-overlay .lo-text{font-size:13.5px;font-weight:700;color:var(--ink);text-align:center;}
+  @keyframes lo-spin{to{transform:rotate(360deg);}}
+
   /* ---------- verified badge on feed ---------- */
   .verified{color:var(--accent);font-size:12px;}
 
@@ -1414,6 +1422,7 @@
   </div>
 
   <div id="toast"></div>
+  <div id="loading-overlay"><div class="lo-box"><div class="lo-spin"></div><div class="lo-text" id="lo-text">Aguarde…</div></div></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1585,6 +1594,8 @@ function goBack(){
 }
 function resetNav(){navHistory=[];}
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
+function showLoading(text){document.getElementById('lo-text').textContent=text||'Aguarde…';document.getElementById('loading-overlay').classList.add('show');}
+function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
 
 /* ============ AUTH ============ */
 async function doLogin(){
@@ -1593,6 +1604,7 @@ async function doLogin(){
   if(!em){toast('Digite seu e-mail');return;}
   if(SUPABASE_READY){
     if(!pass){toast('Digite sua senha');return;}
+    showLoading('Entrando…');
     try{
       const authUser=await sbSignIn({email:em,password:pass});
       const profile=await sbGetProfile(authUser.id);
@@ -1600,6 +1612,7 @@ async function doLogin(){
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();routeAfterAuth();
     }catch(e){toast('E-mail ou senha incorretos');}
+    finally{hideLoading();}
     return;
   }
   toast('Configuração pendente: preencha config.js com as chaves do Supabase (veja LEIA-ME.md) antes de usar contas de verdade.');
@@ -1860,6 +1873,7 @@ async function doSignup(){
   user.termsAcceptedAt=termsAcceptedAt;
 
   if(SUPABASE_READY){
+    showLoading('Criando sua conta…');
     try{
       const authUser=await sbSignUp({email,password:pass,name,type:user.type});
       if(user.type==='business'){
@@ -1880,6 +1894,7 @@ async function doSignup(){
       toast('Conta criada! 🎉 Confira seu e-mail pra confirmar.');
       save();openInstallScreen();
     }catch(e){toast('Não deu pra criar a conta: '+(e.message||'tente de novo'));}
+    finally{hideLoading();}
     return;
   }
 
@@ -1914,6 +1929,7 @@ function initMap(){
   const si=document.getElementById('search-input');if(si&&!si.value)si.placeholder='Buscar em Vila Madalena…';
   buildChips();
   if(!feedLoadedOnce){showSkeletons();setTimeout(()=>{feedLoadedOnce=true;renderFeed();},750);}else renderFeed();
+  if(SUPABASE_READY)loadRoomsFromSupabase();
   if(!map){
     map=L.map('map',{zoomControl:false,attributionControl:false}).setView(hasRealLocation?[userPos.lat,userPos.lng]:CENTER,15);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
@@ -1997,7 +2013,7 @@ function renderPins(){
     const m=L.marker([s.lat,s.lng],{icon}).addTo(map);
     m._zid=s.id;m.on('click',()=>openRoom(s.id));markers.push(m);
   });
-  document.getElementById('live-count').textContent=rooms.length*8+ (rooms.length);
+  document.getElementById('live-count').textContent=rooms.length;
 }
 function cardHTML(s){
   const isB=s.isBusiness;
@@ -2548,6 +2564,7 @@ async function submitRole(){
 async function publishPending(){
   if(pendingRoom.free){localStorage.setItem('zona_freecd',pendingRoom.expiresAt+3600e3);}
   if(SUPABASE_READY&&user&&user.id){
+    showLoading('Publicando seu rolê…');
     try{
       await sbCreateRoom({
         owner_id:user.id,is_business:false,nome:pendingRoom.nome,emoji:pendingRoom.emoji,cat:pendingRoom.cat,
@@ -2558,6 +2575,7 @@ async function publishPending(){
       });
       await loadRoomsFromSupabase();
     }catch(e){toast('Não deu pra publicar no servidor — salvo só localmente');rooms.unshift(pendingRoom);}
+    finally{hideLoading();}
   }else{
     rooms.unshift(pendingRoom);save();
   }
@@ -2584,6 +2602,7 @@ function genOrderNsu(){return 'role-'+Date.now()+'-'+Math.random().toString(36).
 async function startInfinitePayCheckout(kind,amountCents,description,payload){
   if(!SUPABASE_READY||!user||!user.id){toast('Faça login pra continuar');return;}
   const orderNsu=genOrderNsu();
+  showLoading('Preparando pagamento…');
   try{
     const {error:insErr}=await sb.from('payment_intents').insert({order_nsu:orderNsu,user_id:user.id,kind,amount_cents:amountCents,payload});
     if(insErr)throw insErr;
@@ -2595,6 +2614,7 @@ async function startInfinitePayCheckout(kind,amountCents,description,payload){
     if(data.url)location.href=data.url;
     else toast('Não deu pra iniciar o pagamento');
   }catch(e){toast('Erro ao iniciar pagamento: '+(e.message||'tente de novo'));}
+  finally{hideLoading();}
 }
 async function checkPaymentReturn(){
   const p=new URLSearchParams(location.search);
