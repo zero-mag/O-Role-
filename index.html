@@ -110,6 +110,21 @@
   .install-steps b{color:var(--ink);}
   .install-skip{margin-top:14px;color:var(--ink-3);font-weight:700;font-size:13.5px;}
 
+  /* ---- mockup ilustrado (iOS/Android) mostrando onde tocar pra instalar ---- */
+  .inst-frame{width:160px;height:300px;border-radius:26px;background:#0c0c0c;border:5px solid #2b2b2b;box-shadow:0 20px 45px rgba(0,0,0,.3);position:relative;padding:7px;margin-bottom:22px;}
+  .inst-notch{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:46px;height:12px;background:#0c0c0c;border-radius:0 0 9px 9px;z-index:2;}
+  .inst-screen{width:100%;height:100%;border-radius:19px;overflow:hidden;position:relative;background:linear-gradient(160deg,#fff4ef,#ffe6da);display:flex;flex-direction:column;}
+  .inst-appicon{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:34px;}
+  .inst-appicon span{font-size:10px;font-weight:800;color:var(--ink-2);}
+  .inst-bar{position:absolute;left:0;right:0;height:38px;background:rgba(255,255,255,.92);display:flex;align-items:center;padding:0 10px;gap:8px;box-shadow:0 0 0 1px rgba(0,0,0,.05);}
+  .inst-frame.ios .inst-bar{bottom:0;justify-content:center;}
+  .inst-frame.android .inst-bar{top:14px;justify-content:flex-end;}
+  .inst-url{font-size:9px;color:var(--ink-3);flex:1;}
+  .inst-frame.ios .inst-url{display:none;}
+  .inst-tap{position:relative;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:15px;border-radius:7px;}
+  .inst-tap .inst-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--accent);animation:instring 1.6s infinite;}
+  @keyframes instring{0%{transform:scale(.6);opacity:.9;}100%{transform:scale(1.6);opacity:0;}}
+
   /* ---------- SKELETON ---------- */
   .sk{background:linear-gradient(90deg,var(--line) 25%,var(--card) 37%,var(--line) 63%);background-size:400% 100%;animation:shimmer 1.4s infinite;border-radius:8px;}
   @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
@@ -489,13 +504,13 @@
   #toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;background:var(--ink);color:#fff;padding:12px 20px;border-radius:100px;font-size:13.5px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  /* loading overlay (login/cadastro/pagamento/criar rolê) */
-  #loading-overlay{position:absolute;inset:0;z-index:300;background:rgba(20,24,35,.45);display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+  /* loading overlay (login/cadastro/pagamento/criar rolê) — mesma cara da splash */
+  #loading-overlay{position:absolute;inset:0;z-index:300;background:linear-gradient(160deg,var(--accent),var(--accent-dark));display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;}
   #loading-overlay.show{display:flex;}
-  #loading-overlay .lo-box{background:var(--card);border-radius:16px;padding:22px 30px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:var(--shadow-lg);max-width:80%;}
-  #loading-overlay .lo-spin{width:30px;height:30px;border:3px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:lo-spin .8s linear infinite;}
-  #loading-overlay .lo-text{font-size:13.5px;font-weight:700;color:var(--ink);text-align:center;}
-  @keyframes lo-spin{to{transform:rotate(360deg);}}
+  #loading-overlay .lo-logo{font-size:44px;font-weight:900;letter-spacing:-1.5px;animation:splashpop .5s cubic-bezier(.32,1.7,.5,1);}
+  #loading-overlay .lo-logo span{display:inline-block;animation:plusPop .45s .35s cubic-bezier(.32,1.7,.5,1) backwards;}
+  #loading-overlay .lo-text{font-size:13.5px;font-weight:600;opacity:.9;margin-top:8px;text-align:center;padding:0 30px;animation:splashpop .5s .1s backwards;}
+  #loading-overlay .lo-spin{width:28px;height:28px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;margin-top:22px;animation:spin .8s linear infinite;}
 
   /* ---------- verified badge on feed ---------- */
   .verified{color:var(--accent);font-size:12px;}
@@ -767,7 +782,16 @@
   <!-- ===== ADICIONAR À TELA DE INÍCIO (pós-cadastro) ===== -->
   <section class="screen" id="s-install">
     <div class="install-wrap">
-      <div class="install-ic">📲</div>
+      <div class="inst-frame" id="inst-frame">
+        <div class="inst-notch"></div>
+        <div class="inst-screen">
+          <div class="inst-bar">
+            <div class="inst-url">orole.app</div>
+            <div class="inst-tap" id="inst-tap"><div class="inst-ring"></div><span id="inst-tap-ic">📤</span></div>
+          </div>
+          <div class="inst-appicon">🎉<span>O Rolê+</span></div>
+        </div>
+      </div>
       <h2>Adicione o Rolê+ à tela de início</h2>
       <p>Assim ele abre rapidinho, como um app de verdade — sem precisar procurar o link toda vez.</p>
       <div class="install-steps" id="install-steps"></div>
@@ -1422,7 +1446,7 @@
   </div>
 
   <div id="toast"></div>
-  <div id="loading-overlay"><div class="lo-box"><div class="lo-spin"></div><div class="lo-text" id="lo-text">Aguarde…</div></div></div>
+  <div id="loading-overlay"><div class="lo-logo">O Rolê<span>+</span></div><div class="lo-text" id="lo-text">Aguarde…</div><div class="lo-spin"></div></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1445,20 +1469,30 @@ applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;});
 function isStandaloneApp(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+function isMobileDevice(){
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints>1 && window.innerWidth<900);
+}
 function openInstallScreen(){
   if(isStandaloneApp()){routeAfterAuth(true);return;} // já tá instalado, não faz sentido pedir de novo
+  if(!isMobileDevice()){routeAfterAuth(true);return;} // no PC "adicionar à tela de início" não se aplica — pula direto
   const ua=navigator.userAgent;
   const isIOS=/iPhone|iPad|iPod/.test(ua);
   const steps=document.getElementById('install-steps');
   const btn=document.getElementById('install-btn');
+  const frame=document.getElementById('inst-frame');
+  const tapIc=document.getElementById('inst-tap-ic');
+  frame.classList.toggle('ios',isIOS);frame.classList.toggle('android',!isIOS);
   if(deferredInstallPrompt){
+    tapIc.textContent='➕';
     steps.innerHTML='Um clique e o Rolê+ vira um ícone na sua tela de início, igual qualquer outro app.';
     btn.textContent='Adicionar agora';btn.classList.remove('hide');
   }else if(isIOS){
-    steps.innerHTML='1. Toque no ícone de <b>Compartilhar</b> 📤 na barra do Safari<br>2. Escolha <b>"Adicionar à Tela de Início"</b><br>3. Toque em <b>Adicionar</b>';
+    tapIc.textContent='📤';
+    steps.innerHTML='1. Toque no ícone de <b>Compartilhar</b> 📤 na barra do Safari (embaixo da tela)<br>2. Escolha <b>"Adicionar à Tela de Início"</b><br>3. Toque em <b>Adicionar</b>';
     btn.classList.add('hide');
   }else{
-    steps.innerHTML='Abra o menu do seu navegador (⋮ ou •••) e procure <b>"Adicionar à tela inicial"</b> ou <b>"Instalar app"</b>.';
+    tapIc.textContent='⋮';
+    steps.innerHTML='1. Toque no menu <b>⋮</b> no canto do navegador (em cima da tela)<br>2. Procure <b>"Adicionar à tela inicial"</b> ou <b>"Instalar app"</b><br>3. Confirme';
     btn.classList.add('hide');
   }
   go('s-install',true);
@@ -2597,7 +2631,6 @@ function resetCreate(){
 function openCreate(){resetCreate();go('s-create');}
 
 /* ============ PAYMENT (InfinitePay real) ============ */
-const INFINITEPAY_HANDLE='nextoria';
 function genOrderNsu(){return 'role-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);}
 async function startInfinitePayCheckout(kind,amountCents,description,payload){
   if(!SUPABASE_READY||!user||!user.id){toast('Faça login pra continuar');return;}
@@ -2606,13 +2639,11 @@ async function startInfinitePayCheckout(kind,amountCents,description,payload){
   try{
     const {error:insErr}=await sb.from('payment_intents').insert({order_nsu:orderNsu,user_id:user.id,kind,amount_cents:amountCents,payload});
     if(insErr)throw insErr;
-    const res=await fetch('https://api.checkout.infinitepay.io/links',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({handle:INFINITEPAY_HANDLE,items:[{quantity:1,price:amountCents,description}],order_nsu:orderNsu,redirect_url:location.origin+location.pathname})
-    });
-    const data=await res.json();
-    if(data.url)location.href=data.url;
-    else toast('Não deu pra iniciar o pagamento');
+    // a API do InfinitePay bloqueia chamada direta do navegador (CORS) — passa pela
+    // Edge Function create-checkout, que roda no servidor e não tem essa restrição
+    const {data,error}=await sb.functions.invoke('create-checkout',{body:{order_nsu:orderNsu,redirect_url:location.origin+location.pathname}});
+    if(error||!data||!data.url)throw new Error((data&&data.error)||(error&&error.message)||'Não deu pra iniciar o pagamento');
+    location.href=data.url;
   }catch(e){toast('Erro ao iniciar pagamento: '+(e.message||'tente de novo'));}
   finally{hideLoading();}
 }
