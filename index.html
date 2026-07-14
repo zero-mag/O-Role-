@@ -651,6 +651,10 @@
   .prod-x:hover{background:var(--red-soft);color:var(--red-ink);}
   .add-prod{display:grid;grid-template-columns:60px 1fr 170px;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line-2);}
   .add-prod select,.add-prod input{padding:11px;border:1px solid var(--line-2);border-radius:10px;font-size:13px;background:var(--card);color:var(--ink);outline:none;min-width:0;}
+  .price-input{display:flex;align-items:center;border:1px solid var(--line-2);border-radius:10px;background:var(--card);}
+  .price-input span{padding-left:11px;font-size:13px;color:var(--ink-2);font-weight:700;}
+  .price-input.free span{display:none;}
+  .price-input input{border:none !important;background:none !important;flex:1;}
   .add-prod input::placeholder{font-size:12.5px;}
   .add-prod select:focus,.add-prod input:focus{border-color:var(--accent);}
   .add-prod .np-add{grid-column:1/-1;background:var(--accent);color:#fff;font-weight:800;padding:11px;border-radius:11px;font-size:13.5px;}
@@ -684,6 +688,8 @@
   .badge-club{font-size:9.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-dark));padding:2px 7px;border-radius:6px;letter-spacing:.3px;vertical-align:middle;}
   .club-ring{box-shadow:0 0 0 3px var(--accent) !important;}
   .bstat.upsell{display:flex;align-items:center;gap:14px;}
+  .bstat.upsell .spark{position:static;flex:none;font-size:26px;}
+  .bstat.upsell .lbl{flex:1;}
   .boost-active.club{background:linear-gradient(135deg,#fff7e0,#ffedb3);border-radius:14px;padding:10px 12px;margin:-10px -2px 0;}
   .card.card-club{border-color:var(--accent);box-shadow:0 4px 16px rgba(232,54,91,.22);}
   .zpin.club .drop{width:48px;height:48px;box-shadow:0 0 0 4px rgba(232,54,91,.35),0 4px 14px rgba(20,24,35,.35);animation:clubpulse 1.8s infinite;}
@@ -1185,13 +1191,6 @@
         <input type="file" id="file-avatar" accept="image/*" style="display:none" onchange="onPhoto(event,'avatar')" />
         <div class="bhead">
           <div><h1 id="biz-hi">Boa noite 🍺</h1><p>Aqui está o pulso do seu negócio nas últimas 24h.</p></div>
-          <div class="bhead-right">
-            <div class="biz-open-toggle js-biz-open" onclick="toggleBizOpen()">
-              <span class="js-biz-open-label">Aberto</span>
-              <div class="switch on js-biz-open-switch"></div>
-            </div>
-            <div class="bav"><div class="ph">🏪</div><div class="nm" id="biz-nm">Empresa<small>Premium</small></div></div>
-          </div>
         </div>
         <div class="bstats">
           <div class="bstat" id="bstat-alcance"><span class="spark"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span><div class="lbl">Alcance no mapa</div><div class="val">0</div><div class="trend">Sem dados ainda</div></div>
@@ -1210,7 +1209,7 @@
             <div class="add-prod" id="vitrine-add-form">
               <select id="np-em"><option>🍔</option><option>🍺</option><option>🍻</option><option>🍕</option><option>🍹</option><option>🍔</option><option>🎶</option><option>💪</option><option>💇</option><option>💅</option><option>🎉</option><option>🎟️</option><option>☕</option><option>🛍️</option></select>
               <input id="np-nome" placeholder="Nome do produto ou promoção" />
-              <input id="np-preco" placeholder="R$ 20 ou Grátis" onblur="fmtPrecoInput(this)" />
+              <div class="price-input"><span>R$</span><input id="np-preco" inputmode="numeric" placeholder="0,00 ou Grátis" oninput="maskPreco(this)" /></div>
               <button class="np-add" onclick="addVitrine()">+ Adicionar à vitrine</button>
             </div>
           </div>
@@ -1602,14 +1601,14 @@ let map,markers=[];
 
 function save(){localStorage.setItem('zona_rooms',JSON.stringify(rooms));localStorage.setItem('zona_user',JSON.stringify(user));}
 function brl(c){return 'R$ '+(c/100).toFixed(2).replace('.',',');}
-function fmtPrecoInput(el){
-  const v=el.value.trim();
-  if(!v)return;
-  if(/^gr[aá]tis$/i.test(v)){el.value='Grátis';return;}
-  if(/r\$/i.test(v))return;
-  const num=v.replace(/\./g,'').replace(',','.').replace(/[^\d.]/g,'');
-  if(num===''||isNaN(+num))return;
-  el.value='R$ '+(+num).toFixed(2).replace('.',',');
+function maskPreco(el){
+  const wrap=el.closest('.price-input');
+  if(/[a-zA-Zá]/.test(el.value)){if(wrap)wrap.classList.add('free');return;}
+  if(wrap)wrap.classList.remove('free');
+  const digits=el.value.replace(/\D/g,'');
+  if(!digits){el.value='';return;}
+  const num=(parseInt(digits,10)/100).toFixed(2);
+  el.value=num.replace('.',',').replace(/\B(?=(\d{3})+(?=,))/g,'.');
 }
 
 /* ===== expiração / contagem regressiva ===== */
@@ -2921,9 +2920,7 @@ function onUserPhoto(e){
 function fillBiz(){
   if(!user)return;
   syncBizRoom();
-  document.getElementById('biz-hi').textContent='Boa noite, '+user.name+' '+(user.emoji||'🏪');
-  document.getElementById('biz-nm').innerHTML=user.name+(user.verified?' <span title="CNPJ verificado" style="color:var(--green);">✓</span>':'')+'<small>'+(isClub(user)?'⭐ Rolê+':(user.segment||'Business'))+'</small>';
-  const ph=document.querySelector('#s-biz .bhead .ph');if(ph)ph.textContent=user.emoji||'🏪';
+  document.getElementById('biz-hi').textContent='Boa noite, '+user.name+' '+(user.emoji||'🏪')+(user.verified?' ✓':'');
   applyBizPhotos();
   renderBizVitrine();
   renderAllHorarios();
@@ -3003,13 +3000,15 @@ function renderBizVitrine(){
 async function addVitrine(){
   const em=document.getElementById('np-em').value;
   const nome=document.getElementById('np-nome').value.trim();
-  const preco=document.getElementById('np-preco').value.trim()||'—';
+  const precoRaw=document.getElementById('np-preco').value.trim();
+  const preco=precoRaw?(/^gr[aá]tis$/i.test(precoRaw)?'Grátis':'R$ '+precoRaw):'—';
   if(!nome){toast('Dê um nome ao item');return;}
   if(!user.vitrine)user.vitrine=[];
   if(!isClub(user)&&user.vitrine.length>=3){toast('Conta grátis permite até 3 itens. Assine o Rolê+ pra vitrine ilimitada 🔓');openClubModal();return;}
   const item={em,nome,desc:'',preco};
   user.vitrine.push(item);
-  document.getElementById('np-nome').value='';document.getElementById('np-preco').value='';
+  document.getElementById('np-nome').value='';
+  const precoEl=document.getElementById('np-preco');precoEl.value='';precoEl.closest('.price-input')?.classList.remove('free');
   syncBizRoom();save();renderBizVitrine();applyClubUI();toast('Item adicionado à vitrine ✓');
   if(SUPABASE_READY&&user.roomId){
     try{
@@ -3102,14 +3101,24 @@ async function delPromo(i){
 }
 
 /* ---- Meus Chats ---- */
-const BIZCHATS=[
-  {av:'👩',nome:'Ana Souza',msg:'Vocês têm mesa pra 4 hoje à noite?',time:'12min'},
-  {av:'🧔',nome:'Carlos',msg:'Chego em 10 min, será que ainda tem chopp duplo?',time:'40min'},
-  {av:'👧',nome:'Bia',msg:'Que horas fecha hoje?',time:'2h'},
-];
-function renderBizChats(){
+function fmtAgo(iso){
+  const ms=Date.now()-new Date(iso).getTime();
+  const min=Math.floor(ms/60000);
+  if(min<1)return 'agora';
+  if(min<60)return min+'min';
+  const h=Math.floor(min/60);
+  if(h<24)return h+'h';
+  return Math.floor(h/24)+'d';
+}
+async function renderBizChats(){
   const box=document.getElementById('biz-chats-list');if(!box)return;
-  box.innerHTML=BIZCHATS.map(c=>`<div class="notif" style="cursor:pointer;" onclick="openOwnBizChat()"><div class="ni">${c.av}</div><div class="nc"><b>${c.nome}</b><small>${c.msg}</small></div><span class="nt">${c.time}</span></div>`).join('');
+  if(!SUPABASE_READY||!user||!user.roomId){box.innerHTML='<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Sem conversas ainda.</p>';return;}
+  try{
+    const all=await sbLoadMessages(user.roomId);
+    const recent=all.slice(-8).reverse().filter(m=>m.sender_id!==(user&&user.id));
+    box.innerHTML=recent.length?recent.map(m=>`<div class="notif" style="cursor:pointer;" onclick="openOwnBizChat()"><div class="ni">💬</div><div class="nc"><b>${m.sender_name||'Cliente'}</b><small>${m.texto}</small></div><span class="nt">${fmtAgo(m.created_at)}</span></div>`).join('')
+      :'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Sem conversas ainda. Quando alguém falar na sala da loja, aparece aqui.</p>';
+  }catch(e){box.innerHTML='<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Não deu pra carregar as conversas.</p>';}
 }
 function openOwnBizChat(){
   if(!user||!user.roomId)return;
