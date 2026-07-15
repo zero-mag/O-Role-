@@ -577,6 +577,9 @@
   #s-biz .bgrid{grid-template-columns:1fr;}
   #s-biz .add-prod{grid-template-columns:52px 1fr;}
   #s-biz .add-prod>*:not(:first-child):not(.np-add){grid-column:2;width:100%;}
+  /* modais são sempre estreitos (mesmo no desktop) — mesmo ajuste de coluna única */
+  .modal .add-prod{grid-template-columns:52px 1fr;}
+  .modal .add-prod>*:not(:first-child):not(.np-add){grid-column:2;width:100%;}
   #s-biz .hr-row{flex-wrap:wrap;}
   #s-biz .hr-times{flex-wrap:wrap;gap:4px 6px;}
   #s-biz .hr-times input[type=time]{font-size:12px;padding:5px 4px;min-width:0;}
@@ -3138,8 +3141,17 @@ function fillBiz(){
   updateVitrineHiddenUI();
   const alcanceVal=document.querySelector('#bstat-alcance .val'),alcanceTrend=document.querySelector('#bstat-alcance .trend');
   if(alcanceVal){alcanceVal.textContent=user.profileViews||0;alcanceTrend.textContent=user.profileViews?'Visitas registradas':'Sem dados ainda';}
+  updateChatEntriesStat();
   bizTab('dash');
   renderProfileViewsChart();
+}
+async function updateChatEntriesStat(){
+  const val=document.querySelector('#bstat-chat .val'),trend=document.querySelector('#bstat-chat .trend');
+  if(!val||!SUPABASE_READY||!user||!user.roomId)return;
+  try{
+    const n=await sbCountRoomJoins(user.roomId);
+    val.textContent=n;trend.textContent=n?'Pessoas que entraram no chat':'Sem dados ainda';
+  }catch(e){console.error('Falha ao contar entradas no chat',e);}
 }
 async function renderProfileViewsChart(){
   const bc=document.getElementById('bchart');if(!bc||!user)return;

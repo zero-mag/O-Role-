@@ -80,6 +80,11 @@ async function sbLoadProfileViewEvents(roomId, sinceIso) {
   if (error) throw error;
   return data;
 }
+async function sbCountRoomJoins(roomId) {
+  const { data, error } = await sb.rpc('count_room_joins', { p_room_id: roomId });
+  if (error) throw error;
+  return data || 0;
+}
 
 /* ---------- SALVOS / ENTROU / BLOQUEADOS (por usuário) ---------- */
 async function sbLoadUserFlags(userId) {
