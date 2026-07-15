@@ -2193,7 +2193,9 @@ function cardHTML(s){
   const nameExtra=(isB?' <span class="verified">◆</span>':'')+destaque;
   const timerEl=isB?'':`<span class="timer" data-exp="${s.expiresAt}">⏱ ${fmtRemaining(s.expiresAt)}</span>`;
   const saveBtn=isB?`<button class="save-btn${savedPlaces.includes(s.id)?' saved':''}" data-id="${s.id}" title="Salvar local"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg></button>`:'';
-  el.innerHTML=`<div class="thumb">${s.priv?'🔒':s.emoji}${saveBtn}</div>
+  const showPhoto=!s.priv&&s.avatar;
+  const thumbStyle=showPhoto?` style="background-image:url(${s.avatar});background-size:cover;background-position:center;"`:'';
+  el.innerHTML=`<div class="thumb"${thumbStyle}>${showPhoto?'':(s.priv?'🔒':s.emoji)}${saveBtn}</div>
     <div class="info"><div class="name">${s.nome}${nameExtra}</div>
       <div class="meta"><span>${s.cat}</span><span class="sep">·</span>${isB?(()=>{const st=statusHorario(s);return `<span class="badge-open ${st.state}">${statusBadgeTxt(st.state)}</span>`;})():`<span class="on">${s.membros} online</span>`}<span class="sep">·</span><span>${s.dist}m</span></div></div>
     <div class="right">${timerEl}<button class="join">${isB?'Ver':'Entrar'}</button></div>`;
@@ -3623,12 +3625,16 @@ async function loadRoomsFromSupabase(){
 function refreshLiveScreens(){
   if(document.getElementById('s-app').classList.contains('active')){renderPins();renderFeed();}
   if(user&&user.type==='business'&&document.getElementById('s-biz').classList.contains('active')){
-    updateBizOpenToggle();updateChatToggleUI();updateVitrineHiddenUI();updateBizHorarioResumo();
+    updateBizOpenToggle();updateChatToggleUI();updateVitrineHiddenUI();updateBizHorarioResumo();applyBizPhotos();renderBizVitrine();
   }
   if(currentBiz&&document.getElementById('s-bizprofile').classList.contains('active')){
     const fresh=rooms.find(x=>x.id===currentBiz.id);
     if(fresh){
       currentBiz=fresh;
+      const cover=document.querySelector('#s-bizprofile .bp-cover');
+      if(cover){cover.style.backgroundImage=fresh.cover?`url(${fresh.cover})`:'';cover.classList.toggle('has-cover',!!fresh.cover);}
+      const av=document.getElementById('bp-av');
+      if(av){if(fresh.avatar){av.style.backgroundImage=`url(${fresh.avatar})`;av.textContent='';av.classList.add('img');}else{av.style.backgroundImage='';av.textContent=fresh.emoji;av.classList.remove('img');}}
       const hb=document.getElementById('bp-hours');
       if(hb&&fresh.horario){const st=statusHorario(fresh);hb.innerHTML=`<b class="${st.state}">${statusIcon(st.state)} ${st.label}</b><br>${fmtHojeResumo(fresh)}${st.sub?' · '+st.sub:''}`;}
       const chatOff=!!(fresh.horario&&fresh.horario._chatDisabled);
@@ -3654,6 +3660,7 @@ function hydrateBizUserFromRoom(){
   user.site=r.site||user.site;
   user.oferece=r.oferece||user.oferece;
   user.cover=r.cover||user.cover;
+  user.avatar=r.avatar||user.avatar;
   user.verified=!!r.verified;
   user.clubUntil=r.clubUntil||null;
   user.boostUntil=r.boostUntil||null;
