@@ -1728,7 +1728,8 @@ async function doLogin(){
       }else if(/invalid login credentials/i.test(msg)){
         toastError('E-mail ou senha incorretos.');
       }else{
-        toastError('Não deu pra entrar: '+(msg||'tente de novo'));
+        const pt=traduzErro(msg);
+        toastError('Não deu pra entrar'+(pt?': '+pt:'. Tente de novo em instantes.'));
       }
     }
     finally{hideLoading();}
@@ -3026,7 +3027,13 @@ function onUserPhoto(e){
   const f=e.target.files&&e.target.files[0];if(!f)return;
   if(f.size>3.5e6){toast('Imagem muito grande (máx ~3MB)');return;}
   const rd=new FileReader();
-  rd.onload=()=>{user.avatar=rd.result;save();fillProfile();toast('Foto de perfil atualizada ✓');};
+  rd.onload=async()=>{
+    user.avatar=rd.result;save();fillProfile();toast('Foto de perfil atualizada ✓');
+    if(SUPABASE_READY&&user.id){
+      try{await sbUpdateProfile(user.id,{avatar_url:user.avatar});}
+      catch(e2){toastError('Não deu pra salvar a foto no servidor — verifique sua conexão.');}
+    }
+  };
   rd.readAsDataURL(f);
 }
 function fillBiz(){
