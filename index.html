@@ -1678,6 +1678,26 @@ function toast(t){const el=document.getElementById('toast');el.textContent=t;el.
 function showLoading(text){document.getElementById('lo-text').textContent=text||'Aguarde…';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
 function toastError(t){document.getElementById('err-text').textContent=t;document.getElementById('err-modal').classList.add('show');}
+// traduz mensagens de erro técnicas (Supabase/rede, quase sempre em inglês) pra
+// PT-BR — nunca mostra o texto em inglês cru pro usuário, só registra no console
+function traduzErro(msg){
+  const raw=String(msg||'');
+  console.error('Erro original:',raw);
+  const map=[
+    [/email not confirmed/i,'e-mail ainda não confirmado'],
+    [/invalid login credentials/i,'e-mail ou senha incorretos'],
+    [/user already registered/i,'esse e-mail já tem conta'],
+    [/password.*(least|weak|short)/i,'senha muito curta ou fraca'],
+    [/network|failed to fetch|load failed/i,'falha de conexão — verifique sua internet'],
+    [/permission denied/i,'sem permissão no servidor'],
+    [/rate limit/i,'muitas tentativas — aguarde um pouco e tente de novo'],
+    [/duplicate key|already exists/i,'esse registro já existe'],
+    [/non-2xx status code/i,'o servidor recusou o pedido'],
+    [/timeout/i,'o servidor demorou pra responder'],
+  ];
+  for(const [re,pt] of map)if(re.test(raw))return pt;
+  return null;
+}
 function closeErrModal(){document.getElementById('err-modal').classList.remove('show');}
 function togglePw(id,el){
   const inp=document.getElementById(id);
@@ -1992,7 +2012,7 @@ async function doSignup(){
       user.id=authUser.id;
       toast('Conta criada! 🎉 Confira seu e-mail pra confirmar.');
       save();openInstallScreen();
-    }catch(e){toastError('Não deu pra criar a conta: '+(e.message||'tente de novo'));}
+    }catch(e){const pt=traduzErro(e&&e.message);toastError('Não deu pra criar a conta'+(pt?': '+pt:'. Tente de novo em instantes.'));}
     finally{hideLoading();}
     return;
   }
@@ -2731,14 +2751,14 @@ async function startInfinitePayCheckout(kind,amountCents,description,payload){
     const {data,error}=await sb.functions.invoke('create-checkout',{body:{order_nsu:orderNsu,redirect_url:location.origin+location.pathname}});
     if(error||!data||!data.url){
       let detail=(data&&data.error)||(error&&error.message)||'';
-      if(error&&error.context&&typeof error.context.text==='function'){
-        try{detail+=' | corpo: '+(await error.context.text()).slice(0,200);}catch(e2){}
+      if(!detail&&error&&error.context&&typeof error.context.text==='function'){
+        try{detail=await error.context.text();}catch(e2){}
       }
-      if(!detail)detail='sem detalhes | raw: '+JSON.stringify({data,error:error?{name:error.name,message:error.message,status:error.status||(error.context&&error.context.status)}:null}).slice(0,300);
-      throw new Error(detail);
+      console.error('create-checkout falhou',{data,error,detail});
+      throw new Error(detail||'falha desconhecida no servidor de pagamento');
     }
     location.href=data.url;
-  }catch(e){toastError('Erro ao iniciar pagamento: '+(e.message||'tente de novo'));}
+  }catch(e){const pt=traduzErro(e&&e.message);toastError('Não deu pra iniciar o pagamento'+(pt?': '+pt:'. Tente de novo em instantes.'));}
   finally{hideLoading();}
 }
 async function checkPaymentReturn(){
