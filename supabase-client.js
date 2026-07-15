@@ -76,6 +76,21 @@ async function sbIncrementProfileViews(roomId) {
   if (error) throw error;
 }
 
+/* ---------- SALVOS / ENTROU / BLOQUEADOS (por usuário) ---------- */
+async function sbLoadUserFlags(userId) {
+  const { data, error } = await sb.from('user_room_flags').select('room_id, flag').eq('user_id', userId);
+  if (error) throw error;
+  return data;
+}
+async function sbAddFlag(userId, roomId, flag) {
+  const { error } = await sb.from('user_room_flags').upsert({ user_id: userId, room_id: roomId, flag }, { onConflict: 'user_id,room_id,flag' });
+  if (error) throw error;
+}
+async function sbRemoveFlag(userId, roomId, flag) {
+  const { error } = await sb.from('user_room_flags').delete().eq('user_id', userId).eq('room_id', roomId).eq('flag', flag);
+  if (error) throw error;
+}
+
 // chama cb() toda vez que qualquer room muda (criada/editada/apagada) — é o "mapa ao vivo" de verdade
 function sbSubscribeRooms(cb) {
   return sb

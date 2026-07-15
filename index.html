@@ -1719,6 +1719,7 @@ async function doLogin(){
       const profile=await sbGetProfile(authUser.id);
       user=profileToUser(profile);
       if(user.type==='business')await loadRoomsFromSupabase();
+      await hydrateUserFlags();
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();routeAfterAuth();
     }catch(e){
@@ -2324,7 +2325,22 @@ function clearRoute(keepBanner){
 /* ============ MEUS ROLÊS ============ */
 let joined=JSON.parse(localStorage.getItem('zona_joined')||'[]');
 let savedPlaces=JSON.parse(localStorage.getItem('zona_saved')||'[]');
-function toggleSaved(id){
+let blocked=JSON.parse(localStorage.getItem('zona_blocked')||'[]');
+// puxa salvos/entrou/bloqueados de verdade do servidor (localStorage era só
+// cache local — sumia ao trocar de aparelho ou limpar o navegador)
+async function hydrateUserFlags(){
+  if(!SUPABASE_READY||!user||!user.id)return;
+  try{
+    const flags=await sbLoadUserFlags(user.id);
+    savedPlaces=flags.filter(f=>f.flag==='saved').map(f=>f.room_id);
+    joined=flags.filter(f=>f.flag==='joined').map(f=>f.room_id);
+    blocked=flags.filter(f=>f.flag==='blocked').map(f=>f.room_id);
+    localStorage.setItem('zona_saved',JSON.stringify(savedPlaces));
+    localStorage.setItem('zona_joined',JSON.stringify(joined));
+    localStorage.setItem('zona_blocked',JSON.stringify(blocked));
+  }catch(e){console.error('Falha ao carregar salvos/entrou/bloqueados',e);}
+}
+async function toggleSaved(id){
   const i=savedPlaces.indexOf(id);
   if(i>-1){savedPlaces.splice(i,1);}else{savedPlaces.push(id);}
   localStorage.setItem('zona_saved',JSON.stringify(savedPlaces));
@@ -2332,15 +2348,26 @@ function toggleSaved(id){
   document.querySelectorAll(`.save-btn[data-id="${id}"]`).forEach(b=>b.classList.toggle('saved',isSaved));
   toast(isSaved?'Local salvo 🔖':'Removido dos salvos');
   if(document.getElementById('s-myroles').classList.contains('active')&&mrTab==='saved')renderMyRoles();
+  if(SUPABASE_READY&&user&&user.id){
+    try{if(isSaved)await sbAddFlag(user.id,id,'saved');else await sbRemoveFlag(user.id,id,'saved');}
+    catch(e){toastError('Não deu pra sincronizar com o servidor.');}
+  }
 }
-function markJoined(id){if(!joined.includes(id)){joined.push(id);localStorage.setItem('zona_joined',JSON.stringify(joined));}}
-let blocked=JSON.parse(localStorage.getItem('zona_blocked')||'[]');
+function markJoined(id){
+  if(!joined.includes(id)){
+    joined.push(id);localStorage.setItem('zona_joined',JSON.stringify(joined));
+    if(SUPABASE_READY&&user&&user.id)sbAddFlag(user.id,id,'joined').catch(()=>{});
+  }
+}
 /* ===== segurança: sair / denunciar / bloquear ===== */
 function openChatMenu(){if(!chatRoom)return;document.getElementById('sm-room-name').textContent=chatRoom.nome;document.getElementById('chat-menu').classList.add('active');}
 function closeChatMenu(){document.getElementById('chat-menu').classList.remove('active');}
 function leaveRoom(){
   closeChatMenu();
-  if(chatRoom){joined=joined.filter(id=>id!==chatRoom.id);localStorage.setItem('zona_joined',JSON.stringify(joined));}
+  if(chatRoom){
+    joined=joined.filter(id=>id!==chatRoom.id);localStorage.setItem('zona_joined',JSON.stringify(joined));
+    if(SUPABASE_READY&&user&&user.id)sbRemoveFlag(user.id,chatRoom.id,'joined').catch(()=>{});
+  }
   toast('Você saiu da sala');goBack();
 }
 function reportRoom(){
@@ -2350,8 +2377,12 @@ function reportRoom(){
 function blockRoom(){
   closeChatMenu();
   if(chatRoom){
-    if(!blocked.includes(chatRoom.id)){blocked.push(chatRoom.id);localStorage.setItem('zona_blocked',JSON.stringify(blocked));}
+    if(!blocked.includes(chatRoom.id)){
+      blocked.push(chatRoom.id);localStorage.setItem('zona_blocked',JSON.stringify(blocked));
+      if(SUPABASE_READY&&user&&user.id)sbAddFlag(user.id,chatRoom.id,'blocked').catch(()=>{});
+    }
     joined=joined.filter(id=>id!==chatRoom.id);localStorage.setItem('zona_joined',JSON.stringify(joined));
+    if(SUPABASE_READY&&user&&user.id)sbRemoveFlag(user.id,chatRoom.id,'joined').catch(()=>{});
   }
   toast('🚫 Bloqueado. Você não vê mais essa sala.');goBack();
 }
@@ -3457,6 +3488,7 @@ async function bootSequence(){
       if(session){const profile=await sbGetProfile(session.user.id);user=profileToUser(profile);save();}
     }catch(e){/* sem sessão válida, segue fluxo normal de login */}
     await loadRoomsFromSupabase();
+    await hydrateUserFlags();
     sbSubscribeRooms(()=>{loadRoomsFromSupabase();});
     await checkPaymentReturn();
   }
