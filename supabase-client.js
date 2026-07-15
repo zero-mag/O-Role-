@@ -75,6 +75,11 @@ async function sbIncrementProfileViews(roomId) {
   const { error } = await sb.rpc('increment_profile_views', { p_room_id: roomId });
   if (error) throw error;
 }
+async function sbLoadProfileViewEvents(roomId, sinceIso) {
+  const { data, error } = await sb.from('profile_view_events').select('created_at').eq('room_id', roomId).gte('created_at', sinceIso);
+  if (error) throw error;
+  return data;
+}
 
 /* ---------- SALVOS / ENTROU / BLOQUEADOS (por usuário) ---------- */
 async function sbLoadUserFlags(userId) {

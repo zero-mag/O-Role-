@@ -3139,9 +3139,32 @@ function fillBiz(){
   const alcanceVal=document.querySelector('#bstat-alcance .val'),alcanceTrend=document.querySelector('#bstat-alcance .trend');
   if(alcanceVal){alcanceVal.textContent=user.profileViews||0;alcanceTrend.textContent=user.profileViews?'Visitas registradas':'Sem dados ainda';}
   bizTab('dash');
-  const bc=document.getElementById('bchart');if(bc.childElementCount)return;
-  // Sem coleta de métricas ainda — mostra estado vazio honesto em vez de números inventados.
-  bc.innerHTML='<p style="color:var(--ink-3);font-size:13px;padding:20px 0;text-align:center;width:100%;">Ainda sem visitas registradas.</p>';
+  renderProfileViewsChart();
+}
+async function renderProfileViewsChart(){
+  const bc=document.getElementById('bchart');if(!bc||!user)return;
+  const empty='<p style="color:var(--ink-3);font-size:13px;padding:20px 0;text-align:center;width:100%;">Ainda sem visitas registradas.</p>';
+  if(!SUPABASE_READY||!user.roomId){bc.innerHTML=empty;return;}
+  try{
+    const since=new Date(Date.now()-24*3600e3).toISOString();
+    const events=await sbLoadProfileViewEvents(user.roomId,since);
+    if(!events.length){bc.innerHTML=empty;return;}
+    const buckets=new Array(8).fill(0); // 8 janelas de 3h cobrindo as últimas 24h
+    const now=Date.now();
+    events.forEach(e=>{
+      const ageH=(now-new Date(e.created_at).getTime())/3600e3;
+      let idx=Math.floor(ageH/3);if(idx<0)idx=0;if(idx>7)idx=7;
+      buckets[idx]++;
+    });
+    const ordered=buckets.slice().reverse(); // mais antigo primeiro, mais recente por último
+    const max=Math.max(...ordered,1);
+    bc.innerHTML=ordered.map((v,i)=>{
+      const hoursAgo=(7-i)*3;
+      const label=hoursAgo===0?'agora':'-'+hoursAgo+'h';
+      const h=Math.max(6,Math.round((v/max)*150));
+      return `<div class="bar" style="height:${h}px" title="${v} visita${v===1?'':'s'}"><span>${label}</span></div>`;
+    }).join('');
+  }catch(e){console.error('Falha ao carregar gráfico de visitas',e);bc.innerHTML=empty;}
 }
 function updateBizOpenToggle(){
   if(!user)return;
