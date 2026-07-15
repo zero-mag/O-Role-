@@ -116,6 +116,10 @@ async function sbAddVitrineItem(roomId, item) {
   if (error) throw error;
   return data;
 }
+async function sbUpdateVitrineItem(itemId, fields) {
+  const { error } = await sb.from('vitrine_items').update(fields).eq('id', itemId);
+  if (error) throw error;
+}
 async function sbDeleteVitrineItem(itemId) {
   const { error } = await sb.from('vitrine_items').delete().eq('id', itemId);
   if (error) throw error;
