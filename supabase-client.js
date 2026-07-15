@@ -91,6 +91,17 @@ async function sbRemoveFlag(userId, roomId, flag) {
   if (error) throw error;
 }
 
+/* ---------- NOTIFICAÇÕES ---------- */
+async function sbLoadNotifications(userId) {
+  const { data, error } = await sb.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(30);
+  if (error) throw error;
+  return data;
+}
+async function sbMarkNotificationsRead(userId) {
+  const { error } = await sb.from('notifications').update({ read: true }).eq('user_id', userId).eq('read', false);
+  if (error) throw error;
+}
+
 // chama cb() toda vez que qualquer room muda (criada/editada/apagada) — é o "mapa ao vivo" de verdade
 function sbSubscribeRooms(cb) {
   return sb

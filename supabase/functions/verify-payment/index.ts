@@ -62,6 +62,14 @@ Deno.serve(async (req: Request) => {
 
     await supabase.from('payment_intents').update({ status: 'paid' }).eq('order_nsu', order_nsu);
 
+    const notifByKind: Record<string, { title: string; body: string }> = {
+      boost_business: { title: 'Boost ativado! 🚀', body: 'Seu negócio está em destaque no mapa e no feed.' },
+      club_subscription: { title: 'Bem-vindo ao Rolê+! ⭐', body: 'Sua assinatura está ativa — vitrine ilimitada e métricas reais liberadas.' },
+      role_personal: { title: 'Rolê publicado! 🎉', body: 'Seu rolê já está no mapa pra galera encontrar.' },
+    };
+    const n = notifByKind[intent.kind];
+    if (n) await supabase.from('notifications').insert({ user_id: intent.user_id, icon: '🎉', title: n.title, body: n.body });
+
     return new Response(JSON.stringify({ ok: true, kind: intent.kind }), { headers: CORS });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: CORS });

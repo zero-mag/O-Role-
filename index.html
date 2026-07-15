@@ -262,7 +262,7 @@
   .icon-btn svg{width:20px;height:20px;stroke:var(--ink-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .hico{display:inline-flex;vertical-align:-0.18em;}
   .hico svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;}
-  .icon-btn .badge{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--accent);border:2px solid #fff;}
+  .icon-btn .badge{display:none;position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--accent);border:2px solid #fff;}
   .chips{position:absolute;z-index:19;left:0;right:0;top:calc(env(safe-area-inset-top) + 66px);display:flex;gap:8px;padding:0 14px;overflow-x:auto;scrollbar-width:none;}
   .chips::-webkit-scrollbar{display:none;}
   .chip{flex:none;background:var(--card);border:1px solid var(--line);border-radius:100px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-2);box-shadow:var(--shadow-sm);}
@@ -639,7 +639,10 @@
   .bpanel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow-sm);}
   .bpanel h3{font-size:15px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
   .bpanel h3 .live-chip{position:static;margin-left:auto;padding:5px 11px;box-shadow:none;border:1px solid var(--line);}
-  .vitrine-hide-btn{font-size:11.5px;font-weight:800;color:var(--accent-dark);background:var(--accent-soft);border:1px solid var(--accent-soft-2);border-radius:100px;padding:6px 12px;white-space:nowrap;}
+  .vitrine-actions{display:flex;gap:8px;margin-bottom:10px;}
+  .vitrine-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--accent-dark);background:var(--accent-soft);border:1px solid var(--accent-soft-2);border-radius:12px;padding:10px 12px;white-space:nowrap;}
+  .vitrine-action-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;}
+  .vitrine-action-btn.on{color:var(--ink-3);background:var(--bg);border-color:var(--line-2);}
   .vitrine-hide-btn.on{color:var(--ink-2);background:var(--card);border-color:var(--line);}
   .bchart{display:flex;align-items:flex-end;gap:10px;height:180px;padding-top:10px;}
   .bchart .bar{flex:1;background:linear-gradient(180deg,var(--accent),var(--accent-dark));border-radius:7px 7px 0 0;position:relative;min-height:6px;}
@@ -1207,7 +1210,12 @@
         </div>
         <div class="bgrid">
           <div class="bpanel"><h3>Visitas ao perfil por hora</h3><div class="bchart" id="bchart"></div></div>
-          <div class="bpanel" id="biz-vitrine-panel"><h3>Minha Vitrine <span class="live-chip" id="vitrine-live-chip"><span class="pulse"></span> no ar</span><button class="vitrine-hide-btn" onclick="shareOwnRoom()" title="Compartilhar"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:3px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.8M8.6 13.5l6.8 3.8"/></svg>Compartilhar</button><button class="vitrine-hide-btn" id="vitrine-hide-btn" onclick="toggleVitrineHidden()">Ocultar vitrine</button></h3>
+          <div>
+            <div class="vitrine-actions">
+              <button class="vitrine-action-btn" onclick="shareOwnRoom()"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.8M8.6 13.5l6.8 3.8"/></svg>Compartilhar</button>
+              <button class="vitrine-action-btn" id="vitrine-hide-btn" onclick="toggleVitrineHidden()"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16" stroke-dasharray="1 0"/></svg><span id="vitrine-hide-label">Ocultar vitrine</span></button>
+            </div>
+            <div class="bpanel" id="biz-vitrine-panel"><h3>Minha Vitrine <span class="live-chip" id="vitrine-live-chip"><span class="pulse"></span> no ar</span></h3>
             <div id="biz-vitrine"></div>
             <p id="biz-vitrine-hint" style="font-size:12px;color:var(--ink-3);margin-top:8px;"></p>
             <div class="add-prod" id="vitrine-add-form">
@@ -1216,6 +1224,7 @@
               <div class="price-input"><span>R$</span><input id="np-preco" inputmode="numeric" placeholder="0,00 ou Grátis" oninput="maskPreco(this)" /></div>
               <button class="np-add" onclick="addVitrine()">+ Adicionar à vitrine</button>
             </div>
+          </div>
           </div>
         </div>
         <div class="bpanel" style="margin-top:16px;cursor:pointer;" onclick="bizTab('config')">
@@ -1722,6 +1731,7 @@ async function doLogin(){
       user=profileToUser(profile);
       if(user.type==='business')await loadRoomsFromSupabase();
       await hydrateUserFlags();
+      refreshNotifBadge();
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();routeAfterAuth();
     }catch(e){
@@ -2478,11 +2488,26 @@ function renderFeedTab(){
 }
 
 /* ============ NOTIFICAÇÕES ============ */
-const NOTIFS=[
-  {ic:'🎉',t:'Bem-vindo ao Rolê+!',d:'Explore o mapa e entre no primeiro rolê perto de você.',time:'agora'},
-];
-function openNotif(){
-  document.getElementById('notif-list').innerHTML=NOTIFS.map(n=>`<div class="notif"><div class="ni">${n.ic}</div><div class="nc"><b>${n.t}</b><small>${n.d}</small></div><span class="nt">${n.time}</span></div>`).join('');
+async function refreshNotifBadge(){
+  const badge=document.querySelector('.icon-btn .badge');if(!badge)return;
+  if(!SUPABASE_READY||!user||!user.id){badge.style.display='none';return;}
+  try{
+    const list=await sbLoadNotifications(user.id);
+    badge.style.display=list.some(n=>!n.read)?'':'none';
+  }catch(e){badge.style.display='none';}
+}
+async function openNotif(){
+  const box=document.getElementById('notif-list');
+  if(!SUPABASE_READY||!user||!user.id){
+    box.innerHTML='<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Faça login pra ver suas notificações.</p>';
+    go('s-notif');return;
+  }
+  try{
+    const list=await sbLoadNotifications(user.id);
+    box.innerHTML=list.length?list.map(n=>`<div class="notif"><div class="ni">${n.icon||'🔔'}</div><div class="nc"><b>${n.title}</b><small>${n.body||''}</small></div><span class="nt">${fmtAgo(n.created_at)}</span></div>`).join('')
+      :'<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Nenhuma notificação ainda.</p>';
+    if(list.some(n=>!n.read))await sbMarkNotificationsRead(user.id);
+  }catch(e){box.innerHTML='<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Não deu pra carregar as notificações.</p>';}
   document.querySelectorAll('.icon-btn .badge').forEach(b=>b.style.display='none');
   go('s-notif');
 }
@@ -2807,6 +2832,7 @@ async function checkPaymentReturn(){
     toast(data.already?'Pagamento já confirmado ✓':'Pagamento confirmado! 🎉');
     if(user){const profile=await sbGetProfile(user.id);user=profileToUser(profile);save();}
     await loadRoomsFromSupabase();
+    refreshNotifBadge();
     if(user&&user.type==='business')fillBiz();
   }catch(e){toastError('Erro ao confirmar pagamento');}
 }
@@ -3179,7 +3205,8 @@ async function toggleVitrineHidden(){
 function updateVitrineHiddenUI(){
   if(!user)return;
   const hidden=!!(user.horario&&user.horario._vitrineHidden);
-  const btn=document.getElementById('vitrine-hide-btn');if(btn){btn.textContent=hidden?'Mostrar vitrine':'Ocultar vitrine';btn.classList.toggle('on',hidden);}
+  const lbl=document.getElementById('vitrine-hide-label');if(lbl)lbl.textContent=hidden?'Mostrar vitrine':'Ocultar vitrine';
+  const btn=document.getElementById('vitrine-hide-btn');if(btn)btn.classList.toggle('on',hidden);
   const chip=document.getElementById('vitrine-live-chip');if(chip)chip.innerHTML=hidden?'oculta':'<span class="pulse"></span> no ar';
 }
 async function delVitrine(i){
@@ -3352,8 +3379,8 @@ function updateBizHorarioResumo(){
   const el=document.getElementById('biz-horario-resumo');if(!el||!user)return;
   el.textContent=fmtHojeResumo(user);
 }
-function togHorarioDia(k){const h=ensureHorario();h[k].aberto=!h[k].aberto;syncBizRoom();save();renderAllHorarios();}
-function setHorario(k,field,val){const h=ensureHorario();h[k][field]=val;syncBizRoom();save();}
+function togHorarioDia(k){const h=ensureHorario();h[k].aberto=!h[k].aberto;syncBizRoom();save();renderAllHorarios();updateBizOpenToggle();}
+function setHorario(k,field,val){const h=ensureHorario();h[k][field]=val;syncBizRoom();save();updateBizHorarioResumo();updateBizOpenToggle();}
 function fmtHora(t){const [h,m]=t.split(':');return m==='00'?(+h)+'h':(+h)+'h'+m;}
 function fmtHojeResumo(r){
   if(!r.horario)return '';
@@ -3491,6 +3518,7 @@ async function bootSequence(){
     }catch(e){/* sem sessão válida, segue fluxo normal de login */}
     await loadRoomsFromSupabase();
     await hydrateUserFlags();
+    refreshNotifBadge();
     sbSubscribeRooms(()=>{loadRoomsFromSupabase();});
     await checkPaymentReturn();
   }
