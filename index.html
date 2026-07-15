@@ -582,7 +582,7 @@
   .modal .add-prod>*:not(:first-child):not(.np-add){grid-column:2;width:100%;}
   #s-biz .hr-row{flex-wrap:wrap;}
   #s-biz .hr-times{flex-wrap:wrap;gap:4px 6px;}
-  #s-biz .hr-times input[type=time]{font-size:12px;padding:5px 4px;min-width:0;}
+  #s-biz .hr-sel{font-size:12px;padding:5px 3px;min-width:0;}
   #s-biz .two-col{grid-template-columns:1fr;}
   #s-biz .bhead-right{width:100%;}
   #s-biz .bhead-right,#s-biz .biz-open-toggle,#s-biz .bav{align-items:center;}
@@ -683,9 +683,10 @@
   .hr-row{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line);}
   .hr-row:last-child{border:none;}
   .hr-day{width:38px;font-weight:700;font-size:13px;color:var(--ink);flex:none;}
-  .hr-times{display:flex;align-items:center;gap:6px;flex:1;font-size:12.5px;color:var(--ink-2);}
-  .hr-times input[type=time]{border:1px solid var(--line-2);border-radius:8px;padding:6px 7px;font-size:12.5px;background:var(--card);outline:none;color:var(--ink);}
-  .hr-times input[type=time]:focus{border-color:var(--accent);}
+  .hr-times{display:flex;align-items:center;gap:4px;flex:1;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap;}
+  .hr-sel{border:1px solid var(--line-2);border-radius:8px;padding:6px 3px;font-size:12.5px;background:var(--card);outline:none;color:var(--ink);}
+  .hr-sel:focus{border-color:var(--accent);}
+  .hr-colon{color:var(--ink-3);font-weight:700;}
   .hr-closed{color:var(--ink-3);font-size:12.5px;flex:1;}
   .switch.sm{width:38px;height:22px;}
   .switch.sm::after{width:16px;height:16px;top:3px;left:3px;}
@@ -3475,6 +3476,19 @@ const DIA_KEYS=['dom','seg','ter','qua','qui','sex','sab']; // índice = Date.ge
 function defaultHorario(){const h={};DIAS.forEach(([k])=>h[k]={aberto:true,ini:'18:00',fim:'00:00'});return h;}
 
 function ensureHorario(){if(!user.horario)user.horario=defaultHorario();return user.horario;}
+const HR_HOURS=Array.from({length:24},(_,i)=>String(i).padStart(2,'0'));
+function hrMinuteOpts(m){const base=['00','15','30','45'];return base.includes(m)?base:[m,...base].sort();}
+function timeSelectHTML(k,field,val){
+  const [h,m]=(val||'00:00').split(':');
+  return `<select class="hr-sel" onchange="setHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select>`+
+    `<span class="hr-colon">:</span>`+
+    `<select class="hr-sel" onchange="setHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select>`;
+}
+function setHorarioPart(k,field,part,value){
+  const h=ensureHorario();
+  const [hh,mm]=(h[k][field]||'00:00').split(':');
+  setHorario(k,field,part==='h'?(value+':'+mm):(hh+':'+value));
+}
 function renderHorario(containerId){
   const box=document.getElementById(containerId);if(!box||!user)return;
   const h=ensureHorario();
@@ -3483,7 +3497,7 @@ function renderHorario(containerId){
     return `<div class="hr-row">
       <div class="hr-day">${label}</div>
       <div class="switch sm${d.aberto?' on':''}" onclick="togHorarioDia('${k}')"></div>
-      ${d.aberto?`<div class="hr-times"><input type="time" value="${d.ini}" onchange="setHorario('${k}','ini',this.value)" /><span>às</span><input type="time" value="${d.fim}" onchange="setHorario('${k}','fim',this.value)" /></div>`
+      ${d.aberto?`<div class="hr-times">${timeSelectHTML(k,'ini',d.ini)}<span>às</span>${timeSelectHTML(k,'fim',d.fim)}</div>`
         :'<div class="hr-closed">Fechado</div>'}
     </div>`;
   }).join('');
