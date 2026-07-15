@@ -694,9 +694,12 @@
   .bp-hours b.fechado{color:var(--ink-3);}
   .badge-club{font-size:9.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-dark));padding:2px 7px;border-radius:6px;letter-spacing:.3px;vertical-align:middle;}
   .club-ring{box-shadow:0 0 0 3px var(--accent) !important;}
-  .bstat.upsell{display:flex;align-items:center;gap:14px;}
-  .bstat.upsell .spark{position:static;flex:none;font-size:26px;}
-  .bstat.upsell .lbl{flex:1;}
+  .bstat.upsell{display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .bstat.upsell .spark{position:static;flex:none;width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent-dark);display:grid;place-items:center;}
+  .bstat.upsell .upsell-txt{flex:1;min-width:0;}
+  .bstat.upsell .upsell-txt b{display:block;font-size:14px;color:var(--ink);}
+  .bstat.upsell .upsell-txt small{display:block;font-size:12px;color:var(--ink-2);margin-top:2px;line-height:1.35;}
+  .bstat.upsell .upsell-btn{flex:none;background:var(--accent);color:#fff;font-weight:800;font-size:12.5px;padding:10px 16px;border-radius:100px;white-space:nowrap;box-shadow:0 4px 12px rgba(232,54,91,.28);}
   .boost-active.club{background:linear-gradient(135deg,#fff7e0,#ffedb3);border-radius:14px;padding:10px 12px;margin:-10px -2px 0;}
   .card.card-club{border-color:var(--accent);box-shadow:0 4px 16px rgba(232,54,91,.22);}
   .zpin.club .drop{width:48px;height:48px;box-shadow:0 0 0 4px rgba(232,54,91,.35),0 4px 14px rgba(20,24,35,.35);animation:clubpulse 1.8s infinite;}
@@ -1203,8 +1206,10 @@
           <div class="bstat" id="bstat-alcance"><span class="spark"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span><div class="lbl">Alcance no mapa</div><div class="val">0</div><div class="trend">Sem dados ainda</div></div>
           <div class="bstat" id="bstat-chat"><span class="spark"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg></span><div class="lbl">Entradas no chat</div><div class="val">0</div><div class="trend">Sem dados ainda</div></div>
           <div class="bstat" id="bstat-cupons"><span class="spark"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></span><div class="lbl">Cupons resgatados</div><div class="val">0</div><div class="trend">Sem dados ainda</div></div>
-          <div class="bstat upsell hide" id="bstat-upsell" style="grid-column:1/-1;cursor:pointer;" onclick="openClubModal()">
-            <span class="spark"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><div class="lbl">Alcance, entradas no chat e cupons resgatados</div><div class="val" style="font-size:16px;">Disponível no Rolê+</div><div class="trend warn">Toque pra assinar →</div>
+          <div class="bstat upsell hide" id="bstat-upsell" style="grid-column:1/-1;" onclick="openClubModal()">
+            <span class="spark"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+            <div class="upsell-txt"><b>Métricas completas</b><small>Alcance, entradas no chat e cupons resgatados</small></div>
+            <button class="upsell-btn" onclick="event.stopPropagation();openClubModal()">Assinar Rolê+</button>
           </div>
           <div class="bstat"><span class="spark"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3 3-3-3c-1-1-2-3-2-5 0-4 2-8 5-10Z"/><circle cx="12" cy="10" r="2"/><path d="M9 17l-2 4M15 17l2 4"/></svg></span><div class="lbl">Boost ativo</div><div class="val" id="biz-boost-val">Inativo</div><div class="trend warn" id="biz-boost-trend">Ative na aba Boost</div></div>
         </div>
