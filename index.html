@@ -562,8 +562,10 @@
   .bp-actions .btn:not(.ghost){flex:1;}
 
   /* ---------- BUSINESS DASHBOARD (responsivo) ---------- */
-  #root.biz-mode{max-width:100%;box-shadow:none;}
-  #s-biz{background:var(--bg);}
+  #root.biz-mode{max-width:100%;box-shadow:none;overflow-x:hidden;}
+  #s-biz{background:var(--bg);overflow-x:hidden;max-width:100%;}
+  #s-biz *{min-width:0;}
+  #s-biz h1,#s-biz p,#s-biz .bp-addr,#s-biz .bp-name,#s-biz .nm,#s-biz .prod .pn b,#s-biz .prod .pn small{overflow-wrap:break-word;word-break:break-word;}
   /* mobile: coluna única + bottom nav */
   #s-biz.active{display:flex;flex-direction:column;}
   #s-biz .side{display:none;}
