@@ -3601,8 +3601,29 @@ async function loadRoomsFromSupabase(){
     const data=await sbLoadRooms();
     rooms=data.map(sbRoomToLocal);
     hydrateBizUserFromRoom();
-    if(document.getElementById('s-app').classList.contains('active')){renderPins();renderFeed();}
+    refreshLiveScreens();
   }catch(e){console.error('Falha ao carregar rooms do Supabase',e);}
+}
+// reflete mudanças (feitas por você em outra aba, ou por qualquer edição no banco)
+// nas telas que já estão abertas na hora, sem precisar sair e voltar
+function refreshLiveScreens(){
+  if(document.getElementById('s-app').classList.contains('active')){renderPins();renderFeed();}
+  if(user&&user.type==='business'&&document.getElementById('s-biz').classList.contains('active')){
+    updateBizOpenToggle();updateChatToggleUI();updateVitrineHiddenUI();updateBizHorarioResumo();
+  }
+  if(currentBiz&&document.getElementById('s-bizprofile').classList.contains('active')){
+    const fresh=rooms.find(x=>x.id===currentBiz.id);
+    if(fresh){
+      currentBiz=fresh;
+      const hb=document.getElementById('bp-hours');
+      if(hb&&fresh.horario){const st=statusHorario(fresh);hb.innerHTML=`<b class="${st.state}">${statusIcon(st.state)} ${st.label}</b><br>${fmtHojeResumo(fresh)}${st.sub?' · '+st.sub:''}`;}
+      const chatOff=!!(fresh.horario&&fresh.horario._chatDisabled);
+      const chatBtn=document.getElementById('bp-chat-btn');
+      if(chatBtn){chatBtn.onclick=chatOff?null:()=>enterChat(fresh);chatBtn.classList.toggle('disabled',chatOff);chatBtn.textContent=chatOff?'💬 Chat desativado por este estabelecimento':'💬 Entrar no chat';}
+      const vh=!!(fresh.horario&&fresh.horario._vitrineHidden);
+      const vs=document.getElementById('bp-vitrine-section');if(vs)vs.classList.toggle('hide',vh);
+    }
+  }
 }
 // login "puro" (sem passar pelo cadastro) não sabe qual room é do negócio — sem isso,
 // toda edição (foto, vitrine, horário) falhava em silêncio por falta de user.roomId
