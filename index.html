@@ -163,15 +163,21 @@
   .warn-note{font-size:12px;color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-soft-2);border-radius:12px;padding:11px 13px;margin-bottom:14px;display:flex;gap:8px;line-height:1.45;}
   .loc-hint{font-size:12.5px;color:var(--ink-2);background:var(--accent-soft);border:1px solid var(--accent-soft-2);border-radius:12px;padding:11px 13px;margin-bottom:14px;line-height:1.45;}
   .geo-status{font-size:12.5px;font-weight:700;color:var(--green);background:var(--green-soft);border:1px solid var(--green-soft-2);border-radius:12px;padding:10px 13px;margin-bottom:12px;display:flex;gap:8px;align-items:center;}
+  /* ---- padrão de "box" reutilizável — usar em qualquer cartão novo pra manter consistência ---- */
+  .box-card{border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--card);}
+  .box-card input,.box-card select{background:var(--bg);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;}
+  .box-card input:focus,.box-card select:focus{border-color:var(--accent);}
+  .box-card small{color:var(--ink-3);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:.3px;}
+
   .admin-tabs{display:flex;gap:8px;margin-bottom:16px;}
   .admin-tab{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);font-weight:800;font-size:12.5px;letter-spacing:.3px;}
   .admin-tab.sel{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .admin-points-box{display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line-2);border-radius:16px;padding:16px 10px;margin-bottom:20px;}
+  .admin-points-box{display:flex;align-items:center;justify-content:center;padding:16px 10px;margin-bottom:20px;}
   .admin-points-sep{width:1px;align-self:stretch;background:var(--line-2);margin:0 26px;}
   .admin-point{text-align:center;flex:1;}
   .admin-point b{display:block;font-size:24px;color:var(--accent);margin-top:2px;}
   .admin-point small{color:var(--ink-3);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.3px;}
-  .admin-cnae{font-size:12.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:10px 13px;margin-bottom:12px;}
+  .admin-cnae{font-size:12.5px;color:var(--ink-2);background:var(--bg);margin-bottom:12px;}
   .admin-google-link{display:block;font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:6px;}
   .admin-biz-item{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);}
   .admin-biz-item .nm{flex:1;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;}
@@ -179,8 +185,7 @@
   .admin-dot.laranja{background:#f59e0b;}
   .admin-dot.azul{background:#3b82f6;}
   .admin-dot.verde{background:var(--green);}
-  .admin-vit-card{border:1px solid var(--line-2);border-radius:14px;padding:10px 12px;margin-bottom:10px;background:var(--card);}
-  .admin-vit-card small{color:var(--ink-3);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:.3px;}
+  .admin-vit-card{margin-bottom:10px;}
   .admin-vit-card .two-col{margin-top:6px;}
   .two-col{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;}
   .or-line{display:flex;align-items:center;gap:12px;margin:8px 0 12px;color:var(--ink-3);font-size:12px;font-weight:600;}
@@ -1148,7 +1153,7 @@
         <button class="admin-tab" id="adm-tab-add" onclick="adminTab('add')">ADC EMPRESA</button>
         <button class="admin-tab hide" id="adm-tab-prom" onclick="adminTab('prom')">PROM ADM</button>
       </div>
-      <div class="admin-points-box">
+      <div class="admin-points-box box-card">
         <div class="admin-point"><small>Negócios</small><b id="adm-pts-biz">0</b></div>
         <div class="admin-points-sep"></div>
         <div class="admin-point"><small>Vitrine</small><b id="adm-pts-vit">0</b></div>
@@ -1158,7 +1163,7 @@
       <div id="adm-pane-add" class="hide">
         <div class="field"><label>CNPJ</label><input id="adm-cnpj" placeholder="00.000.000/0000-00" oninput="maskCnpjAdmin(this)" /></div>
         <div id="adm-cnpj-status" class="geo-status hide"></div>
-        <div id="adm-cnae-box" class="admin-cnae hide"></div>
+        <div id="adm-cnae-box" class="admin-cnae box-card hide"></div>
         <div class="field"><label>Nome do negócio</label><input id="adm-nome" placeholder="Nome que aparece pros clientes" /></div>
         <div class="field"><label>Categoria</label><select id="adm-cat"></select></div>
         <div class="field"><label>Endereço</label><input id="adm-address" placeholder="Rua, número, bairro" /></div>
@@ -1175,7 +1180,7 @@
       <!-- ---- ABA: PROMOVER ADMIN (só o dev) ---- -->
       <div id="adm-pane-prom" class="hide">
         <p style="color:var(--ink-2);font-size:14px;margin-bottom:14px;">Toque numa conta da lista pra promover ou remover o acesso.</p>
-        <div class="admin-vit-card hide" id="adm-prom-selected">
+        <div class="admin-vit-card box-card hide" id="adm-prom-selected">
           <small>Selecionado</small>
           <b id="adm-prom-selected-email" style="display:block;margin:4px 0 10px;"></b>
           <button class="btn" id="adm-prom-action-btn" onclick="promoteAdminAccount()"></button>
@@ -1914,7 +1919,7 @@ function resetAdminForm(){
   const cat=document.getElementById('adm-cat');
   cat.innerHTML=SEG_GROUPS.flatMap(g=>g.items).map(([seg,em])=>`<option value="${seg}" data-em="${em}">${seg}</option>`).join('');
   const vf=document.getElementById('adm-vitrine-fields');
-  vf.innerHTML=[1,2,3].map(i=>`<div class="admin-vit-card"><small>Item ${i}</small><div class="two-col"><input id="adm-vit-nome-${i}" placeholder="Ex: Chopp 500ml" /><input id="adm-vit-preco-${i}" placeholder="R$" /></div></div>`).join('');
+  vf.innerHTML=[1,2,3].map(i=>`<div class="admin-vit-card box-card"><small>Item ${i}</small><div class="two-col"><input id="adm-vit-nome-${i}" placeholder="Ex: Chopp 500ml" /><input id="adm-vit-preco-${i}" placeholder="R$" /></div></div>`).join('');
 }
 function maskCnpjAdmin(el){
   const d=el.value.replace(/\D/g,'').slice(0,14);
@@ -1963,7 +1968,7 @@ async function buscarCnpjAdmin(cnpj){
   }catch(e){st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra verificar agora.';}
 }
 function adTimeSelectHTML(k,field,val){
-  return `<input type="time" class="hr-time-native" value="${val||'00:00'}" onchange="adSetHorarioPart('${k}','${field}',this.value)" />`;
+  return `<input type="time" class="hr-time-native" lang="pt-BR" value="${val||'00:00'}" onchange="adSetHorarioPart('${k}','${field}',this.value)" />`;
 }
 function adRenderHorario(){
   const box=document.getElementById('adm-horario');if(!box||!adHorario)return;
@@ -3819,7 +3824,7 @@ function defaultHorario(){const h={};DIAS.forEach(([k])=>h[k]={aberto:true,ini:'
 
 function ensureHorario(){if(!user.horario)user.horario=defaultHorario();return user.horario;}
 function timeSelectHTML(k,field,val){
-  return `<input type="time" class="hr-time-native" value="${val||'00:00'}" onchange="setHorario('${k}','${field}',this.value)" />`;
+  return `<input type="time" class="hr-time-native" lang="pt-BR" value="${val||'00:00'}" onchange="setHorario('${k}','${field}',this.value)" />`;
 }
 function renderHorario(containerId){
   const box=document.getElementById(containerId);if(!box||!user)return;
