@@ -49,8 +49,36 @@ async function sbUpdateProfile(userId, fields) {
 async function sbLoadRooms() {
   const { data, error } = await sb
     .from('rooms')
-    .select('*, vitrine_items(*), promocoes(*), profiles!rooms_owner_id_fkey(name, avatar_url)')
+    .select('*, vitrine_items(*), promocoes(*)')
     .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString()); // esconde rolê pessoal já expirado
+  if (error) throw error;
+  // nome/foto de quem criou vem da view pública (profiles_public) — a tabela
+  // profiles crua agora só é legível pelo próprio dono, então não dá mais pra
+  // embutir esse join direto na query de rooms.
+  const ownerIds = [...new Set(data.map(r => r.owner_id).filter(Boolean))];
+  let byId = {};
+  if (ownerIds.length) {
+    const { data: profs, error: profErr } = await sb.from('profiles_public').select('id, name, avatar_url').in('id', ownerIds);
+    if (profErr) throw profErr;
+    (profs || []).forEach(p => { byId[p.id] = p; });
+  }
+  return data.map(r => ({ ...r, profiles: r.owner_id ? (byId[r.owner_id] || null) : null }));
+}
+
+/* ---------- FERRAMENTA ADMIN (cadastro de empresa sem dono) ---------- */
+async function sbCountCatalogedBy(userId) {
+  const { count, error } = await sb.from('rooms').select('*', { count: 'exact', head: true }).eq('cataloged_by', userId);
+  if (error) throw error;
+  return count || 0;
+}
+async function sbCountVitrineAddedBy(userId) {
+  const { count, error } = await sb.from('vitrine_items').select('*', { count: 'exact', head: true }).eq('added_by', userId);
+  if (error) throw error;
+  return count || 0;
+}
+async function sbLoadCatalogedRooms() {
+  const { data, error } = await sb.from('rooms').select('id,nome,owner_id,claim_started_at,horario')
+    .not('cataloged_by', 'is', null).order('id', { ascending: false });
   if (error) throw error;
   return data;
 }

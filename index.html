@@ -163,6 +163,21 @@
   .warn-note{font-size:12px;color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-soft-2);border-radius:12px;padding:11px 13px;margin-bottom:14px;display:flex;gap:8px;line-height:1.45;}
   .loc-hint{font-size:12.5px;color:var(--ink-2);background:var(--accent-soft);border:1px solid var(--accent-soft-2);border-radius:12px;padding:11px 13px;margin-bottom:14px;line-height:1.45;}
   .geo-status{font-size:12.5px;font-weight:700;color:var(--green);background:var(--green-soft);border:1px solid var(--green-soft-2);border-radius:12px;padding:10px 13px;margin-bottom:12px;display:flex;gap:8px;align-items:center;}
+  .admin-tabs{display:flex;gap:8px;margin-bottom:16px;}
+  .admin-tab{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);font-weight:800;font-size:12.5px;letter-spacing:.3px;}
+  .admin-tab.sel{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .admin-points{display:flex;justify-content:center;gap:28px;margin-bottom:20px;}
+  .admin-point{text-align:center;}
+  .admin-point b{display:block;font-size:22px;color:var(--accent);}
+  .admin-point small{color:var(--ink-3);font-weight:700;}
+  .admin-cnae{font-size:12.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:10px 13px;margin-bottom:12px;}
+  .admin-google-link{display:block;font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:6px;}
+  .admin-biz-item{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);}
+  .admin-biz-item .nm{flex:1;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .admin-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .admin-dot.laranja{background:#f59e0b;}
+  .admin-dot.azul{background:#3b82f6;}
+  .admin-dot.verde{background:var(--green);}
   .two-col{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;}
   .or-line{display:flex;align-items:center;gap:12px;margin:8px 0 12px;color:var(--ink-3);font-size:12px;font-weight:600;}
   .or-line::before,.or-line::after{content:"";flex:1;height:1px;background:var(--line-2);}
@@ -1019,9 +1034,9 @@
       <div class="bpanel" style="margin-bottom:16px;">
         <h3><span class="hico"><svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h5l1 1.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="12.5" r="3"/></svg></span> Foto do estabelecimento</h3>
         <div class="biz-cover" id="setup-cover">
-          <button class="cover-btn" onclick="pickPhoto('cover','setup')">📷 Adicionar capa</button>
+          <button class="cover-btn" onclick="pickPhoto('cover','setup')"><span class="hico"><svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h5l1 1.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="12.5" r="3"/></svg></span> Adicionar capa</button>
           <div class="biz-avatar" id="setup-avatar"><span id="setup-av-emoji">🏪</span></div>
-          <button class="avatar-btn" onclick="pickPhoto('avatar','setup')">📷</button>
+          <button class="avatar-btn" onclick="pickPhoto('avatar','setup')"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h5l1 1.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="12.5" r="3"/></svg></button>
         </div>
         <input type="file" id="file-cover-setup" accept="image/*" style="display:none" onchange="onPhoto(event,'cover','setup')" />
         <input type="file" id="file-avatar-setup" accept="image/*" style="display:none" onchange="onPhoto(event,'avatar','setup')" />
@@ -1075,9 +1090,9 @@
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Criar um rolê</h2></div>
     <div class="scroll">
       <div class="biz-cover" id="cr-cover-box" style="margin-bottom:38px;">
-        <button class="cover-btn" onclick="pickPhoto('cover','cr')">📷 Adicionar capa</button>
+        <button class="cover-btn" onclick="pickPhoto('cover','cr')"><span class="hico"><svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h5l1 1.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="12.5" r="3"/></svg></span> Adicionar capa</button>
         <div class="biz-avatar" id="cr-avatar-box"><span id="cr-av-emoji">🎲</span></div>
-        <button class="avatar-btn" onclick="pickPhoto('avatar','cr')">📷</button>
+        <button class="avatar-btn" onclick="pickPhoto('avatar','cr')"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h5l1 1.5H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="12.5" r="3"/></svg></button>
       </div>
       <input type="file" id="file-cover-cr" accept="image/*" style="display:none" onchange="onCrPhoto(event,'cover')" />
       <input type="file" id="file-avatar-cr" accept="image/*" style="display:none" onchange="onCrPhoto(event,'avatar')" />
@@ -1119,6 +1134,50 @@
       </div>
       <div class="cd-note hide" id="cr-cd"></div>
       <button class="btn" id="cr-btn" onclick="submitRole()">Publicar rolê grátis</button>
+    </div>
+  </section>
+
+  <!-- ===== FERRAMENTA ADMIN: ADICIONAR EMPRESA ===== -->
+  <section class="screen" id="s-admin-tool">
+    <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Ferramenta de negócios</h2></div>
+    <div class="scroll">
+      <div class="admin-tabs">
+        <button class="admin-tab sel" id="adm-tab-add" onclick="adminTab('add')">ADC EMPRESA</button>
+        <button class="admin-tab hide" id="adm-tab-prom" onclick="adminTab('prom')">PROM ADM</button>
+      </div>
+      <div class="admin-points">
+        <div class="admin-point"><b id="adm-pts-biz">0</b><small>Negócios (+10)</small></div>
+        <div class="admin-point"><b id="adm-pts-vit">0</b><small>Vitrine (+3)</small></div>
+      </div>
+
+      <!-- ---- ABA: ADICIONAR EMPRESA ---- -->
+      <div id="adm-pane-add">
+        <div class="field"><label>CNPJ</label><input id="adm-cnpj" placeholder="00.000.000/0000-00" oninput="maskCnpjAdmin(this)" /></div>
+        <div id="adm-cnpj-status" class="geo-status hide"></div>
+        <div id="adm-cnae-box" class="admin-cnae hide"></div>
+        <div class="field"><label>Nome do negócio</label><input id="adm-nome" placeholder="Nome que aparece pros clientes" /></div>
+        <div class="field"><label>Categoria</label><select id="adm-cat"></select></div>
+        <div class="field"><label>Endereço</label><input id="adm-address" placeholder="Rua, número, bairro" /></div>
+        <div class="field"><label>Cidade / UF</label><input id="adm-city" placeholder="Cidade - UF" /></div>
+        <div class="field"><label>Telefone</label><input id="adm-phone" placeholder="(19) 00000-0000" /></div>
+        <a id="adm-google-link" href="#" target="_blank" rel="noopener" class="admin-google-link"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Ver no Google (conferir horário e dados)</a>
+        <h3 style="margin-top:16px;">Horário de funcionamento</h3>
+        <div id="adm-horario"></div>
+        <h3 style="margin-top:16px;">Vitrine inicial <small style="color:var(--ink-3);font-weight:600;">(até 3 itens, opcional)</small></h3>
+        <div id="adm-vitrine-fields"></div>
+        <button class="btn" style="margin-top:20px;" onclick="submitAdminEmpresa()">Adicionar empresa</button>
+
+        <h3 style="margin-top:28px;">Negócios cadastrados</h3>
+        <div id="adm-lista-negocios"></div>
+      </div>
+
+      <!-- ---- ABA: PROMOVER ADMIN (só o dev) ---- -->
+      <div id="adm-pane-prom" class="hide">
+        <p style="color:var(--ink-2);font-size:14px;margin-bottom:14px;">Contas promovidas ganham acesso só à aba "Adicionar empresa".</p>
+        <div class="field"><label>E-mail da conta pessoal</label><input id="adm-prom-email" placeholder="email@exemplo.com" /></div>
+        <button class="btn ghost" onclick="promoteAdminAccount(true)">Promover a admin</button>
+        <button class="btn ghost" style="margin-top:8px;" onclick="promoteAdminAccount(false)">Remover admin</button>
+      </div>
     </div>
   </section>
 
@@ -1175,6 +1234,7 @@
       <div class="list-item" onclick="openMyRoles('mine')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v2a2 2 0 0 0 0 5v2A1.5 1.5 0 0 1 18.5 18h-13A1.5 1.5 0 0 1 4 16.5v-2a2 2 0 0 0 0-5v-2Z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span> Meus rolês <span class="ch">›</span></div>
       <div class="list-item" onclick="openPayHist()"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18"/></svg></span> Pagamentos <span class="ch">›</span></div>
       <div class="list-item" onclick="openNotif()"><span class="ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span> Notificações <span class="ch">›</span></div>
+      <div class="list-item hide" id="pf-admin-item" onclick="openAdminTool()"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg></span> Adicionar empresa <span class="ch">›</span></div>
       <div class="list-item" onclick="go('s-settings')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h8M18 8h2M4 16h2M12 16h8"/><circle cx="15" cy="8" r="2.2"/><circle cx="9" cy="16" r="2.2"/></svg></span> Configurações <span class="ch">›</span></div>
       <div class="list-item" onclick="openHelp()"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.5 2.5 0 1 1 3.6 2.3c-.8.4-1.1.9-1.1 1.8"/><path d="M12 17h.01"/></svg></span> Ajuda <span class="ch">›</span></div>
       <div class="set-row" style="margin-top:10px;">
@@ -1364,7 +1424,7 @@
         <div class="bp-hours" id="bp-hours"></div>
       </div>
       <div class="bp-section" id="bp-promo-section"><h4>🔥 Promoções</h4><div id="bp-promo"></div></div>
-      <div class="bp-section" id="bp-vitrine-section"><h4>🛍️ Vitrine</h4><div id="bp-vitrine"></div></div>
+      <div class="bp-section" id="bp-vitrine-section"><h4>🛍️ Vitrine</h4><div id="bp-vitrine"></div><button class="btn ghost hide" id="bp-dev-add-item" style="margin-top:10px;" onclick="devAddVitrineItem()">+ Adicionar item (dev)</button></div>
     </div>
     <div class="bp-bottom bp-actions">
       <button class="btn ghost" id="bp-route-btn"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6Z"/></svg>Rota</button>
@@ -1701,7 +1761,7 @@ function cleanupExpiredRoles(){
 setInterval(cleanupExpiredRoles,15000);
 
 /* ============ NAV ============ */
-const MODALS=['s-create','s-pay','s-chat','s-profile','s-bizprofile','s-roleprofile','s-myroles','s-terms','s-feed','s-notif','s-settings','s-payhist','s-help'];
+const MODALS=['s-create','s-pay','s-chat','s-profile','s-bizprofile','s-roleprofile','s-myroles','s-terms','s-feed','s-notif','s-settings','s-payhist','s-help','s-admin-tool'];
 let navHistory=[];
 function go(id,replace){
   const cur=document.querySelector('.screen.active');
@@ -1794,8 +1854,209 @@ function profileToUser(p){
     coords:(p.lat&&p.lng)?{lat:p.lat,lng:p.lng}:null,
     cnpj:p.cnpj,razaoSocial:p.razao_social,verified:p.verified,
     whatsapp:p.whatsapp,instagram:p.instagram,site:p.site,cover:p.cover_url,
-    horario:p.horario,oferece:p.oferece||[],clubUntil:p.club_until,boostUntil:p.boost_until
+    horario:p.horario,oferece:p.oferece||[],clubUntil:p.club_until,boostUntil:p.boost_until,
+    isAdmin:!!p.is_admin
   };
+}
+const DEV_EMAIL='felipegust59@gmail.com';
+function isToolAdmin(){return !!(user&&(user.isAdmin||user.email===DEV_EMAIL));}
+
+/* ============ FERRAMENTA ADMIN: ADICIONAR EMPRESA ============ */
+let adHorario=null, adCnpjBlocked=false, adCoords=null;
+function openAdminTool(){
+  if(!isToolAdmin()){toast('Sem acesso');return;}
+  document.getElementById('adm-tab-prom').classList.toggle('hide',user.email!==DEV_EMAIL);
+  adminTab('add');
+  resetAdminForm();
+  refreshAdminPoints();
+  refreshAdminList();
+  go('s-admin-tool');
+}
+function adminTab(name){
+  document.getElementById('adm-tab-add').classList.toggle('sel',name==='add');
+  document.getElementById('adm-tab-prom').classList.toggle('sel',name==='prom');
+  document.getElementById('adm-pane-add').classList.toggle('hide',name!=='add');
+  document.getElementById('adm-pane-prom').classList.toggle('hide',name!=='prom');
+}
+function resetAdminForm(){
+  document.getElementById('adm-cnpj').value='';
+  document.getElementById('adm-cnpj-status').classList.add('hide');
+  document.getElementById('adm-cnae-box').classList.add('hide');
+  document.getElementById('adm-nome').value='';
+  document.getElementById('adm-address').value='';
+  document.getElementById('adm-city').value='';
+  document.getElementById('adm-phone').value='';
+  document.getElementById('adm-google-link').href='#';
+  adCoords=null;adCnpjBlocked=false;
+  adHorario=defaultHorario();
+  adRenderHorario();
+  const cat=document.getElementById('adm-cat');
+  cat.innerHTML=SEG_GROUPS.flatMap(g=>g.items).map(([seg,em])=>`<option value="${seg}" data-em="${em}">${seg}</option>`).join('');
+  const vf=document.getElementById('adm-vitrine-fields');
+  vf.innerHTML=[1,2,3].map(i=>`<div class="two-col" style="margin-bottom:8px;"><input id="adm-vit-nome-${i}" placeholder="Item ${i} (ex: Chopp 500ml)" /><input id="adm-vit-preco-${i}" placeholder="R$" /></div>`).join('');
+}
+function maskCnpjAdmin(el){
+  const d=el.value.replace(/\D/g,'').slice(0,14);
+  let v=d;
+  if(d.length>12)v=d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8,12)+'-'+d.slice(12);
+  else if(d.length>8)v=d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8);
+  else if(d.length>5)v=d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5);
+  else if(d.length>2)v=d.slice(0,2)+'.'+d.slice(2);
+  el.value=v;
+  const st=document.getElementById('adm-cnpj-status');
+  adCnpjBlocked=false;
+  if(d.length<14){st.classList.add('hide');return;}
+  if(!isValidCNPJ(d)){st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='⚠️ CNPJ inválido. Confira os números.';adCnpjBlocked=true;return;}
+  buscarCnpjAdmin(d);
+}
+async function buscarCnpjAdmin(cnpj){
+  const st=document.getElementById('adm-cnpj-status'),cb=document.getElementById('adm-cnae-box');
+  st.classList.remove('hide');st.style.color='var(--amber)';st.textContent='🔎 Verificando CNPJ na Receita Federal…';
+  cb.classList.add('hide');
+  try{
+    const r=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpj);
+    if(!r.ok){st.style.color='var(--accent-dark)';st.textContent='⚠️ CNPJ não encontrado na Receita Federal.';return;}
+    const d=await r.json();
+    const ativa=d.descricao_situacao_cadastral==='ATIVA';
+    st.style.color=ativa?'var(--green)':'var(--accent-dark)';
+    st.textContent=(ativa?'✓ Ativa — ':'⚠️ Situação: '+(d.descricao_situacao_cadastral||'desconhecida')+' — ')+(d.razao_social||'');
+    // sugestão de nome (nome fantasia costuma vir sem "LTDA"/"ME" — mas fica editável do mesmo jeito)
+    document.getElementById('adm-nome').value=(d.nome_fantasia&&d.nome_fantasia.trim())||d.razao_social||'';
+    const rua=[d.descricao_tipo_de_logradouro,d.logradouro,d.numero].filter(Boolean).join(' ');
+    document.getElementById('adm-address').value=[rua,d.bairro].filter(Boolean).join(', ');
+    document.getElementById('adm-city').value=[d.municipio,d.uf].filter(Boolean).join(' - ');
+    if(d.ddd_telefone_1)document.getElementById('adm-phone').value=d.ddd_telefone_1;
+    if(d.cnae_fiscal_descricao){
+      cb.classList.remove('hide');cb.textContent='CNAE: '+d.cnae_fiscal_descricao+' (confira a categoria abaixo — o CNAE é só uma sugestão)';
+      const all=SEG_GROUPS.flatMap(({items})=>items);
+      const q=normSeg(d.cnae_fiscal_descricao);
+      const hit=all.find(([seg])=>q.includes(normSeg(seg)));
+      if(hit)document.getElementById('adm-cat').value=hit[0];
+    }
+    document.getElementById('adm-google-link').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent([document.getElementById('adm-nome').value,rua,d.municipio,d.uf].filter(Boolean).join(' '));
+    try{
+      const gr=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent([rua,d.municipio,d.uf,'Brasil'].filter(Boolean).join(', ')));
+      const arr=await gr.json();
+      if(arr&&arr[0])adCoords={lat:+arr[0].lat,lng:+arr[0].lon};
+    }catch(e){/* sem geocode automático — usa a posição atual como fallback no envio */}
+  }catch(e){st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra verificar agora.';}
+}
+function adTimeSelectHTML(k,field,val){
+  const [h,m]=(val||'00:00').split(':');
+  return `<select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select>`+
+    `<span class="hr-colon">:</span>`+
+    `<select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select>`;
+}
+function adRenderHorario(){
+  const box=document.getElementById('adm-horario');if(!box||!adHorario)return;
+  box.innerHTML=DIAS.map(([k,label])=>{
+    const d=adHorario[k];
+    return `<div class="hr-row">
+      <div class="hr-day">${label}</div>
+      <div class="switch sm${d.aberto?' on':''}" onclick="adTogHorarioDia('${k}')"></div>
+      ${d.aberto?`<div class="hr-times">${adTimeSelectHTML(k,'ini',d.ini)}<span>às</span>${adTimeSelectHTML(k,'fim',d.fim)}</div>`:'<div class="hr-closed">Fechado</div>'}
+    </div>`;
+  }).join('');
+}
+function adTogHorarioDia(k){adHorario[k].aberto=!adHorario[k].aberto;adRenderHorario();}
+function adSetHorarioPart(k,field,part,value){
+  const [hh,mm]=(adHorario[k][field]||'00:00').split(':');
+  adHorario[k][field]=part==='h'?(value+':'+mm):(hh+':'+value);
+}
+async function submitAdminEmpresa(){
+  if(adCnpjBlocked){toast('Confira o CNPJ antes de continuar');return;}
+  const nome=document.getElementById('adm-nome').value.trim();
+  if(!nome){toast('Preencha o nome do negócio');return;}
+  if(!SUPABASE_READY||!user){toast('Sem conexão com o servidor');return;}
+  const catSel=document.getElementById('adm-cat');
+  const cat=catSel.value,em=(catSel.selectedOptions[0]&&catSel.selectedOptions[0].dataset.em)||'🏪';
+  const address=[document.getElementById('adm-address').value.trim(),document.getElementById('adm-city').value.trim()].filter(Boolean).join(' — ');
+  const phoneDigits=document.getElementById('adm-phone').value.replace(/\D/g,'');
+  const coords=adCoords||{lat:userPos.lat,lng:userPos.lng};
+  showLoading('Cadastrando negócio…');
+  try{
+    const room=await sbCreateRoom({
+      owner_id:null,is_business:true,cataloged_by:user.id,nome,emoji:em,cat,
+      address,lat:coords.lat,lng:coords.lng,horario:adHorario,
+      whatsapp:phoneDigits?('55'+phoneDigits):null,oferece:[]
+    });
+    for(let i=1;i<=3;i++){
+      const inome=document.getElementById('adm-vit-nome-'+i).value.trim();
+      const ipreco=document.getElementById('adm-vit-preco-'+i).value.trim();
+      if(inome)await sbAddVitrineItem(room.id,{emoji:em,nome:inome,preco:ipreco||'—',added_by:user.id});
+    }
+    toast('Empresa adicionada ✓');
+    resetAdminForm();refreshAdminPoints();refreshAdminList();
+  }catch(e){toastError('Não deu pra cadastrar: '+(e.message||e));}
+  finally{hideLoading();}
+}
+async function refreshAdminPoints(){
+  if(!SUPABASE_READY||!user)return;
+  try{
+    const [biz,vit]=await Promise.all([sbCountCatalogedBy(user.id),sbCountVitrineAddedBy(user.id)]);
+    document.getElementById('adm-pts-biz').textContent=biz*10;
+    document.getElementById('adm-pts-vit').textContent=vit*3;
+  }catch(e){console.error('Falha ao calcular pontos do admin',e);}
+}
+async function refreshAdminList(){
+  const box=document.getElementById('adm-lista-negocios');if(!box)return;
+  if(!SUPABASE_READY){box.innerHTML='';return;}
+  try{
+    const list=await sbLoadCatalogedRooms();
+    box.innerHTML=list.length?list.map(r=>{
+      const dot=r.owner_id?'verde':(r.claim_started_at?'azul':'laranja');
+      const hidden=!!(r.horario&&r.horario._vitrineHidden);
+      return `<div class="admin-biz-item">
+        <div class="nm" onclick="adOpenBiz(${r.id})"><span class="admin-dot ${dot}" title="${dot==='verde'?'Já tem dono':(dot==='azul'?'Alguém reivindicando':'Sem dono ainda')}"></span>${escHtml(r.nome)}</div>
+        <div class="switch sm${hidden?'':' on'}" onclick="adToggleVitrineHidden(${r.id},this)"></div>
+      </div>`;
+    }).join(''):'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhuma empresa cadastrada por aqui ainda.</p>';
+  }catch(e){console.error('Falha ao carregar lista de negócios cadastrados',e);}
+}
+function adOpenBiz(id){
+  const r=rooms.find(x=>x.id===id);
+  if(!r){toast('Negócio não encontrado (recarregue a lista)');return;}
+  openRoom(r.id);
+}
+async function adToggleVitrineHidden(id,el){
+  const r=rooms.find(x=>x.id===id);if(!r)return;
+  const h=r.horario||(r.horario={});
+  h._vitrineHidden=!h._vitrineHidden;
+  el.classList.toggle('on',!h._vitrineHidden);
+  try{await sbUpdateRoom(id,{horario:h});toast(h._vitrineHidden?'Vitrine ocultada':'Vitrine visível');}
+  catch(e){toastError('Não deu pra salvar essa mudança agora');}
+}
+async function devAddVitrineItem(){
+  if(!currentBiz||!isToolAdmin())return;
+  const nome=prompt('Nome do item (ex: Chopp 500ml):');if(!nome||!nome.trim())return;
+  const preco=prompt('Preço (ex: R$ 12,90):')||'—';
+  try{
+    await sbAddVitrineItem(currentBiz.id,{emoji:currentBiz.emoji||'🍽️',nome:nome.trim(),preco:preco.trim(),added_by:user.id});
+    toast('Item adicionado à vitrine ✓');
+    await loadRoomsFromSupabase();
+    const fresh=rooms.find(x=>x.id===currentBiz.id);
+    if(fresh)openBizProfile(fresh);
+    refreshAdminPoints();
+  }catch(e){toastError('Não deu pra adicionar o item agora');}
+}
+async function promoteAdminAccount(makeAdmin){
+  const email=document.getElementById('adm-prom-email').value.trim();
+  if(!email){toast('Digite o e-mail da conta');return;}
+  if(!SUPABASE_READY){toast('Sem conexão com o servidor');return;}
+  showLoading(makeAdmin?'Promovendo…':'Removendo acesso…');
+  try{
+    const { data:{ session } }=await sb.auth.getSession();
+    const res=await fetch(window.SUPABASE_URL+'/functions/v1/smooth-task',{ // nome de exibição é "promote-admin" no painel, mas o endereço muda a cada redeploy — conferir se ainda bate antes de mexer
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session&&session.access_token)},
+      body:JSON.stringify({target_email:email,is_admin:makeAdmin})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'falha ao promover');
+    toast(makeAdmin?'Admin promovido ✓':'Acesso removido ✓');
+    document.getElementById('adm-prom-email').value='';
+  }catch(e){toastError('Não deu: '+(e.message||e));}
+  finally{hideLoading();}
 }
 function selType(el){document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');signupType=el.dataset.type;}
 function goAfterType(){
@@ -3073,6 +3334,7 @@ function openBizProfile(r){
   const items=r.vitrine||[];
   v.innerHTML=items.length?items.map(p=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${escHtml(p.nome)}</b><small>${escHtml(p.desc||'')}</small></div><div class="pp">${escHtml(p.preco)}</div></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:6px 0;">Sem itens na vitrine ainda.</p>';
+  document.getElementById('bp-dev-add-item').classList.toggle('hide',!(isToolAdmin()&&!r.mine));
   const hb=document.getElementById('bp-hours');
   if(hb){
     if(r.horario){
@@ -3155,6 +3417,7 @@ function fillProfile(){
   if(user.avatar){av.style.backgroundImage='url('+user.avatar+')';av.textContent='';}
   else{av.style.backgroundImage='';av.textContent=user.type==='business'?(user.emoji||'🏪'):'🙂';}
   document.getElementById('pf-badge').textContent=user.type==='business'?(user.segment+(isClub(user)?' · ⭐ Rolê+':'')):'Conta Pessoal';
+  document.getElementById('pf-admin-item').classList.toggle('hide',!isToolAdmin());
 }
 function pickUserPhoto(){document.getElementById('file-user-avatar').click();}
 function onUserPhoto(e){
