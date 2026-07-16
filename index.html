@@ -332,6 +332,12 @@
   .card.boosted{border-color:var(--accent-soft-2);box-shadow:0 4px 16px rgba(232,54,91,.14);}
   .badge-boost{font-size:9.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-dark));padding:2px 7px;border-radius:6px;letter-spacing:.3px;vertical-align:middle;}
   .zpin.boost .drop{width:48px;height:48px;box-shadow:0 0 0 4px rgba(232,54,91,.25),0 4px 14px rgba(20,24,35,.35);animation:boostpulse 1.8s infinite;}
+  /* marca rolês criados por pessoa comum (não-negócio), pra não confundir com vitrine de estabelecimento */
+  .zpin{position:relative;}
+  .dado-badge{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--card);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9.5px;line-height:1;}
+  .zpin .dado-badge{right:-2px;bottom:4px;}
+  .thumb{position:relative;}
+  .thumb .dado-badge{right:4px;bottom:4px;}
   .zpin.boost .drop span{font-size:21px;}
   @keyframes boostpulse{0%{box-shadow:0 0 0 2px rgba(232,54,91,.35),0 4px 14px rgba(20,24,35,.35);}70%{box-shadow:0 0 0 12px rgba(232,54,91,0),0 4px 14px rgba(20,24,35,.35);}100%{box-shadow:0 0 0 2px rgba(232,54,91,0),0 4px 14px rgba(20,24,35,.35);}}
   /* sort pill */
@@ -877,7 +883,7 @@
         <div class="ph-frame">
           <div class="ph-notch"></div>
           <div class="ph-screen">
-            <div class="ph-topbar"><div class="ph-search">🔍 <span id="ph-search-text">Buscar em Vila Madalena…</span></div></div>
+            <div class="ph-topbar"><div class="ph-search"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> <span id="ph-search-text">Buscar em Vila Madalena…</span></div></div>
             <div class="ph-map">
               <div class="ph-pin p1"></div>
               <div class="ph-pin p2"></div>
@@ -895,7 +901,7 @@
         <div class="brand">O Rolê</div>
         <div class="tag">O que tá <b>rolando perto de você</b>, agora.</div>
         <div class="field"><label>E-mail</label><input id="login-email" type="email" placeholder="voce@email.com" /></div>
-        <div class="field"><label>Senha</label><div class="pw-wrap"><input id="login-pass" type="password" placeholder="••••••••" /><span class="pw-eye" onclick="togglePw('login-pass',this)">👁️</span></div></div>
+        <div class="field"><label>Senha</label><div class="pw-wrap"><input id="login-pass" type="password" placeholder="••••••••" /><span class="pw-eye" onclick="togglePw('login-pass',this)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span></div></div>
         <button class="btn" onclick="doLogin()">Entrar</button>
         <div class="alt">Não tem conta? <b onclick="go('s-type')">Criar agora</b></div>
       </div>
@@ -961,7 +967,7 @@
         </div>
       </div>
       <div class="field"><label>E-mail</label><input id="su-email" type="email" placeholder="voce@email.com" /></div>
-      <div class="field"><label>Senha</label><div class="pw-wrap"><input id="su-pass" type="password" placeholder="Crie uma senha" /><span class="pw-eye" onclick="togglePw('su-pass',this)">👁️</span></div></div>
+      <div class="field"><label>Senha</label><div class="pw-wrap"><input id="su-pass" type="password" placeholder="Crie uma senha" /><span class="pw-eye" onclick="togglePw('su-pass',this)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span></div></div>
 
       <!-- BUSINESS: tipo de estabelecimento -->
       <div id="biz-segment" class="hide">
@@ -976,13 +982,13 @@
 
       <!-- PESSOAL: GPS pra achar rolês perto -->
       <div id="personal-gps" class="toggle-row" onclick="askGPS(this)">
-        <div class="tx"><b>📍 Ativar localização</b><small id="gps-txt">Precisamos do GPS pra mostrar rolês perto de você</small></div>
+        <div class="tx"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Ativar localização</b><small id="gps-txt">Precisamos do GPS pra mostrar rolês perto de você</small></div>
         <div class="switch" id="gps-switch"></div>
       </div>
 
       <!-- BUSINESS: endereço fixo do estabelecimento (via CEP) -->
       <div id="biz-loc" class="hide">
-        <div class="loc-hint">📍 Onde fica o seu estabelecimento? Digite o <b>CEP</b> que a gente completa o resto e fixa seu pin no mapa pros clientes.</div>
+        <div class="loc-hint"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Onde fica o seu estabelecimento? Digite o <b>CEP</b> que a gente completa o resto e fixa seu pin no mapa pros clientes.</div>
         <div class="field"><label>CEP</label><input id="biz-cep" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="maskCep(this)" /></div>
         <div id="biz-cep-status" class="geo-status hide"></div>
         <div class="field"><label>Endereço</label><input id="biz-address" placeholder="Rua / logradouro" /></div>
@@ -992,14 +998,14 @@
         </div>
         <div class="field"><label>Cidade / UF</label><input id="biz-city" placeholder="Cidade - UF" /></div>
         <div class="or-line">ou</div>
-        <button type="button" class="btn ghost" id="biz-geo-btn" onclick="useCurrentAsBiz()" style="margin-bottom:6px;">📍 Estou no local agora — usar meu GPS</button>
+        <button type="button" class="btn ghost" id="biz-geo-btn" onclick="useCurrentAsBiz()" style="margin-bottom:6px;"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Estou no local agora — usar meu GPS</button>
         <div id="biz-geo-status" class="geo-status hide"></div>
 
         <label class="blk-label" style="margin-top:16px;">Contatos do perfil <span style="color:var(--ink-3);font-weight:600;">(opcional)</span></label>
         <div class="field"><label>📱 WhatsApp</label><input id="biz-wpp" inputmode="numeric" placeholder="(11) 90000-0000" /></div>
         <div class="two-col">
           <div class="field"><label>📸 Instagram</label><input id="biz-insta" placeholder="@seuperfil" /></div>
-          <div class="field"><label>🔗 Cardápio/Site</label><input id="biz-site" placeholder="link" /></div>
+          <div class="field"><label><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Cardápio/Site</label><input id="biz-site" placeholder="link" /></div>
         </div>
       </div>
 
@@ -1040,7 +1046,7 @@
     <div id="map"></div>
     <div class="topbar">
       <div class="logo">O Rolê</div>
-      <div class="searchbar">🔍 <input id="search-input" placeholder="Buscar bar, rolê, evento…" autocomplete="off" oninput="onSearch(this.value)" /><button class="src-x" id="src-x" onclick="onSearch('');document.getElementById('search-input').value='';">✕</button></div>
+      <div class="searchbar"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> <input id="search-input" placeholder="Buscar bar, rolê, evento…" autocomplete="off" oninput="onSearch(this.value)" /><button class="src-x" id="src-x" onclick="onSearch('');document.getElementById('search-input').value='';"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
       <div class="icon-btn" onclick="openNotif()"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="badge"></span></div>
     </div>
     <div class="chips" id="chips"></div>
@@ -1049,7 +1055,7 @@
       <div class="rb-main">
         <div class="eta" id="route-eta">—</div>
         <div class="ri"><b id="route-dest">Destino</b><small id="route-dist">calculando…</small></div>
-        <button class="rx" onclick="clearRoute()">✕</button>
+        <button class="rx" onclick="clearRoute()"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;"><path d="M5 5l14 14M19 5 5 19"/></svg></button>
       </div>
       <div class="rb-msg" id="route-msg">Dirija com atenção. Se beber, não dirija.</div>
     </div>
@@ -1081,13 +1087,13 @@
       <div class="field"><label>Categoria</label>
         <select id="cr-cat"><option value="🍺">🍺 Bar</option><option value="🍽️">🍽️ Restaurante</option><option value="🎉">🎉 Balada</option><option value="💪">💪 Academia</option><option value="🎮">🎮 Games/Fliperama</option><option value="💇">💇 Salão de Beleza</option><option value="🏀">🏀 Quadra Esportiva</option></select>
       </div>
-      <div class="field"><label>📍 Onde vai ser?</label>
+      <div class="field"><label><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Onde vai ser?</label>
         <button type="button" class="loc-pick-btn" id="cr-loc-btn" onclick="openLocPicker()">
           <span class="lp-ic">🗺️</span>
           <span id="cr-loc-label">Escolher no mapa</span>
           <span class="chev">›</span>
         </button>
-        <button type="button" class="loc-gps-btn" onclick="useCurrentAsRole()">📍 Ou usar minha localização atual</button>
+        <button type="button" class="loc-gps-btn" onclick="useCurrentAsRole()"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Ou usar minha localização atual</button>
         <input type="hidden" id="cr-loc" />
       </div>
       <div class="field" id="cr-dur-field"><label>Duração</label>
@@ -1100,7 +1106,7 @@
         </div>
       </div>
       <div class="toggle-row" onclick="togPriv(this)">
-        <div class="tx"><b>🔒 Grupo privado</b><small>Só entra quem tem a senha</small></div>
+        <div class="tx"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Grupo privado</b><small>Só entra quem tem a senha</small></div>
         <div class="switch" id="priv-switch"></div>
       </div>
       <div class="field hide" id="pass-field"><label>Senha da sala</label><input id="cr-pass" placeholder="Ex: 123" /></div>
@@ -1122,13 +1128,13 @@
   <section class="screen" id="s-locpicker">
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Onde vai ser o rolê?</h2></div>
     <div class="lp-search">
-      <span class="lp-search-ic">🔍</span>
+      <span class="lp-search-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
       <input id="lp-search-input" placeholder="Buscar rua ou CEP…" autocomplete="off" onkeydown="if(event.key==='Enter')lpSearch()" />
       <button class="lp-search-btn" onclick="lpSearch()">Buscar</button>
     </div>
     <div class="lp-map-wrap">
       <div id="lp-map"></div>
-      <div class="lp-hint" id="lp-hint">Toque no mapa para marcar 📍</div>
+      <div class="lp-hint" id="lp-hint">Toque no mapa para marcar <svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg></div>
       <button class="lp-gps" onclick="lpUseGPS()" title="Minha localização">◎</button>
     </div>
     <div class="lp-foot">
@@ -1310,7 +1316,7 @@
             <div class="field"><label>📱 WhatsApp</label><input id="cfg-wpp" placeholder="(11) 90000-0000" /></div>
             <div class="two-col">
               <div class="field"><label>📸 Instagram</label><input id="cfg-insta" placeholder="@seuperfil" /></div>
-              <div class="field"><label>🔗 Cardápio/Site</label><input id="cfg-site" placeholder="link" /></div>
+              <div class="field"><label><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Cardápio/Site</label><input id="cfg-site" placeholder="link" /></div>
             </div>
             <button class="btn" onclick="saveBizContacts()">Salvar alterações</button>
           </div>
@@ -1356,15 +1362,15 @@
     <div class="bp-contacts" id="bp-contacts"></div>
     <div class="bp-scroll">
       <div class="bp-section">
-        <div class="bp-addr" id="bp-addr">📍 endereço</div>
+        <div class="bp-addr" id="bp-addr"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> endereço</div>
         <div class="bp-hours" id="bp-hours"></div>
       </div>
       <div class="bp-section" id="bp-promo-section"><h4>🔥 Promoções</h4><div id="bp-promo"></div></div>
       <div class="bp-section" id="bp-vitrine-section"><h4>🛍️ Vitrine</h4><div id="bp-vitrine"></div></div>
     </div>
     <div class="bp-bottom bp-actions">
-      <button class="btn ghost" id="bp-route-btn">🧭 Rota</button>
-      <button class="btn" id="bp-chat-btn">💬 Entrar no chat</button>
+      <button class="btn ghost" id="bp-route-btn"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6Z"/></svg>Rota</button>
+      <button class="btn" id="bp-chat-btn"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:6px;"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg>Entrar no chat</button>
     </div>
   </section>
 
@@ -1381,18 +1387,18 @@
     <div class="bp-scroll">
       <div class="bp-section hide" id="rp-owner">
         <div class="rp-owner-bar">
-          <button onclick="editMyRole()"><span>✏️</span> Editar</button>
-          <button class="danger" onclick="cancelMyRole()"><span>🗑️</span> Cancelar rolê</button>
+          <button onclick="editMyRole()"><span><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19l-4 1Z"/></svg></span> Editar</button>
+          <button class="danger" onclick="cancelMyRole()"><span><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0-.7 12.4A2 2 0 0 1 14.3 21H9.7a2 2 0 0 1-2-1.6L7 7"/></svg></span> Cancelar rolê</button>
         </div>
       </div>
       <div class="bp-section"><div class="rp-creator" id="rp-creator"></div></div>
-      <div class="bp-section"><h4>📝 Sobre o rolê</h4><p class="rp-desc" id="rp-desc"></p></div>
-      <div class="bp-section"><div class="bp-addr" id="rp-addr">📍</div></div>
+      <div class="bp-section"><h4><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Sobre o rolê</h4><p class="rp-desc" id="rp-desc"></p></div>
+      <div class="bp-section"><div class="bp-addr" id="rp-addr"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg></div></div>
       <div class="bp-section"><div class="rp-stat" id="rp-stat"></div></div>
     </div>
     <div class="bp-bottom bp-actions">
-      <button class="btn ghost" id="rp-route-btn">🧭 Rota</button>
-      <button class="btn" id="rp-chat-btn">💬 Entrar no chat</button>
+      <button class="btn ghost" id="rp-route-btn"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6Z"/></svg>Rota</button>
+      <button class="btn" id="rp-chat-btn"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:6px;"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg>Entrar no chat</button>
     </div>
   </section>
 
@@ -1401,7 +1407,7 @@
     <div class="feed-top">
       <div class="feed-bar">
         <button class="back" onclick="goBack()">‹</button>
-        <div class="searchbar">🔍 <input id="feed-search" placeholder="Buscar rolê, bar, evento…" autocomplete="off" oninput="onFeedSearch(this.value)" /></div>
+        <div class="searchbar"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> <input id="feed-search" placeholder="Buscar rolê, bar, evento…" autocomplete="off" oninput="onFeedSearch(this.value)" /></div>
         <div class="live-pill"><span class="pulse"></span><b id="feed-live">0</b></div>
       </div>
       <div class="chips" id="feed-chips"></div>
@@ -1434,12 +1440,12 @@
   <section class="screen" id="s-settings">
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Configurações</h2></div>
     <div class="scroll">
-      <div class="set-row"><div class="st"><b>🔔 Notificações push</b><small>Avisos de rolês e promoções perto de você</small></div><div class="switch on" onclick="tgSet(this,'Notificações')"></div></div>
-      <div class="set-row"><div class="st"><b>📍 Localização</b><small>Usar meu GPS pra achar o que está perto</small></div><div class="switch on" onclick="tgSet(this,'Localização')"></div></div>
+      <div class="set-row"><div class="st"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> Notificações push</b><small>Avisos de rolês e promoções perto de você</small></div><div class="switch on" onclick="tgSet(this,'Notificações')"></div></div>
+      <div class="set-row"><div class="st"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Localização</b><small>Usar meu GPS pra achar o que está perto</small></div><div class="switch on" onclick="tgSet(this,'Localização')"></div></div>
       <div class="set-row"><div class="st"><b>🎯 Anúncios personalizados</b><small>Usar meus interesses pra mostrar anúncios relevantes</small></div><div class="switch on" onclick="tgSet(this,'Anúncios personalizados')"></div></div>
       <div class="set-links">
         <div class="list-item" onclick="openTerms('uso')"><span class="ic">📄</span> Termos de Uso <span class="ch">›</span></div>
-        <div class="list-item" onclick="openTerms('privacidade')"><span class="ic">🔒</span> Política de Privacidade <span class="ch">›</span></div>
+        <div class="list-item" onclick="openTerms('privacidade')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></span> Política de Privacidade <span class="ch">›</span></div>
       </div>
       <div style="padding:18px 4px;"><button class="btn ghost" onclick="logout()">Sair da conta</button></div>
       <p style="text-align:center;color:var(--ink-3);font-size:12px;">O Rolê+ · v1.0</p>
@@ -1486,7 +1492,7 @@
     <div class="sm-card">
       <div class="sm-title" id="sm-room-name">Sala</div>
       <button class="sm-item" onclick="leaveRoom()"><span class="sm-ic">🚪</span> Sair da sala</button>
-      <button class="sm-item warn" onclick="reportRoom()"><span class="sm-ic">🚩</span> Denunciar sala</button>
+      <button class="sm-item warn" onclick="reportRoom()"><span class="sm-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5"/></svg></span> Denunciar sala</button>
       <button class="sm-item warn" onclick="blockRoom()"><span class="sm-ic">🚫</span> Bloquear e não ver mais</button>
       <button class="sm-cancel" onclick="closeChatMenu()">Cancelar</button>
     </div>
@@ -1512,7 +1518,7 @@
   <!-- password modal -->
   <div class="modal-bg" id="pass-modal">
     <div class="modal">
-      <div class="mem">🔒</div>
+      <div class="mem"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></div>
       <h3>Sala privada</h3>
       <p>Esta sala pede senha pra entrar.</p>
       <input id="pass-input" type="text" inputmode="numeric" placeholder="senha" />
@@ -1538,7 +1544,7 @@
 
   <div id="toast"></div>
   <div id="loading-overlay"><div class="lo-logo">O Rolê<span>+</span></div><div class="lo-text" id="lo-text">Aguarde…</div><div class="lo-spin"></div></div>
-  <div id="err-modal"><div class="err-box"><div class="err-ic">⚠️</div><div class="err-text" id="err-text"></div><button class="btn err-close" onclick="closeErrModal()">Entendi</button></div></div>
+  <div id="err-modal"><div class="err-box"><div class="err-ic"><svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></div><div class="err-text" id="err-text"></div><button class="btn err-close" onclick="closeErrModal()">Entendi</button></div></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1740,11 +1746,13 @@ function traduzErro(msg){
   return null;
 }
 function closeErrModal(){document.getElementById('err-modal').classList.remove('show');}
+const ICON_EYE=`<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const ICON_EYE_OFF=`<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M3 3l18 18"/><path d="M10.6 5.2A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17.7 17.7 0 0 1-3.2 4.1M6.5 6.6A17 17 0 0 0 2 12s3.5 7 10 7c1.4 0 2.6-.3 3.7-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
 function togglePw(id,el){
   const inp=document.getElementById(id);
   const show=inp.type==='password';
   inp.type=show?'text':'password';
-  el.textContent=show?'🙈':'👁️';
+  el.innerHTML=show?ICON_EYE_OFF:ICON_EYE;
 }
 
 /* ============ AUTH ============ */
@@ -1828,8 +1836,23 @@ const SEG_GROUPS=[
   {g:'Hospedagem',items:[['Hospedagem','🏨']]},
 ];
 /* ---- O que o negócio oferece: atributos/estilos que ANTES eram nicho próprio, agora são tag (filtro), não categoria ---- */
-const OFERECE_TAGS=['Rodízio','Self-service','Delivery','Aceita Pix','Estacionamento','Pet friendly','Música ao vivo','Wi-Fi grátis','Área externa','Acessível','Vegetariano/Vegano','24 horas','Reserva necessária','Cozinha Japonesa','Cozinha Árabe','Cozinha Mexicana','Cozinha Nordestina'];
+const OFERECE_TAGS=['Rodízio','Self-service','Delivery','Aceita Pix','Aceita Cartão','Estacionamento','Valet','Pet friendly','Música ao vivo','DJ ao vivo','Pista de Dança','Wi-Fi grátis','Área externa','Rooftop/Vista','Acessível','Vegetariano/Vegano','24 horas','Reserva necessária','Agendamento Online','Grupos Grandes','Espaço Kids','Ambiente Climatizado','Fumódromo','Happy Hour','Open Bar','Sinuca/Bilhar','Cardápio Digital (QR Code)','LGBTQIA+ Friendly','Cozinha Japonesa','Cozinha Árabe','Cozinha Mexicana','Cozinha Nordestina'];
+/* ---- Ícones de marca (redes sociais) — mesmo estilo stroke/currentColor usado no resto do app ---- */
+const ICON_WHATSAPP=`<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.6 8.4c-.3.6-.3 1.4.2 2.3.9 1.7 2.7 3.5 4.4 4.4.9.5 1.7.5 2.3.2.3-.2.7-.6.9-1l-.2-1.1-1.7-.8c-.2-.1-.5 0-.6.2l-.4.5c-.2.2-.4.2-.6.1-.6-.3-1.6-1.2-2-1.8-.1-.2-.1-.4.1-.6l.5-.5c.2-.2.2-.4.1-.6L11 8.7c-.2-.4-.5-.4-.8-.4h-.6c-.4 0-.7.2-1 .1Z" fill="currentColor" stroke="none"/></svg>`;
+const ICON_INSTAGRAM=`<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="16.6" cy="7.4" r=".9" fill="currentColor" stroke="none"/></svg>`;
+const ICON_STAR=`<svg viewBox="0 0 24 24" style="width:10px;height:10px;vertical-align:-1px;margin-right:3px;"><path d="M12 2.5l2.6 6.3 6.8.5-5.2 4.4 1.7 6.6L12 16.7l-5.9 3.6 1.7-6.6-5.2-4.4 6.8-.5Z" fill="currentColor"/></svg>`;
+const ICON_ROCKET=`<svg viewBox="0 0 24 24" style="width:10px;height:10px;vertical-align:-1px;margin-right:3px;"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3 3-3-3c-1-1-2-3-2-5 0-4 2-8 5-10Z" fill="currentColor"/></svg>`;
+const ICON_LOCK=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>`;
+const ICON_PIN=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg>`;
+const ICON_CLOSE=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;"><path d="M5 5l14 14M19 5 5 19"/></svg>`;
+const ICON_SEARCH=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`;
+const ICON_COMPASS=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6Z"/></svg>`;
+const ICON_LINK=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg>`;
+const ICON_BELL=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>`;
+const ICON_FLAG=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5"/></svg>`;
+const ICON_CHECK=`<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;color:var(--green);"><path d="M5 12l5 5L19 7"/></svg>`;
 function normSeg(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();}
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function segItemHTML([seg,em]){return `<div class="est" data-seg="${seg}" data-em="${em}">${em}<span>${seg}</span></div>`;}
 function renderSegAll(filter){
   const q=filter?normSeg(filter):'';
@@ -2176,7 +2199,8 @@ function renderPins(){
   filtered().forEach(s=>{
     const fechado=s.isBusiness&&statusHorario(s).state==='fechado';
     const cls=(s.priv?'priv ':'')+(fechado?'closed':(isClub(s)?'club':(isBoosted(s)?'boost':'')));
-    const html=`<div class="zpin ${cls}"><div class="drop"><span>${s.priv?'🔒':s.emoji}</span></div></div>`;
+    const dado=(!s.isBusiness&&!s.priv)?'<span class="dado-badge" title="Rolê criado por uma pessoa">🎲</span>':'';
+    const html=`<div class="zpin ${cls}"><div class="drop"><span>${s.priv?ICON_LOCK:s.emoji}</span></div>${dado}</div>`;
     const icon=L.divIcon({className:'',html,iconSize:[40,40],iconAnchor:[20,40]});
     const m=L.marker([s.lat,s.lng],{icon}).addTo(map);
     m._zid=s.id;m.on('click',()=>{followUser=false;openRoom(s.id);});markers.push(m);
@@ -2189,14 +2213,15 @@ function cardHTML(s){
   const el=document.createElement('div');
   el.className='card'+(isB?' open':'')+(club?' card-club':(boosted?' boosted':''));
   el.onclick=()=>focusCard(s);
-  const destaque=club?' <span class="badge-club">⭐ ROLÊ+</span>':(boosted?' <span class="badge-boost">🚀 EM DESTAQUE</span>':'');
+  const destaque=club?' <span class="badge-club">'+ICON_STAR+'ROLÊ+</span>':(boosted?' <span class="badge-boost">'+ICON_ROCKET+'EM DESTAQUE</span>':'');
   const nameExtra=(isB?' <span class="verified">◆</span>':'')+destaque;
   const timerEl=isB?'':`<span class="timer" data-exp="${s.expiresAt}">⏱ ${fmtRemaining(s.expiresAt)}</span>`;
   const saveBtn=isB?`<button class="save-btn${savedPlaces.includes(s.id)?' saved':''}" data-id="${s.id}" title="Salvar local"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg></button>`:'';
   const showPhoto=!s.priv&&s.avatar;
   const thumbStyle=showPhoto?` style="background-image:url(${s.avatar});background-size:cover;background-position:center;"`:'';
-  el.innerHTML=`<div class="thumb"${thumbStyle}>${showPhoto?'':(s.priv?'🔒':s.emoji)}${saveBtn}</div>
-    <div class="info"><div class="name">${s.nome}${nameExtra}</div>
+  const dado=(!isB&&!s.priv)?'<span class="dado-badge" title="Rolê criado por uma pessoa">🎲</span>':'';
+  el.innerHTML=`<div class="thumb"${thumbStyle}>${showPhoto?'':(s.priv?ICON_LOCK:s.emoji)}${saveBtn}${dado}</div>
+    <div class="info"><div class="name">${escHtml(s.nome)}${nameExtra}</div>
       <div class="meta"><span>${s.cat}</span><span class="sep">·</span>${isB?(()=>{const st=statusHorario(s);return `<span class="badge-open ${st.state}">${statusBadgeTxt(st.state)}</span>`;})():`<span class="on">${s.membros} online</span>`}<span class="sep">·</span><span>${s.dist}m</span></div></div>
     <div class="right">${timerEl}<button class="join">${isB?'Ver':'Entrar'}</button></div>`;
   el.querySelector('.join').onclick=e=>{e.stopPropagation();openRoom(s.id);};
@@ -2237,7 +2262,7 @@ function renderFeed(){
   const c=document.getElementById('cards');c.innerHTML='';
   const list=sortList(filtered());
   if(!list.length){
-    c.innerHTML=`<div class="feed-empty"><span class="em">🔍</span>Nada encontrado${searchQuery?' para "'+searchQuery+'"':''}.<br>Tenta outra busca ou categoria.</div>`;
+    c.innerHTML=`<div class="feed-empty"><span class="em">${ICON_SEARCH}</span>Nada encontrado${searchQuery?' para "'+escHtml(searchQuery)+'"':''}.<br>Tenta outra busca ou categoria.</div>`;
     document.getElementById('sh-count').textContent='0 resultados';return;
   }
   const negocios=list.filter(r=>r.isBusiness);
@@ -2506,7 +2531,7 @@ function renderFeedTab(){
   document.getElementById('sort-label-2').textContent=sortLabels[sortMode];
   const list=sortList(filtered());
   document.getElementById('feed-live').textContent=rooms.length;
-  if(!list.length){box.innerHTML=`<div class="feed-empty"><span class="em">🔍</span>Nada encontrado${searchQuery?' para "'+searchQuery+'"':''}.</div>`;return;}
+  if(!list.length){box.innerHTML=`<div class="feed-empty"><span class="em">${ICON_SEARCH}</span>Nada encontrado${searchQuery?' para "'+escHtml(searchQuery)+'"':''}.</div>`;return;}
   const negocios=list.filter(r=>r.isBusiness);
   const clube=negocios.filter(isClub).sort(bizSort);
   const abertos=negocios.filter(r=>!isClub(r)).sort(bizSort);
@@ -2536,7 +2561,7 @@ async function openNotif(){
   }
   try{
     const list=await sbLoadNotifications(user.id);
-    box.innerHTML=list.length?list.map(n=>`<div class="notif"><div class="ni">${n.icon||'🔔'}</div><div class="nc"><b>${n.title}</b><small>${n.body||''}</small></div><span class="nt">${fmtAgo(n.created_at)}</span></div>`).join('')
+    box.innerHTML=list.length?list.map(n=>`<div class="notif"><div class="ni">${n.icon||ICON_BELL}</div><div class="nc"><b>${escHtml(n.title)}</b><small>${escHtml(n.body||'')}</small></div><span class="nt">${fmtAgo(n.created_at)}</span></div>`).join('')
       :'<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Nenhuma notificação ainda.</p>';
     if(list.some(n=>!n.read))await sbMarkNotificationsRead(user.id);
   }catch(e){box.innerHTML='<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Não deu pra carregar as notificações.</p>';}
@@ -2684,7 +2709,7 @@ function placePin(lat,lng){
   lpReverse(lat,lng);
 }
 function lpReverse(lat,lng){
-  const el=document.getElementById('lp-addr');el.textContent='📍 Buscando endereço…';
+  const el=document.getElementById('lp-addr');el.innerHTML=ICON_PIN+' Buscando endereço…';
   clearTimeout(lpTimer);
   lpTimer=setTimeout(async()=>{
     try{
@@ -2693,8 +2718,8 @@ function lpReverse(lat,lng){
       const rua=[a.road,a.house_number].filter(Boolean).join(', ');
       const area=[a.suburb||a.neighbourhood,a.city||a.town].filter(Boolean).join(' — ');
       lpAddr=[rua,area].filter(Boolean).join(' — ')||d.display_name||'Local no mapa';
-      el.textContent='📍 '+lpAddr;
-    }catch(e){lpAddr='Local no mapa';el.textContent='📍 Local selecionado';}
+      el.innerHTML=ICON_PIN+' '+escHtml(lpAddr);
+    }catch(e){lpAddr='Local no mapa';el.innerHTML=ICON_PIN+' Local selecionado';}
   },450);
 }
 async function geocodeQuery(q){
@@ -2751,7 +2776,7 @@ function updatePrice(){
   const rem=(total===0)?freeCooldownMs():0;
   if(rem>0){
     cd.classList.remove('hide');
-    cd.innerHTML='🔒 Você já criou um rolê grátis recentemente. Poderá criar outro grátis em <b>'+fmtRemaining(Date.now()+rem)+'</b>. Escolha uma duração paga pra criar agora mesmo.';
+    cd.innerHTML=ICON_LOCK+' Você já criou um rolê grátis recentemente. Poderá criar outro grátis em <b>'+fmtRemaining(Date.now()+rem)+'</b>. Escolha uma duração paga pra criar agora mesmo.';
     btn.textContent='Rolê grátis indisponível';btn.classList.add('disabled');
   }else{
     cd.classList.add('hide');btn.classList.remove('disabled');
@@ -2961,13 +2986,13 @@ function askChat(r){
   else enterChat(r);
 }
 function openRoleProfile(r){
-  document.getElementById('rp-av').textContent=r.priv?'🔒':r.emoji;
+  document.getElementById('rp-av').innerHTML=r.priv?ICON_LOCK:r.emoji;
   document.getElementById('rp-name').textContent=r.nome;
   document.getElementById('rp-meta').textContent=r.cat+' · '+r.membros+' online';
-  document.getElementById('rp-creator').innerHTML=(r.creatorAvatar?'<span class="rp-cav" style="background-image:url('+r.creatorAvatar+')"></span>':'<span class="rp-cav ph">👤</span>')+'Criado por <b>'+(r.creator||'Anônimo')+'</b>';
+  document.getElementById('rp-creator').innerHTML=(r.creatorAvatar?'<span class="rp-cav" style="background-image:url('+r.creatorAvatar+')"></span>':'<span class="rp-cav ph">👤</span>')+'Criado por <b>'+escHtml(r.creator||'Anônimo')+'</b>';
   document.getElementById('rp-desc').textContent=r.desc||'O criador não adicionou uma descrição.';
-  document.getElementById('rp-addr').textContent='📍 '+(r.address||'Local aproximado no mapa');
-  document.getElementById('rp-stat').innerHTML='⏱ Encerra em <b>'+fmtRemaining(r.expiresAt)+'</b>'+(r.priv?' &nbsp;·&nbsp; 🔒 Sala privada (pede senha)':'');
+  document.getElementById('rp-addr').innerHTML=ICON_PIN+' '+escHtml(r.address||'Local aproximado no mapa');
+  document.getElementById('rp-stat').innerHTML='⏱ Encerra em <b>'+fmtRemaining(r.expiresAt)+'</b>'+(r.priv?' &nbsp;·&nbsp; '+ICON_LOCK+' Sala privada (pede senha)':'');
   document.getElementById('rp-chat-btn').onclick=()=>askChat(r);
   document.getElementById('rp-route-btn').onclick=()=>showRoute(r);
   currentRole=r;
@@ -3020,24 +3045,24 @@ function openBizProfile(r){
   const av=document.getElementById('bp-av');
   if(r.avatar){av.style.backgroundImage=`url(${r.avatar})`;av.textContent='';av.classList.add('img');}
   else{av.style.backgroundImage='';av.textContent=r.emoji;av.classList.remove('img');}
-  document.getElementById('bp-name').innerHTML=r.nome+(isClub(r)?' <span class="badge-club">⭐ ROLÊ+</span>':'');
+  document.getElementById('bp-name').innerHTML=r.nome+(isClub(r)?' <span class="badge-club">'+ICON_STAR+'ROLÊ+</span>':'');
   document.getElementById('bp-seg').textContent=r.cat+(r.verified?' · ✓ Verificado':'')+' · '+(r.address? r.address.split('—').pop().trim() : 'Perto de você');
   av.classList.toggle('club-ring',isClub(r));
   const saveBtn=document.getElementById('bp-save-btn');
   saveBtn.dataset.id=r.id;
   saveBtn.classList.toggle('saved',savedPlaces.includes(r.id));
   saveBtn.onclick=()=>toggleSaved(r.id);
-  document.getElementById('bp-addr').textContent='📍 '+(r.address||'Endereço não informado');
+  document.getElementById('bp-addr').innerHTML=ICON_PIN+' '+escHtml(r.address||'Endereço não informado');
   const c=document.getElementById('bp-contacts');c.innerHTML='';
-  if(r.whatsapp)c.innerHTML+=`<a onclick="toast('Abriria o WhatsApp')"><span class="ic">📱</span>WhatsApp</a>`;
-  if(r.instagram)c.innerHTML+=`<a onclick="toast('Abriria o Instagram')"><span class="ic">📸</span>Instagram</a>`;
-  if(r.site)c.innerHTML+=`<a onclick="toast('Abriria o cardápio')"><span class="ic">🔗</span>Cardápio</a>`;
+  if(r.whatsapp)c.innerHTML+=`<a onclick="toast('Abriria o WhatsApp')"><span class="ic">${ICON_WHATSAPP}</span>WhatsApp</a>`;
+  if(r.instagram)c.innerHTML+=`<a onclick="toast('Abriria o Instagram')"><span class="ic">${ICON_INSTAGRAM}</span>Instagram</a>`;
+  if(r.site)c.innerHTML+=`<a onclick="toast('Abriria o cardápio')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg></span>Cardápio</a>`;
   c.style.display=c.innerHTML?'flex':'none';
   const vitrineHidden=!!(r.horario&&r.horario._vitrineHidden);
   document.getElementById('bp-vitrine-section').classList.toggle('hide',vitrineHidden);
   const v=document.getElementById('bp-vitrine');
   const items=r.vitrine||[];
-  v.innerHTML=items.length?items.map(p=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${p.nome}</b><small>${p.desc||''}</small></div><div class="pp">${p.preco}</div></div>`).join('')
+  v.innerHTML=items.length?items.map(p=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${escHtml(p.nome)}</b><small>${escHtml(p.desc||'')}</small></div><div class="pp">${escHtml(p.preco)}</div></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:6px 0;">Sem itens na vitrine ainda.</p>';
   const hb=document.getElementById('bp-hours');
   if(hb){
@@ -3051,13 +3076,13 @@ function openBizProfile(r){
   const ps=document.getElementById('bp-promo-section');
   if(ps){
     ps.style.display=promos.length?'':'none';
-    document.getElementById('bp-promo').innerHTML=promos.map(p=>`<div class="prod promo"><div class="em">${p.em}</div><div class="pn"><b>${p.titulo}</b><small>⏳ termina em ${fmtRemaining(p.validade)}</small></div></div>`).join('');
+    document.getElementById('bp-promo').innerHTML=promos.map(p=>`<div class="prod promo"><div class="em">${p.em}</div><div class="pn"><b>${escHtml(p.titulo)}</b><small>⏳ termina em ${fmtRemaining(p.validade)}</small></div></div>`).join('');
   }
-  const chatOff=!!(r.horario&&r.horario._chatDisabled);
+  const cc0=chatClosedInfo(r);
   const chatBtn=document.getElementById('bp-chat-btn');
-  chatBtn.onclick=chatOff?null:()=>enterChat(r);
-  chatBtn.classList.toggle('disabled',chatOff);
-  chatBtn.textContent=chatOff?'💬 Chat desativado por este estabelecimento':'💬 Entrar no chat';
+  chatBtn.onclick=cc0.closed?null:()=>enterChat(r);
+  chatBtn.classList.toggle('disabled',cc0.closed);
+  chatBtn.innerHTML=chatBtnLabel(cc0);
   document.getElementById('bp-route-btn').onclick=()=>showRoute(r);
   go('s-bizprofile');
 }
@@ -3071,7 +3096,7 @@ let chatRoom=null, chatChannel=null;
 async function enterChat(r){
   chatRoom=r;
   markJoined(r.id);
-  document.getElementById('chat-em').textContent=r.priv?'🔒':r.emoji;
+  document.getElementById('chat-em').innerHTML=r.priv?ICON_LOCK:r.emoji;
   document.getElementById('chat-name').textContent=r.nome;
   document.getElementById('chat-sub').textContent=r.membros+' online';
   currentChatExp=r.isBusiness?null:r.expiresAt;
@@ -3096,10 +3121,15 @@ async function enterChat(r){
 }
 function addMsg(t,cls,who){
   const m=document.getElementById('msgs');const d=document.createElement('div');d.className='msg '+cls;
-  d.innerHTML=(cls==='them'&&who?`<div class="who">${who}</div>`:'')+t;m.appendChild(d);m.scrollTop=m.scrollHeight;
+  d.innerHTML=(cls==='them'&&who?`<div class="who">${escHtml(who)}</div>`:'')+escHtml(t);m.appendChild(d);m.scrollTop=m.scrollHeight;
 }
+/* ---- Moderação: negócios catalogados por nós (sem dono ativo ainda) não têm quem module o chat manualmente,
+   então bloqueamos ofensas na entrada da mensagem antes de publicar ---- */
+const PALAVRAS_BLOQUEADAS=['arrombad','babaca','bosta','buceta','caralho','corno','cuzao','cuzão','desgraça','estuprador','filho da puta','fdp','foda-se','fodase','idiota','imbecil','merda','otario','otário','panaca','piranha','porra','puta','putaria','retardado','vadia','vagabund','viad'];
+function containsOffensiveWords(t){const n=normSeg(t);return PALAVRAS_BLOQUEADAS.some(w=>n.includes(normSeg(w)));}
 async function sendMsg(){
   const i=document.getElementById('msg-input');const t=i.value.trim();if(!t)return;
+  if(containsOffensiveWords(t)){toast('Essa mensagem tem linguagem imprópria e não foi enviada 🚫');return;}
   addMsg(t,'me');i.value='';
   if(SUPABASE_READY&&chatRoom){
     try{await sbSendMessage(chatRoom.id,(user&&user.name)||'Você',t);}
@@ -3134,7 +3164,7 @@ function onUserPhoto(e){
 function fillBiz(){
   if(!user)return;
   syncBizRoom();
-  document.getElementById('biz-hi').textContent='Boa noite, '+user.name+' '+(user.emoji||'🏪')+(user.verified?' ✓':'');
+  document.getElementById('biz-hi').innerHTML='Boa noite, '+escHtml(user.name)+' '+(user.emoji||'🏪')+(user.verified?' '+ICON_CHECK:'');
   applyBizPhotos();
   renderBizVitrine();
   renderAllHorarios();
@@ -3214,7 +3244,7 @@ function fillBizConfig(){
   document.getElementById('cfg-site').value=user.site||'';
   document.getElementById('cfg-cnpj').textContent=user.cnpj||'Não informado — conta sem verificação';
   document.getElementById('cfg-razao').textContent=user.razaoSocial||'—';
-  document.getElementById('cfg-verified').textContent=user.verified?'✓ Verificado':'Não verificado';
+  document.getElementById('cfg-verified').innerHTML=user.verified?ICON_CHECK+' Verificado':'Não verificado';
   document.getElementById('cfg-verified').style.color=user.verified?'var(--green)':'var(--ink-3)';
   renderHorario('config-horario');
   renderOfereceChips();
@@ -3240,7 +3270,7 @@ function saveBizContacts(){
 function renderBizVitrine(){
   const box=document.getElementById('biz-vitrine');if(!box)return;
   const items=(user&&user.vitrine)||[];
-  box.innerHTML=items.length?items.map((p,i)=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${p.nome}</b><small>${p.desc||''}</small></div><div class="pp">${p.preco}</div><button class="prod-x" title="Editar" onclick="editVitrineItem(${i})"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>`).join('')
+  box.innerHTML=items.length?items.map((p,i)=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${escHtml(p.nome)}</b><small>${escHtml(p.desc||'')}</small></div><div class="pp">${escHtml(p.preco)}</div><button class="prod-x" title="Editar" onclick="editVitrineItem(${i})"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhum item ainda. Adicione produtos e promoções abaixo 👇</p>';
 }
 async function addVitrine(){
@@ -3365,7 +3395,7 @@ async function persistBizRoom(){
 function renderBizPromo(){
   const box=document.getElementById('biz-promo-list');if(!box)return;
   const items=activePromos(user&&user.promocoes);
-  box.innerHTML=items.length?items.map((p,i)=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${p.titulo}</b><small>Expira em ${fmtRemaining(p.validade)}</small></div><button class="prod-x" title="Remover" onclick="delPromo(${i})">✕</button></div>`).join('')
+  box.innerHTML=items.length?items.map((p,i)=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${escHtml(p.titulo)}</b><small>Expira em ${fmtRemaining(p.validade)}</small></div><button class="prod-x" title="Remover" onclick="delPromo(${i})">${ICON_CLOSE}</button></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhuma promoção ativa. Crie uma abaixo 👇</p>';
 }
 async function addPromo(){
@@ -3555,7 +3585,18 @@ function bizSort(a,b){
   if(wa!==wb)return wa-wb;
   return (isBoosted(b)?1:0)-(isBoosted(a)?1:0);
 }
-function statusIcon(state){return {aberto:'🟢',fechando:'🟡',abrindo:'🔵',fechado:'🔴'}[state]||'🔴';}
+function statusIcon(state){return '<svg viewBox="0 0 24 24" style="width:10px;height:10px;display:inline-block;vertical-align:middle;"><circle cx="12" cy="12" r="9" fill="currentColor"/></svg>';}
+// chat fecha se o dono desativou manualmente OU se o estabelecimento está fechado agora pelo horário
+function chatClosedInfo(r){
+  if(r.horario&&r.horario._chatDisabled)return {closed:true,reason:'off'};
+  if(r.horario&&statusHorario(r).state==='fechado')return {closed:true,reason:'fechado'};
+  return {closed:false,reason:null};
+}
+const ICON_CHAT=`<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:6px;"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg>`;
+function chatBtnLabel(cc){
+  if(!cc.closed)return ICON_CHAT+'Entrar no chat';
+  return ICON_CHAT+(cc.reason==='fechado'?'Chat fecha junto com o estabelecimento':'Chat desativado por este estabelecimento');
+}
 function pickPhoto(type,ctx){document.getElementById('file-'+type+(ctx?'-'+ctx:'')).click();}
 function onPhoto(e,type,ctx){
   const f=e.target.files&&e.target.files[0];if(!f)return;
@@ -3637,9 +3678,9 @@ function refreshLiveScreens(){
       if(av){if(fresh.avatar){av.style.backgroundImage=`url(${fresh.avatar})`;av.textContent='';av.classList.add('img');}else{av.style.backgroundImage='';av.textContent=fresh.emoji;av.classList.remove('img');}}
       const hb=document.getElementById('bp-hours');
       if(hb&&fresh.horario){const st=statusHorario(fresh);hb.innerHTML=`<b class="${st.state}">${statusIcon(st.state)} ${st.label}</b><br>${fmtHojeResumo(fresh)}${st.sub?' · '+st.sub:''}`;}
-      const chatOff=!!(fresh.horario&&fresh.horario._chatDisabled);
+      const cc1=chatClosedInfo(fresh);
       const chatBtn=document.getElementById('bp-chat-btn');
-      if(chatBtn){chatBtn.onclick=chatOff?null:()=>enterChat(fresh);chatBtn.classList.toggle('disabled',chatOff);chatBtn.textContent=chatOff?'💬 Chat desativado por este estabelecimento':'💬 Entrar no chat';}
+      if(chatBtn){chatBtn.onclick=cc1.closed?null:()=>enterChat(fresh);chatBtn.classList.toggle('disabled',cc1.closed);chatBtn.innerHTML=chatBtnLabel(cc1);}
       const vh=!!(fresh.horario&&fresh.horario._vitrineHidden);
       const vs=document.getElementById('bp-vitrine-section');if(vs)vs.classList.toggle('hide',vh);
     }
