@@ -1615,6 +1615,19 @@
     </div>
   </div>
 
+  <!-- dev adiciona item na vitrine de qualquer negócio (só felipegust59@gmail.com) -->
+  <div class="modal-bg" id="dev-add-item-modal">
+    <div class="modal" style="text-align:left;">
+      <h3 style="text-align:center;margin-bottom:14px;">Adicionar item (dev)</h3>
+      <div class="add-prod" style="grid-template-columns:1fr;border:none;margin-top:0;padding-top:0;">
+        <input id="dai-nome" placeholder="Nome do produto ou promoção" />
+        <div class="price-input"><span>R$</span><input id="dai-preco" inputmode="numeric" placeholder="0,00 ou Grátis" oninput="maskPreco(this)" /></div>
+      </div>
+      <button class="btn" style="margin-top:14px;" onclick="confirmDevAddVitrineItem()">Adicionar</button>
+      <button class="btn ghost" style="margin-top:8px;" onclick="closeDevAddItemModal()">Cancelar</button>
+    </div>
+  </div>
+
   <div id="toast"></div>
   <div id="loading-overlay"><div class="lo-logo">O Rolê<span>+</span></div><div class="lo-text" id="lo-text">Aguarde…</div><div class="lo-spin"></div></div>
   <div id="err-modal"><div class="err-box"><div class="err-ic"><svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></div><div class="err-text" id="err-text"></div><button class="btn err-close" onclick="closeErrModal()">Entendi</button></div></div>
@@ -1921,7 +1934,7 @@ function resetAdminForm(){
   const cat=document.getElementById('adm-cat');
   cat.innerHTML=SEG_GROUPS.flatMap(g=>g.items).map(([seg,em])=>`<option value="${seg}" data-em="${em}">${seg}</option>`).join('');
   const vf=document.getElementById('adm-vitrine-fields');
-  vf.innerHTML=[1,2,3].map(i=>`<div class="admin-vit-card box-card"><small>Item ${i}</small><div class="two-col"><input id="adm-vit-nome-${i}" placeholder="Ex: Chopp 500ml" /><input id="adm-vit-preco-${i}" placeholder="R$" /></div></div>`).join('');
+  vf.innerHTML=[1,2,3].map(i=>`<div class="admin-vit-card box-card"><small>Item ${i}</small><div class="two-col"><input id="adm-vit-nome-${i}" placeholder="Ex: Chopp 500ml" /><input id="adm-vit-preco-${i}" placeholder="R$" inputmode="numeric" oninput="maskPreco(this)" /></div></div>`).join('');
 }
 function maskCnpjAdmin(el){
   const d=el.value.replace(/\D/g,'').slice(0,14);
@@ -2052,12 +2065,21 @@ async function adToggleVitrineHidden(id,el){
   try{await sbUpdateRoom(id,{horario:h});toast(h._vitrineHidden?'Vitrine ocultada':'Vitrine visível');}
   catch(e){toastError('Não deu pra salvar essa mudança agora');}
 }
-async function devAddVitrineItem(){
-  if(!currentBiz||!isToolAdmin())return;
-  const nome=prompt('Nome do item (ex: Chopp 500ml):');if(!nome||!nome.trim())return;
-  const preco=prompt('Preço (ex: R$ 12,90):')||'—';
+function devAddVitrineItem(){
+  if(!currentBiz||!user||user.email!==DEV_EMAIL)return;
+  document.getElementById('dai-nome').value='';
+  document.getElementById('dai-preco').value='';
+  document.getElementById('dev-add-item-modal').classList.add('active');
+}
+function closeDevAddItemModal(){document.getElementById('dev-add-item-modal').classList.remove('active');}
+async function confirmDevAddVitrineItem(){
+  if(!currentBiz||!user||user.email!==DEV_EMAIL)return;
+  const nome=document.getElementById('dai-nome').value.trim();
+  if(!nome){toast('Digite o nome do item');return;}
+  const preco=document.getElementById('dai-preco').value.trim()||'—';
   try{
-    await sbAddVitrineItem(currentBiz.id,{emoji:currentBiz.emoji||'🍽️',nome:nome.trim(),preco:preco.trim(),added_by:user.id});
+    await sbAddVitrineItem(currentBiz.id,{emoji:currentBiz.emoji||'🍽️',nome,preco,added_by:user.id});
+    closeDevAddItemModal();
     toast('Item adicionado à vitrine ✓');
     await loadRoomsFromSupabase();
     const fresh=rooms.find(x=>x.id===currentBiz.id);
@@ -3381,7 +3403,7 @@ function openBizProfile(r){
   const items=r.vitrine||[];
   v.innerHTML=items.length?items.map(p=>`<div class="prod"><div class="em">${p.em}</div><div class="pn"><b>${escHtml(p.nome)}</b><small>${escHtml(p.desc||'')}</small></div><div class="pp">${escHtml(p.preco)}</div></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:6px 0;">Sem itens na vitrine ainda.</p>';
-  document.getElementById('bp-dev-add-item').classList.toggle('hide',!(isToolAdmin()&&!r.mine));
+  document.getElementById('bp-dev-add-item').classList.toggle('hide',!(user&&user.email===DEV_EMAIL&&!r.mine));
   const hb=document.getElementById('bp-hours');
   if(hb){
     if(r.horario){
