@@ -332,12 +332,6 @@
   .card.boosted{border-color:var(--accent-soft-2);box-shadow:0 4px 16px rgba(232,54,91,.14);}
   .badge-boost{font-size:9.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-dark));padding:2px 7px;border-radius:6px;letter-spacing:.3px;vertical-align:middle;}
   .zpin.boost .drop{width:48px;height:48px;box-shadow:0 0 0 4px rgba(232,54,91,.25),0 4px 14px rgba(20,24,35,.35);animation:boostpulse 1.8s infinite;}
-  /* marca rolês criados por pessoa comum (não-negócio), pra não confundir com vitrine de estabelecimento */
-  .zpin{position:relative;}
-  .dado-badge{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--card);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9.5px;line-height:1;}
-  .zpin .dado-badge{right:-2px;bottom:4px;}
-  .thumb{position:relative;}
-  .thumb .dado-badge{right:4px;bottom:4px;}
   .zpin.boost .drop span{font-size:21px;}
   @keyframes boostpulse{0%{box-shadow:0 0 0 2px rgba(232,54,91,.35),0 4px 14px rgba(20,24,35,.35);}70%{box-shadow:0 0 0 12px rgba(232,54,91,0),0 4px 14px rgba(20,24,35,.35);}100%{box-shadow:0 0 0 2px rgba(232,54,91,0),0 4px 14px rgba(20,24,35,.35);}}
   /* sort pill */
@@ -1080,12 +1074,16 @@
   <section class="screen" id="s-create">
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Criar um rolê</h2></div>
     <div class="scroll">
+      <div class="biz-cover" id="cr-cover-box" style="margin-bottom:38px;">
+        <button class="cover-btn" onclick="pickPhoto('cover','cr')">📷 Adicionar capa</button>
+        <div class="biz-avatar" id="cr-avatar-box"><span id="cr-av-emoji">🎲</span></div>
+        <button class="avatar-btn" onclick="pickPhoto('avatar','cr')">📷</button>
+      </div>
+      <input type="file" id="file-cover-cr" accept="image/*" style="display:none" onchange="onCrPhoto(event,'cover')" />
+      <input type="file" id="file-avatar-cr" accept="image/*" style="display:none" onchange="onCrPhoto(event,'avatar')" />
       <div class="field"><label>Nome do rolê</label><input id="cr-name" placeholder="Ex: Happy hour no Bar do Zé" /></div>
       <div class="field"><label>Descrição <span style="color:var(--ink-3);font-weight:600;">(o que vai rolar?)</span></label>
         <textarea id="cr-desc" rows="3" placeholder="Conte pra galera: o que é, quem pode ir, o clima do rolê…"></textarea>
-      </div>
-      <div class="field"><label>Categoria</label>
-        <select id="cr-cat"><option value="🍺">🍺 Bar</option><option value="🍽️">🍽️ Restaurante</option><option value="🎉">🎉 Balada</option><option value="💪">💪 Academia</option><option value="🎮">🎮 Games/Fliperama</option><option value="💇">💇 Salão de Beleza</option><option value="🏀">🏀 Quadra Esportiva</option></select>
       </div>
       <div class="field"><label><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Onde vai ser?</label>
         <button type="button" class="loc-pick-btn" id="cr-loc-btn" onclick="openLocPicker()">
@@ -1643,7 +1641,7 @@ const CENTER=[-23.5545,-46.687];
 // depois que alguém cria conta/rolê pelo Supabase (ver loadRoomsFromSupabase).
 let rooms=SUPABASE_READY?[]:(JSON.parse(localStorage.getItem('zona_rooms')||'null')||[]);
 let user=JSON.parse(localStorage.getItem('zona_user')||'null');
-let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null;
+let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null;
 let boostDurH=6, boostPrice=990;
 let bizCoords=null, bizSeg='Bar', bizEm='🍺', bizCnpjRazao='', bizCnpjBlocked=false;
 let roleCoords=null;
@@ -2166,7 +2164,7 @@ window.addEventListener('resize',()=>{if(map)map.invalidateSize();if(typeof lpMa
 window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(map)map.invalidateSize();if(typeof lpMap!=='undefined'&&lpMap)lpMap.invalidateSize();},250);});
 function renderCatChips(containerId,onChange){
   const c=document.getElementById(containerId);if(!c)return;c.innerHTML='';
-  const items=[['Tudo','✨'],...FEED_TOP5.map(n=>[n,emojiForSeg(n)])];
+  const items=[['Tudo','✨'],...FEED_TOP5.map(n=>[n,emojiForSeg(n)]),['Pessoas','🎲']];
   items.forEach(([label,em])=>{const d=document.createElement('div');d.className='chip'+(activeCat===label?' active':'');d.textContent=em+' '+label;
     d.onclick=()=>{activeCat=label;onChange();};c.appendChild(d);});
   const nFiltros=(activeFiltroNicho?1:0)+activeFiltroOferece.length;
@@ -2199,8 +2197,7 @@ function renderPins(){
   filtered().forEach(s=>{
     const fechado=s.isBusiness&&statusHorario(s).state==='fechado';
     const cls=(s.priv?'priv ':'')+(fechado?'closed':(isClub(s)?'club':(isBoosted(s)?'boost':'')));
-    const dado=(!s.isBusiness&&!s.priv)?'<span class="dado-badge" title="Rolê criado por uma pessoa">🎲</span>':'';
-    const html=`<div class="zpin ${cls}"><div class="drop"><span>${s.priv?ICON_LOCK:s.emoji}</span></div>${dado}</div>`;
+    const html=`<div class="zpin ${cls}"><div class="drop"><span>${s.priv?ICON_LOCK:s.emoji}</span></div></div>`;
     const icon=L.divIcon({className:'',html,iconSize:[40,40],iconAnchor:[20,40]});
     const m=L.marker([s.lat,s.lng],{icon}).addTo(map);
     m._zid=s.id;m.on('click',()=>{followUser=false;openRoom(s.id);});markers.push(m);
@@ -2219,8 +2216,7 @@ function cardHTML(s){
   const saveBtn=isB?`<button class="save-btn${savedPlaces.includes(s.id)?' saved':''}" data-id="${s.id}" title="Salvar local"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg></button>`:'';
   const showPhoto=!s.priv&&s.avatar;
   const thumbStyle=showPhoto?` style="background-image:url(${s.avatar});background-size:cover;background-position:center;"`:'';
-  const dado=(!isB&&!s.priv)?'<span class="dado-badge" title="Rolê criado por uma pessoa">🎲</span>':'';
-  el.innerHTML=`<div class="thumb"${thumbStyle}>${showPhoto?'':(s.priv?ICON_LOCK:s.emoji)}${saveBtn}${dado}</div>
+  el.innerHTML=`<div class="thumb"${thumbStyle}>${showPhoto?'':(s.priv?ICON_LOCK:s.emoji)}${saveBtn}</div>
     <div class="info"><div class="name">${escHtml(s.nome)}${nameExtra}</div>
       <div class="meta"><span>${s.cat}</span><span class="sep">·</span>${isB?(()=>{const st=statusHorario(s);return `<span class="badge-open ${st.state}">${statusBadgeTxt(st.state)}</span>`;})():`<span class="on">${s.membros} online</span>`}<span class="sep">·</span><span>${s.dist}m</span></div></div>
     <div class="right">${timerEl}<button class="join">${isB?'Ver':'Entrar'}</button></div>`;
@@ -2790,29 +2786,30 @@ async function submitRole(){
   const name=document.getElementById('cr-name').value.trim();
   if(!name){toast('Dê um nome ao rolê');return;}
   if(priv&&!document.getElementById('cr-pass').value.trim()){toast('Defina a senha da sala');return;}
-  const emoji=document.getElementById('cr-cat').value;
-  const catName={'🍺':'Bar','🍽️':'Restaurante','🎉':'Balada','💪':'Academia','🎮':'Games/Fliperama','💇':'Salão de Beleza','🏀':'Quadra Esportiva'}[emoji];
+  const emoji='🎲',cat='Pessoas'; // rolê de pessoa comum: ícone e categoria fixos, não é um estabelecimento
   const locText=document.getElementById('cr-loc').value.trim();
   // ---- modo edição: atualiza o rolê existente ----
   if(editingId){
     const r=rooms.find(x=>x.id===editingId);
-    if(r){r.nome=name;r.emoji=emoji;r.cat=catName;r.desc=document.getElementById('cr-desc').value.trim();
+    if(r){r.nome=name;r.emoji=emoji;r.cat=cat;r.desc=document.getElementById('cr-desc').value.trim();
       r.priv=priv;r.pass=priv?document.getElementById('cr-pass').value.trim():null;r.boost=boost;
+      r.cover=crCover;r.avatar=crAvatar;
       if(roleCoords){r.lat=roleCoords.lat;r.lng=roleCoords.lng;}
       if(locText)r.address=locText;}
     save();editingId=null;resetCreate();toast('Rolê atualizado ✓');go('s-app');return;
   }
   // coordenadas vêm do seletor de mapa; fallback pra posição atual
   const coords=roleCoords||{lat:userPos.lat+(Math.random()-.5)*.004,lng:userPos.lng+(Math.random()-.5)*.004};
-  pendingRoom={id:Date.now(),nome:name,emoji,cat:catName,membros:1,dist:0,timer:durH+'h',durH,priv,mine:true,free:total===0,
+  pendingRoom={id:Date.now(),nome:name,emoji,cat,membros:1,dist:0,timer:durH+'h',durH,priv,mine:true,free:total===0,
     desc:document.getElementById('cr-desc').value.trim(),creator:(user&&user.name)||'Anônimo',creatorAvatar:(user&&user.avatar)||'',
-    address:locText||'Perto de você · Vila Madalena',
+    address:locText||'Perto de você · Vila Madalena',cover:crCover,avatar:crAvatar,
     pass:priv?document.getElementById('cr-pass').value.trim():null,expiresAt:Date.now()+durH*3600e3,
     lat:coords.lat,lng:coords.lng,boost};
   if(total>0){
     startInfinitePayCheckout('role_personal',total,'Rolê: '+name,{room:{
       nome:pendingRoom.nome,emoji:pendingRoom.emoji,cat:pendingRoom.cat,is_business:false,
       desc_txt:pendingRoom.desc,address:pendingRoom.address,priv:pendingRoom.priv,pass_hash:pendingRoom.pass,
+      cover_url:pendingRoom.cover,avatar_url:pendingRoom.avatar,
       lat:pendingRoom.lat,lng:pendingRoom.lng,expires_at:new Date(pendingRoom.expiresAt).toISOString(),
       boost_until:pendingRoom.boost?new Date(pendingRoom.expiresAt).toISOString():null
     }});
@@ -2826,6 +2823,7 @@ async function publishPending(){
       await sbCreateRoom({
         owner_id:user.id,is_business:false,nome:pendingRoom.nome,emoji:pendingRoom.emoji,cat:pendingRoom.cat,
         desc_txt:pendingRoom.desc,address:pendingRoom.address,priv:pendingRoom.priv,
+        cover_url:pendingRoom.cover||null,avatar_url:pendingRoom.avatar||null,
         pass_hash:pendingRoom.pass||null,lat:pendingRoom.lat,lng:pendingRoom.lng,
         expires_at:new Date(pendingRoom.expiresAt).toISOString(),
         boost_until:pendingRoom.boost?new Date(Date.now()+durH*3600e3).toISOString():null
@@ -2846,6 +2844,10 @@ function resetCreate(){
   document.getElementById('cr-loc-btn').classList.remove('picked');roleCoords=null;editingId=null;
   document.querySelector('#s-create .appbar h2').textContent='Criar um rolê';
   setEditUI(false);
+  crCover=null;crAvatar=null;
+  document.getElementById('cr-cover-box').style.backgroundImage='';
+  document.getElementById('cr-avatar-box').style.backgroundImage='';
+  document.getElementById('cr-av-emoji').style.display='';
   priv=false;boost=false;durH=1;
   document.getElementById('priv-switch').classList.remove('on');document.getElementById('boost-switch').classList.remove('on');
   document.getElementById('pass-field').classList.add('hide');
@@ -2986,7 +2988,11 @@ function askChat(r){
   else enterChat(r);
 }
 function openRoleProfile(r){
-  document.getElementById('rp-av').innerHTML=r.priv?ICON_LOCK:r.emoji;
+  const rpAv=document.getElementById('rp-av');
+  if(!r.priv&&r.avatar){rpAv.style.backgroundImage='url('+r.avatar+')';rpAv.style.backgroundSize='cover';rpAv.style.backgroundPosition='center';rpAv.textContent='';}
+  else{rpAv.style.backgroundImage='';rpAv.innerHTML=r.priv?ICON_LOCK:r.emoji;}
+  const rpCover=document.querySelector('#s-roleprofile .bp-cover');
+  if(rpCover){rpCover.style.backgroundImage=(!r.priv&&r.cover)?'url('+r.cover+')':'';rpCover.classList.toggle('has-cover',!r.priv&&!!r.cover);}
   document.getElementById('rp-name').textContent=r.nome;
   document.getElementById('rp-meta').textContent=r.cat+' · '+r.membros+' online';
   document.getElementById('rp-creator').innerHTML=(r.creatorAvatar?'<span class="rp-cav" style="background-image:url('+r.creatorAvatar+')"></span>':'<span class="rp-cav ph">👤</span>')+'Criado por <b>'+escHtml(r.creator||'Anônimo')+'</b>';
@@ -3015,7 +3021,10 @@ function editMyRole(){
   editingId=r.id;durH=r.durH||1;
   document.getElementById('cr-name').value=r.nome;
   document.getElementById('cr-desc').value=r.desc||'';
-  document.getElementById('cr-cat').value=r.emoji;
+  crCover=r.cover||null;crAvatar=r.avatar||null;
+  document.getElementById('cr-cover-box').style.backgroundImage=crCover?'url('+crCover+')':'';
+  document.getElementById('cr-avatar-box').style.backgroundImage=crAvatar?'url('+crAvatar+')':'';
+  document.getElementById('cr-av-emoji').style.display=crAvatar?'none':'';
   roleCoords={lat:r.lat,lng:r.lng};
   document.getElementById('cr-loc').value=r.address||'';
   document.getElementById('cr-loc-label').textContent=r.address||'Local selecionado';
@@ -3598,6 +3607,17 @@ function chatBtnLabel(cc){
   return ICON_CHAT+(cc.reason==='fechado'?'Chat fecha junto com o estabelecimento':'Chat desativado por este estabelecimento');
 }
 function pickPhoto(type,ctx){document.getElementById('file-'+type+(ctx?'-'+ctx:'')).click();}
+function onCrPhoto(e,type){
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  if(f.size>3.5e6){toast('Imagem muito grande (máx ~3MB)');return;}
+  const rd=new FileReader();
+  rd.onload=()=>{
+    if(type==='cover'){crCover=rd.result;document.getElementById('cr-cover-box').style.backgroundImage='url('+rd.result+')';}
+    else{crAvatar=rd.result;document.getElementById('cr-avatar-box').style.backgroundImage='url('+rd.result+')';document.getElementById('cr-av-emoji').style.display='none';}
+    toast((type==='cover'?'Capa':'Foto')+' adicionada ✓');
+  };
+  rd.readAsDataURL(f);
+}
 function onPhoto(e,type,ctx){
   const f=e.target.files&&e.target.files[0];if(!f)return;
   if(f.size>3.5e6){toast('Imagem muito grande (máx ~3MB)');return;}
