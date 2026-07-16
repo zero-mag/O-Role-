@@ -1173,7 +1173,7 @@
         <div class="field"><label>Telefone</label><input id="adm-phone" placeholder="(19) 00000-0000" /></div>
         <a id="adm-google-link" href="#" target="_blank" rel="noopener" class="admin-google-link"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Ver no Google (conferir horário e dados)</a>
         <h3 style="margin-top:16px;">Horário de funcionamento</h3>
-        <div id="adm-horario"></div>
+        <div class="box-card"><div id="adm-horario"></div></div>
         <h3 style="margin-top:16px;">Vitrine inicial <small style="color:var(--ink-3);font-weight:600;">(até 3 itens, opcional)</small></h3>
         <div id="adm-vitrine-fields"></div>
         <button class="btn" style="margin-top:20px;" onclick="submitAdminEmpresa()">Adicionar empresa</button>
@@ -1396,6 +1396,10 @@
           <div class="bpanel">
             <h3><span class="hico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span> Horário de funcionamento<div class="biz-open-toggle js-biz-open" style="margin-left:auto;" onclick="toggleBizOpen()"><span class="js-biz-open-label">Aberto</span><div class="switch on js-biz-open-switch"></div></div></h3>
             <div id="config-horario"></div>
+            <div class="toggle-row" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);" onclick="toggleHorarioFixo()">
+              <div class="tx"><b>Horário marcado</b><small>Desative se você atende só por contato/agendamento — a vitrine mostra "Entre em contato" no lugar do horário</small></div>
+              <div class="switch on" id="cfg-horario-fixo-switch"></div>
+            </div>
           </div>
           <div class="bpanel">
             <h3>O que você oferece</h3>
@@ -1619,10 +1623,8 @@
   <div class="modal-bg" id="dev-add-item-modal">
     <div class="modal" style="text-align:left;">
       <h3 style="text-align:center;margin-bottom:14px;">Adicionar item (dev)</h3>
-      <div class="add-prod" style="grid-template-columns:1fr;border:none;margin-top:0;padding-top:0;">
-        <input id="dai-nome" placeholder="Nome do produto ou promoção" />
-        <div class="price-input"><span>R$</span><input id="dai-preco" inputmode="numeric" placeholder="0,00 ou Grátis" oninput="maskPreco(this)" /></div>
-      </div>
+      <div class="field"><label>Nome do item</label><input id="dai-nome" placeholder="Nome do produto ou promoção" /></div>
+      <div class="field"><label>Preço</label><div class="price-input"><span>R$</span><input id="dai-preco" inputmode="numeric" placeholder="0,00 ou Grátis" oninput="maskPreco(this)" /></div></div>
       <button class="btn" style="margin-top:14px;" onclick="confirmDevAddVitrineItem()">Adicionar</button>
       <button class="btn ghost" style="margin-top:8px;" onclick="closeDevAddItemModal()">Cancelar</button>
     </div>
@@ -3406,7 +3408,10 @@ function openBizProfile(r){
   document.getElementById('bp-dev-add-item').classList.toggle('hide',!(user&&user.email===DEV_EMAIL&&!r.mine));
   const hb=document.getElementById('bp-hours');
   if(hb){
-    if(r.horario){
+    if(r.horario&&r.horario._horarioFixo===false){
+      hb.innerHTML=`<b>Entre em contato</b><br>Sem horário fixo divulgado`;
+      hb.style.display='';
+    }else if(r.horario){
       const st=statusHorario(r);
       hb.innerHTML=`<b class="${st.state}">${statusIcon(st.state)} ${st.label}</b><br>${fmtHojeResumo(r)}${st.sub?' · '+st.sub:''}`;
       hb.style.display='';
@@ -3589,6 +3594,13 @@ function fillBizConfig(){
   document.getElementById('cfg-verified').style.color=user.verified?'var(--green)':'var(--ink-3)';
   renderHorario('config-horario');
   renderOfereceChips();
+  document.getElementById('cfg-horario-fixo-switch').classList.toggle('on',(user.horario&&user.horario._horarioFixo)!==false);
+}
+function toggleHorarioFixo(){
+  const h=ensureHorario();
+  h._horarioFixo=!(h._horarioFixo!==false);
+  document.getElementById('cfg-horario-fixo-switch').classList.toggle('on',h._horarioFixo);
+  syncBizRoom();save();
 }
 function renderOfereceChips(){
   const box=document.getElementById('cfg-oferece');if(!box)return;
@@ -4027,7 +4039,8 @@ function refreshLiveScreens(){
       const av=document.getElementById('bp-av');
       if(av){if(fresh.avatar){av.style.backgroundImage=`url(${fresh.avatar})`;av.textContent='';av.classList.add('img');}else{av.style.backgroundImage='';av.textContent=fresh.emoji;av.classList.remove('img');}}
       const hb=document.getElementById('bp-hours');
-      if(hb&&fresh.horario){const st=statusHorario(fresh);hb.innerHTML=`<b class="${st.state}">${statusIcon(st.state)} ${st.label}</b><br>${fmtHojeResumo(fresh)}${st.sub?' · '+st.sub:''}`;}
+      if(hb&&fresh.horario&&fresh.horario._horarioFixo===false){hb.innerHTML=`<b>Entre em contato</b><br>Sem horário fixo divulgado`;}
+      else if(hb&&fresh.horario){const st=statusHorario(fresh);hb.innerHTML=`<b class="${st.state}">${statusIcon(st.state)} ${st.label}</b><br>${fmtHojeResumo(fresh)}${st.sub?' · '+st.sub:''}`;}
       const cc1=chatClosedInfo(fresh);
       const chatBtn=document.getElementById('bp-chat-btn');
       if(chatBtn){chatBtn.onclick=cc1.closed?null:()=>enterChat(fresh);chatBtn.classList.toggle('disabled',cc1.closed);chatBtn.innerHTML=chatBtnLabel(cc1);}
