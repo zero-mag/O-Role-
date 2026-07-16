@@ -607,6 +607,11 @@
   #s-biz .hr-row{flex-wrap:wrap;}
   #s-biz .hr-times{flex-wrap:wrap;gap:4px 6px;}
   #s-biz .hr-sel{font-size:12px;padding:5px 3px;min-width:0;}
+  .box-card-tight{padding:10px 8px;}
+  #adm-horario .hr-row{gap:6px;padding:9px 0;}
+  #adm-horario .hr-day{width:30px;font-size:12px;}
+  #adm-horario .hr-times{gap:4px;}
+  #adm-horario .hr-sel{font-size:11.5px;padding:6px 1px;min-width:0;}
   #s-biz .two-col{grid-template-columns:1fr;}
   #s-biz .bhead-right{width:100%;}
   #s-biz .bhead-right,#s-biz .biz-open-toggle,#s-biz .bav{align-items:center;}
@@ -1173,7 +1178,7 @@
         <div class="field"><label>Telefone</label><input id="adm-phone" placeholder="(19) 00000-0000" /></div>
         <a id="adm-google-link" href="#" target="_blank" rel="noopener" class="admin-google-link"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Ver no Google (conferir horário e dados)</a>
         <h3 style="margin-top:16px;">Horário de funcionamento</h3>
-        <div class="box-card"><div id="adm-horario"></div></div>
+        <div class="box-card box-card-tight"><div id="adm-horario"></div></div>
         <h3 style="margin-top:16px;">Vitrine inicial <small style="color:var(--ink-3);font-weight:600;">(até 3 itens, opcional)</small></h3>
         <div id="adm-vitrine-fields"></div>
         <button class="btn" style="margin-top:20px;" onclick="submitAdminEmpresa()">Adicionar empresa</button>
