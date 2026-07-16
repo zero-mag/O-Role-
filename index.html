@@ -166,10 +166,11 @@
   .admin-tabs{display:flex;gap:8px;margin-bottom:16px;}
   .admin-tab{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);font-weight:800;font-size:12.5px;letter-spacing:.3px;}
   .admin-tab.sel{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .admin-points{display:flex;justify-content:center;gap:28px;margin-bottom:20px;}
-  .admin-point{text-align:center;}
-  .admin-point b{display:block;font-size:22px;color:var(--accent);}
-  .admin-point small{color:var(--ink-3);font-weight:700;}
+  .admin-points-box{display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line-2);border-radius:16px;padding:16px 10px;margin-bottom:20px;}
+  .admin-points-sep{width:1px;align-self:stretch;background:var(--line-2);margin:0 26px;}
+  .admin-point{text-align:center;flex:1;}
+  .admin-point b{display:block;font-size:24px;color:var(--accent);margin-top:2px;}
+  .admin-point small{color:var(--ink-3);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.3px;}
   .admin-cnae{font-size:12.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:10px 13px;margin-bottom:12px;}
   .admin-google-link{display:block;font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:6px;}
   .admin-biz-item{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);}
@@ -178,6 +179,9 @@
   .admin-dot.laranja{background:#f59e0b;}
   .admin-dot.azul{background:#3b82f6;}
   .admin-dot.verde{background:var(--green);}
+  .admin-vit-card{border:1px solid var(--line-2);border-radius:14px;padding:10px 12px;margin-bottom:10px;background:var(--card);}
+  .admin-vit-card small{color:var(--ink-3);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:.3px;}
+  .admin-vit-card .two-col{margin-top:6px;}
   .two-col{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;}
   .or-line{display:flex;align-items:center;gap:12px;margin:8px 0 12px;color:var(--ink-3);font-size:12px;font-weight:600;}
   .or-line::before,.or-line::after{content:"";flex:1;height:1px;background:var(--line-2);}
@@ -698,10 +702,11 @@
   .hr-row{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line);}
   .hr-row:last-child{border:none;}
   .hr-day{width:38px;font-weight:700;font-size:13px;color:var(--ink);flex:none;}
-  .hr-times{display:flex;align-items:center;gap:4px;flex:1;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap;}
-  .hr-sel{border:1px solid var(--line-2);border-radius:8px;padding:6px 3px;font-size:12.5px;background:var(--card);outline:none;color:var(--ink);}
-  .hr-sel:focus{border-color:var(--accent);}
-  .hr-colon{color:var(--ink-3);font-weight:700;}
+  .hr-times{display:flex;align-items:center;gap:8px;flex:1;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap;}
+  .hr-time-pill{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:10px;background:var(--card);padding:0 2px;}
+  .hr-time-pill:focus-within{border-color:var(--accent);}
+  .hr-sel{border:none;border-radius:8px;padding:6px 2px;font-size:12.5px;background:transparent;outline:none;color:var(--ink);}
+  .hr-colon{color:var(--ink-3);font-weight:700;padding:0 1px;}
   .hr-closed{color:var(--ink-3);font-size:12.5px;flex:1;}
   .switch.sm{width:38px;height:22px;}
   .switch.sm::after{width:16px;height:16px;top:3px;left:3px;}
@@ -1142,16 +1147,17 @@
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Ferramenta de negócios</h2></div>
     <div class="scroll">
       <div class="admin-tabs">
-        <button class="admin-tab sel" id="adm-tab-add" onclick="adminTab('add')">ADC EMPRESA</button>
+        <button class="admin-tab" id="adm-tab-add" onclick="adminTab('add')">ADC EMPRESA</button>
         <button class="admin-tab hide" id="adm-tab-prom" onclick="adminTab('prom')">PROM ADM</button>
       </div>
-      <div class="admin-points">
-        <div class="admin-point"><b id="adm-pts-biz">0</b><small>Negócios (+10)</small></div>
-        <div class="admin-point"><b id="adm-pts-vit">0</b><small>Vitrine (+3)</small></div>
+      <div class="admin-points-box">
+        <div class="admin-point"><small>Negócios</small><b id="adm-pts-biz">0</b></div>
+        <div class="admin-points-sep"></div>
+        <div class="admin-point"><small>Vitrine</small><b id="adm-pts-vit">0</b></div>
       </div>
 
       <!-- ---- ABA: ADICIONAR EMPRESA ---- -->
-      <div id="adm-pane-add">
+      <div id="adm-pane-add" class="hide">
         <div class="field"><label>CNPJ</label><input id="adm-cnpj" placeholder="00.000.000/0000-00" oninput="maskCnpjAdmin(this)" /></div>
         <div id="adm-cnpj-status" class="geo-status hide"></div>
         <div id="adm-cnae-box" class="admin-cnae hide"></div>
@@ -1166,18 +1172,22 @@
         <h3 style="margin-top:16px;">Vitrine inicial <small style="color:var(--ink-3);font-weight:600;">(até 3 itens, opcional)</small></h3>
         <div id="adm-vitrine-fields"></div>
         <button class="btn" style="margin-top:20px;" onclick="submitAdminEmpresa()">Adicionar empresa</button>
-
-        <h3 style="margin-top:28px;">Negócios cadastrados</h3>
-        <div id="adm-lista-negocios"></div>
       </div>
 
       <!-- ---- ABA: PROMOVER ADMIN (só o dev) ---- -->
       <div id="adm-pane-prom" class="hide">
-        <p style="color:var(--ink-2);font-size:14px;margin-bottom:14px;">Contas promovidas ganham acesso só à aba "Adicionar empresa".</p>
-        <div class="field"><label>E-mail da conta pessoal</label><input id="adm-prom-email" placeholder="email@exemplo.com" /></div>
-        <button class="btn ghost" onclick="promoteAdminAccount(true)">Promover a admin</button>
-        <button class="btn ghost" style="margin-top:8px;" onclick="promoteAdminAccount(false)">Remover admin</button>
+        <p style="color:var(--ink-2);font-size:14px;margin-bottom:14px;">Toque numa conta da lista pra promover ou remover o acesso.</p>
+        <div class="admin-vit-card hide" id="adm-prom-selected">
+          <small>Selecionado</small>
+          <b id="adm-prom-selected-email" style="display:block;margin:4px 0 10px;"></b>
+          <button class="btn" id="adm-prom-action-btn" onclick="promoteAdminAccount()"></button>
+        </div>
+        <h3 style="margin-top:16px;">Contas pessoais</h3>
+        <div id="adm-prom-list"></div>
       </div>
+
+      <h3 style="margin-top:28px;">Negócios cadastrados</h3>
+      <div id="adm-lista-negocios"></div>
     </div>
   </section>
 
@@ -1862,21 +1872,34 @@ const DEV_EMAIL='felipegust59@gmail.com';
 function isToolAdmin(){return !!(user&&(user.isAdmin||user.email===DEV_EMAIL));}
 
 /* ============ FERRAMENTA ADMIN: ADICIONAR EMPRESA ============ */
-let adHorario=null, adCnpjBlocked=false, adCoords=null;
+let adHorario=null, adCnpjBlocked=false, adCoords=null, adActiveTab=null, adSelectedProm=null, adPromList=[];
 function openAdminTool(){
   if(!isToolAdmin()){toast('Sem acesso');return;}
   document.getElementById('adm-tab-prom').classList.toggle('hide',user.email!==DEV_EMAIL);
-  adminTab('add');
+  adActiveTab=null;
+  document.getElementById('adm-tab-add').classList.remove('sel');
+  document.getElementById('adm-tab-prom').classList.remove('sel');
+  document.getElementById('adm-pane-add').classList.add('hide');
+  document.getElementById('adm-pane-prom').classList.add('hide');
   resetAdminForm();
   refreshAdminPoints();
   refreshAdminList();
   go('s-admin-tool');
 }
 function adminTab(name){
-  document.getElementById('adm-tab-add').classList.toggle('sel',name==='add');
-  document.getElementById('adm-tab-prom').classList.toggle('sel',name==='prom');
-  document.getElementById('adm-pane-add').classList.toggle('hide',name!=='add');
-  document.getElementById('adm-pane-prom').classList.toggle('hide',name!=='prom');
+  adActiveTab=(adActiveTab===name)?null:name;
+  document.getElementById('adm-tab-add').classList.toggle('sel',adActiveTab==='add');
+  document.getElementById('adm-tab-prom').classList.toggle('sel',adActiveTab==='prom');
+  document.getElementById('adm-pane-add').classList.toggle('hide',adActiveTab!=='add');
+  document.getElementById('adm-pane-prom').classList.toggle('hide',adActiveTab!=='prom');
+  if(adActiveTab==='prom')refreshAdminPromList();
+}
+function adCollapsePanel(){
+  adActiveTab=null;
+  document.getElementById('adm-tab-add').classList.remove('sel');
+  document.getElementById('adm-tab-prom').classList.remove('sel');
+  document.getElementById('adm-pane-add').classList.add('hide');
+  document.getElementById('adm-pane-prom').classList.add('hide');
 }
 function resetAdminForm(){
   document.getElementById('adm-cnpj').value='';
@@ -1893,7 +1916,7 @@ function resetAdminForm(){
   const cat=document.getElementById('adm-cat');
   cat.innerHTML=SEG_GROUPS.flatMap(g=>g.items).map(([seg,em])=>`<option value="${seg}" data-em="${em}">${seg}</option>`).join('');
   const vf=document.getElementById('adm-vitrine-fields');
-  vf.innerHTML=[1,2,3].map(i=>`<div class="two-col" style="margin-bottom:8px;"><input id="adm-vit-nome-${i}" placeholder="Item ${i} (ex: Chopp 500ml)" /><input id="adm-vit-preco-${i}" placeholder="R$" /></div>`).join('');
+  vf.innerHTML=[1,2,3].map(i=>`<div class="admin-vit-card"><small>Item ${i}</small><div class="two-col"><input id="adm-vit-nome-${i}" placeholder="Ex: Chopp 500ml" /><input id="adm-vit-preco-${i}" placeholder="R$" /></div></div>`).join('');
 }
 function maskCnpjAdmin(el){
   const d=el.value.replace(/\D/g,'').slice(0,14);
@@ -1943,9 +1966,7 @@ async function buscarCnpjAdmin(cnpj){
 }
 function adTimeSelectHTML(k,field,val){
   const [h,m]=(val||'00:00').split(':');
-  return `<select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select>`+
-    `<span class="hr-colon">:</span>`+
-    `<select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select>`;
+  return `<span class="hr-time-pill"><select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select><span class="hr-colon">:</span><select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select></span>`;
 }
 function adRenderHorario(){
   const box=document.getElementById('adm-horario');if(!box||!adHorario)return;
@@ -1986,7 +2007,7 @@ async function submitAdminEmpresa(){
       if(inome)await sbAddVitrineItem(room.id,{emoji:em,nome:inome,preco:ipreco||'—',added_by:user.id});
     }
     toast('Empresa adicionada ✓');
-    resetAdminForm();refreshAdminPoints();refreshAdminList();
+    resetAdminForm();refreshAdminPoints();refreshAdminList();adCollapsePanel();
   }catch(e){toastError('Não deu pra cadastrar: '+(e.message||e));}
   finally{hideLoading();}
 }
@@ -2039,22 +2060,43 @@ async function devAddVitrineItem(){
     refreshAdminPoints();
   }catch(e){toastError('Não deu pra adicionar o item agora');}
 }
-async function promoteAdminAccount(makeAdmin){
-  const email=document.getElementById('adm-prom-email').value.trim();
-  if(!email){toast('Digite o e-mail da conta');return;}
+async function refreshAdminPromList(){
+  const box=document.getElementById('adm-prom-list');if(!box)return;
+  if(!SUPABASE_READY){box.innerHTML='';return;}
+  try{
+    adPromList=await sbLoadPersonalAccounts();
+    box.innerHTML=adPromList.length?adPromList.map((p,i)=>`<div class="admin-biz-item admin-prom-row" data-idx="${i}" style="cursor:pointer;">
+        <div class="nm">${p.is_admin?'<span class="admin-dot verde" title="Já é admin"></span>':''}${escHtml(p.name)} <small style="color:var(--ink-3);font-weight:400;">(${escHtml(p.email)})</small></div>
+      </div>`).join(''):'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhuma conta pessoal encontrada.</p>';
+    box.querySelectorAll('.admin-prom-row').forEach(el=>{el.onclick=()=>adSelectProm(adPromList[+el.dataset.idx]);});
+  }catch(e){console.error('Falha ao listar contas pessoais',e);}
+}
+function adSelectProm(p){
+  adSelectedProm=p;
+  document.getElementById('adm-prom-selected').classList.remove('hide');
+  document.getElementById('adm-prom-selected-email').textContent=p.name+' — '+p.email;
+  const btn=document.getElementById('adm-prom-action-btn');
+  btn.textContent=p.is_admin?'Remover admin':'Promover a admin';
+  btn.className=p.is_admin?'btn ghost':'btn';
+}
+async function promoteAdminAccount(){
+  if(!adSelectedProm){toast('Escolha uma conta na lista');return;}
   if(!SUPABASE_READY){toast('Sem conexão com o servidor');return;}
+  const makeAdmin=!adSelectedProm.is_admin;
   showLoading(makeAdmin?'Promovendo…':'Removendo acesso…');
   try{
     const { data:{ session } }=await sb.auth.getSession();
     const res=await fetch(window.SUPABASE_URL+'/functions/v1/smooth-task',{ // nome de exibição é "promote-admin" no painel, mas o endereço muda a cada redeploy — conferir se ainda bate antes de mexer
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session&&session.access_token)},
-      body:JSON.stringify({target_email:email,is_admin:makeAdmin})
+      body:JSON.stringify({target_email:adSelectedProm.email,is_admin:makeAdmin})
     });
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'falha ao promover');
     toast(makeAdmin?'Admin promovido ✓':'Acesso removido ✓');
-    document.getElementById('adm-prom-email').value='';
+    document.getElementById('adm-prom-selected').classList.add('hide');
+    adSelectedProm=null;
+    refreshAdminPromList();
   }catch(e){toastError('Não deu: '+(e.message||e));}
   finally{hideLoading();}
 }
@@ -3784,9 +3826,7 @@ const HR_HOURS=Array.from({length:24},(_,i)=>String(i).padStart(2,'0'));
 function hrMinuteOpts(m){const base=['00','15','30','45'];return base.includes(m)?base:[m,...base].sort();}
 function timeSelectHTML(k,field,val){
   const [h,m]=(val||'00:00').split(':');
-  return `<select class="hr-sel" onchange="setHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select>`+
-    `<span class="hr-colon">:</span>`+
-    `<select class="hr-sel" onchange="setHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select>`;
+  return `<span class="hr-time-pill"><select class="hr-sel" onchange="setHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select><span class="hr-colon">:</span><select class="hr-sel" onchange="setHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select></span>`;
 }
 function setHorarioPart(k,field,part,value){
   const h=ensureHorario();

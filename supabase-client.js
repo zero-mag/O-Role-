@@ -76,6 +76,11 @@ async function sbCountVitrineAddedBy(userId) {
   if (error) throw error;
   return count || 0;
 }
+async function sbLoadPersonalAccounts() {
+  const { data, error } = await sb.from('profiles').select('id,name,email,is_admin').eq('type', 'personal').order('name');
+  if (error) throw error;
+  return data;
+}
 async function sbLoadCatalogedRooms() {
   const { data, error } = await sb.from('rooms').select('id,nome,owner_id,claim_started_at,horario')
     .not('cataloged_by', 'is', null).order('id', { ascending: false });
