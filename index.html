@@ -506,7 +506,7 @@
   .modal .mem{font-size:44px;margin-bottom:8px;}
   .modal h3{font-size:18px;font-weight:800;margin-bottom:6px;}
   .modal p{font-size:13.5px;color:var(--ink-2);margin-bottom:18px;line-height:1.4;}
-  .modal input{width:100%;padding:14px;border-radius:13px;border:1px solid var(--line-2);font-size:16px;text-align:center;letter-spacing:3px;margin-bottom:12px;}
+  .modal input{width:100%;padding:14px;border-radius:13px;border:1px solid var(--line-2);font-size:16px;text-align:center;letter-spacing:3px;margin-bottom:12px;background:var(--card);color:var(--ink);}
   .modal input:focus{outline:none;border-color:var(--accent);}
   .modal.club-modal{max-width:380px;text-align:left;}
   .modal.club-modal h3,.modal.club-modal .mem{text-align:center;}
@@ -601,7 +601,7 @@
   .modal .add-prod>*:not(:first-child):not(.np-add){grid-column:2;width:100%;}
   #s-biz .hr-row{flex-wrap:wrap;}
   #s-biz .hr-times{flex-wrap:wrap;gap:4px 6px;}
-  #s-biz .hr-sel{font-size:12px;padding:5px 3px;min-width:0;}
+  #s-biz .hr-time-native{font-size:12px;padding:5px 6px;min-width:0;}
   #s-biz .two-col{grid-template-columns:1fr;}
   #s-biz .bhead-right{width:100%;}
   #s-biz .bhead-right,#s-biz .biz-open-toggle,#s-biz .bav{align-items:center;}
@@ -703,10 +703,8 @@
   .hr-row:last-child{border:none;}
   .hr-day{width:38px;font-weight:700;font-size:13px;color:var(--ink);flex:none;}
   .hr-times{display:flex;align-items:center;gap:8px;flex:1;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap;}
-  .hr-time-pill{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:10px;background:var(--card);padding:0 2px;}
-  .hr-time-pill:focus-within{border-color:var(--accent);}
-  .hr-sel{border:none;border-radius:8px;padding:6px 2px;font-size:12.5px;background:transparent;outline:none;color:var(--ink);}
-  .hr-colon{color:var(--ink-3);font-weight:700;padding:0 1px;}
+  .hr-time-native{border:1px solid var(--line-2);border-radius:10px;padding:6px 8px;font-size:13px;background:var(--card);color:var(--ink);outline:none;color-scheme:light dark;}
+  .hr-time-native:focus{border-color:var(--accent);}
   .hr-closed{color:var(--ink-3);font-size:12.5px;flex:1;}
   .switch.sm{width:38px;height:22px;}
   .switch.sm::after{width:16px;height:16px;top:3px;left:3px;}
@@ -1965,8 +1963,7 @@ async function buscarCnpjAdmin(cnpj){
   }catch(e){st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra verificar agora.';}
 }
 function adTimeSelectHTML(k,field,val){
-  const [h,m]=(val||'00:00').split(':');
-  return `<span class="hr-time-pill"><select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select><span class="hr-colon">:</span><select class="hr-sel" onchange="adSetHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select></span>`;
+  return `<input type="time" class="hr-time-native" value="${val||'00:00'}" onchange="adSetHorarioPart('${k}','${field}',this.value)" />`;
 }
 function adRenderHorario(){
   const box=document.getElementById('adm-horario');if(!box||!adHorario)return;
@@ -1980,9 +1977,8 @@ function adRenderHorario(){
   }).join('');
 }
 function adTogHorarioDia(k){adHorario[k].aberto=!adHorario[k].aberto;adRenderHorario();}
-function adSetHorarioPart(k,field,part,value){
-  const [hh,mm]=(adHorario[k][field]||'00:00').split(':');
-  adHorario[k][field]=part==='h'?(value+':'+mm):(hh+':'+value);
+function adSetHorarioPart(k,field,value){
+  adHorario[k][field]=value;
 }
 async function submitAdminEmpresa(){
   if(adCnpjBlocked){toast('Confira o CNPJ antes de continuar');return;}
@@ -3822,16 +3818,8 @@ const DIA_KEYS=['dom','seg','ter','qua','qui','sex','sab']; // índice = Date.ge
 function defaultHorario(){const h={};DIAS.forEach(([k])=>h[k]={aberto:true,ini:'18:00',fim:'00:00'});return h;}
 
 function ensureHorario(){if(!user.horario)user.horario=defaultHorario();return user.horario;}
-const HR_HOURS=Array.from({length:24},(_,i)=>String(i).padStart(2,'0'));
-function hrMinuteOpts(m){const base=['00','15','30','45'];return base.includes(m)?base:[m,...base].sort();}
 function timeSelectHTML(k,field,val){
-  const [h,m]=(val||'00:00').split(':');
-  return `<span class="hr-time-pill"><select class="hr-sel" onchange="setHorarioPart('${k}','${field}','h',this.value)">${HR_HOURS.map(x=>`<option value="${x}"${x===h?' selected':''}>${x}</option>`).join('')}</select><span class="hr-colon">:</span><select class="hr-sel" onchange="setHorarioPart('${k}','${field}','m',this.value)">${hrMinuteOpts(m).map(x=>`<option value="${x}"${x===m?' selected':''}>${x}</option>`).join('')}</select></span>`;
-}
-function setHorarioPart(k,field,part,value){
-  const h=ensureHorario();
-  const [hh,mm]=(h[k][field]||'00:00').split(':');
-  setHorario(k,field,part==='h'?(value+':'+mm):(hh+':'+value));
+  return `<input type="time" class="hr-time-native" value="${val||'00:00'}" onchange="setHorario('${k}','${field}',this.value)" />`;
 }
 function renderHorario(containerId){
   const box=document.getElementById(containerId);if(!box||!user)return;
