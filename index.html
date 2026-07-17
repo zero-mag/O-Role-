@@ -181,6 +181,7 @@
   .admin-google-link{display:block;font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:6px;}
   .admin-biz-item{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);}
   .admin-biz-item .nm{flex:1;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .admin-view-btn{background:none;border:none;color:var(--ink-3);flex:none;display:flex;align-items:center;justify-content:center;padding:4px;}
   .admin-dot{width:9px;height:9px;border-radius:50%;flex:none;}
   .admin-dot.laranja{background:#f59e0b;}
   .admin-dot.azul{background:#3b82f6;}
@@ -1236,9 +1237,13 @@
         <a id="adm-google-link" href="#" target="_blank" rel="noopener" class="admin-google-link"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Ver no Google (conferir horário e dados)</a>
         <h3 style="margin-top:16px;">Horário de funcionamento</h3>
         <div class="box-card box-card-tight"><div id="adm-horario"></div></div>
-        <h3 style="margin-top:16px;">Vitrine inicial <small style="color:var(--ink-3);font-weight:600;">(até 3 itens, opcional)</small></h3>
-        <div id="adm-vitrine-fields"></div>
-        <button class="btn" style="margin-top:20px;" onclick="submitAdminEmpresa()">Adicionar empresa</button>
+        <div id="adm-vitrine-wrap">
+          <h3 style="margin-top:16px;">Vitrine inicial <small style="color:var(--ink-3);font-weight:600;">(até 3 itens, opcional)</small></h3>
+          <div id="adm-vitrine-fields"></div>
+        </div>
+        <button class="btn" id="adm-submit-btn" style="margin-top:20px;" onclick="submitAdminEmpresa()">Adicionar empresa</button>
+        <button class="btn ghost hide" id="adm-cancel-edit-btn" style="margin-top:8px;" onclick="resetAdminForm()">Cancelar edição</button>
+        <button class="btn ghost hide" id="adm-delete-btn" style="margin-top:8px;color:var(--red-ink);" onclick="deleteAdminEmpresa()">Excluir negócio</button>
       </div>
 
       <!-- ---- ABA: PROMOVER ADMIN (só o dev) ---- -->
@@ -1954,7 +1959,7 @@ const DEV_EMAIL='felipegust59@gmail.com';
 function isToolAdmin(){return !!(user&&(user.isAdmin||user.email===DEV_EMAIL));}
 
 /* ============ FERRAMENTA ADMIN: ADICIONAR EMPRESA ============ */
-let adHorario=null, adCnpjBlocked=false, adCoords=null, adActiveTab=null, adSelectedProm=null, adPromList=[];
+let adHorario=null, adCnpjBlocked=false, adCoords=null, adActiveTab=null, adSelectedProm=null, adPromList=[], adEditingRoomId=null;
 function openAdminTool(){
   if(!isToolAdmin()){toast('Sem acesso');return;}
   document.getElementById('adm-tab-prom').classList.toggle('hide',user.email!==DEV_EMAIL);
@@ -1984,7 +1989,9 @@ function adCollapsePanel(){
   document.getElementById('adm-pane-prom').classList.add('hide');
 }
 function resetAdminForm(){
+  adEditingRoomId=null;
   document.getElementById('adm-cnpj').value='';
+  document.getElementById('adm-cnpj').disabled=false;
   document.getElementById('adm-cnpj-status').classList.add('hide');
   document.getElementById('adm-cnae-box').classList.add('hide');
   document.getElementById('adm-nome').value='';
@@ -1999,6 +2006,49 @@ function resetAdminForm(){
   cat.innerHTML=SEG_GROUPS.flatMap(g=>g.items).map(([seg,em])=>`<option value="${seg}" data-em="${em}">${seg}</option>`).join('');
   const vf=document.getElementById('adm-vitrine-fields');
   vf.innerHTML=[1,2,3].map(i=>`<div class="admin-vit-card box-card"><small>Item ${i}</small><div class="two-col"><input id="adm-vit-nome-${i}" placeholder="Ex: Chopp 500ml" /><input id="adm-vit-preco-${i}" placeholder="R$" inputmode="numeric" oninput="maskPreco(this)" /></div></div>`).join('');
+  document.getElementById('adm-vitrine-wrap').classList.remove('hide');
+  document.getElementById('adm-submit-btn').textContent='Adicionar empresa';
+  document.getElementById('adm-cancel-edit-btn').classList.add('hide');
+  document.getElementById('adm-delete-btn').classList.add('hide');
+}
+async function adOpenEdit(id){
+  showLoading('Carregando negócio…');
+  try{
+    const {data:r,error}=await sb.from('rooms').select('*').eq('id',id).single();
+    if(error||!r)throw error||new Error('negócio não encontrado');
+    resetAdminForm();
+    adEditingRoomId=id;
+    document.getElementById('adm-cnpj').value=r.cnpj?r.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):'';
+    document.getElementById('adm-cnpj').disabled=true; // CNPJ não muda depois de catalogado, evita duplicidade
+    document.getElementById('adm-nome').value=r.nome||'';
+    document.getElementById('adm-cat').value=r.cat||'';
+    const [addr,city]=(r.address||'').split(' — ');
+    document.getElementById('adm-address').value=addr||'';
+    document.getElementById('adm-city').value=city||'';
+    document.getElementById('adm-phone').value=r.whatsapp?r.whatsapp.replace(/^55/,''):'';
+    if(r.horario)adHorario=r.horario;
+    adRenderHorario();
+    adCoords={lat:r.lat,lng:r.lng};
+    document.getElementById('adm-vitrine-wrap').classList.add('hide'); // itens da vitrine se editam por "Adicionar item (dev)" na vitrine pública
+    document.getElementById('adm-submit-btn').textContent='Salvar alterações';
+    document.getElementById('adm-cancel-edit-btn').classList.remove('hide');
+    document.getElementById('adm-delete-btn').classList.remove('hide');
+    adminTab(null); // fecha se já tava aberta, pra reabrir do zero
+    adminTab('add');
+  }catch(e){toastError('Não deu pra carregar esse negócio agora');}
+  finally{hideLoading();}
+}
+async function deleteAdminEmpresa(){
+  if(!adEditingRoomId)return;
+  if(!confirm('Excluir esse negócio de vez? Isso apaga a vitrine e não pode ser desfeito.'))return;
+  showLoading('Excluindo…');
+  try{
+    await sbDeleteRoom(adEditingRoomId);
+    toast('Negócio excluído');
+    resetAdminForm();adCollapsePanel();
+    refreshAdminPoints();refreshAdminList();
+  }catch(e){toastError('Não deu pra excluir agora');}
+  finally{hideLoading();}
 }
 function maskCnpjAdmin(el){
   const d=el.value.replace(/\D/g,'').slice(0,14);
@@ -2077,8 +2127,18 @@ async function submitAdminEmpresa(){
   const phoneDigits=document.getElementById('adm-phone').value.replace(/\D/g,'');
   const cnpjDigits=document.getElementById('adm-cnpj').value.replace(/\D/g,'');
   const coords=adCoords||{lat:userPos.lat,lng:userPos.lng};
-  showLoading('Cadastrando negócio…');
   try{
+    if(adEditingRoomId){
+      showLoading('Salvando alterações…');
+      await sbUpdateRoom(adEditingRoomId,{
+        nome,emoji:em,cat,address,lat:coords.lat,lng:coords.lng,horario:adHorario,
+        whatsapp:phoneDigits?('55'+phoneDigits):null
+      });
+      toast('Alterações salvas ✓');
+      resetAdminForm();refreshAdminList();adCollapsePanel();
+      return;
+    }
+    showLoading('Cadastrando negócio…');
     const room=await sbCreateRoom({
       owner_id:null,is_business:true,cataloged_by:user.id,nome,emoji:em,cat,
       address,lat:coords.lat,lng:coords.lng,horario:adHorario,cnpj:cnpjDigits||null,
@@ -2091,7 +2151,7 @@ async function submitAdminEmpresa(){
     }
     toast('Empresa adicionada ✓');
     resetAdminForm();refreshAdminPoints();refreshAdminList();adCollapsePanel();
-  }catch(e){toastError('Não deu pra cadastrar: '+(e.message||e));}
+  }catch(e){toastError('Não deu: '+(e.message||e));}
   finally{hideLoading();}
 }
 async function refreshAdminPoints(){
@@ -2111,7 +2171,8 @@ async function refreshAdminList(){
       const dot=r.owner_id?'verde':(r.claim_started_at?'azul':'laranja');
       const hidden=!!(r.horario&&r.horario._vitrineHidden);
       return `<div class="admin-biz-item">
-        <div class="nm" onclick="adOpenBiz(${r.id})"><span class="admin-dot ${dot}" title="${dot==='verde'?'Já tem dono':(dot==='azul'?'Alguém reivindicando':'Sem dono ainda')}"></span>${escHtml(r.nome)}</div>
+        <div class="nm" onclick="adOpenEdit(${r.id})" title="Editar"><span class="admin-dot ${dot}" title="${dot==='verde'?'Já tem dono':(dot==='azul'?'Alguém reivindicando':'Sem dono ainda')}"></span>${escHtml(r.nome)}</div>
+        <button class="admin-view-btn" onclick="event.stopPropagation();adOpenBiz(${r.id})" title="Ver vitrine pública"><svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
         <div class="switch sm${hidden?'':' on'}" onclick="adToggleVitrineHidden(${r.id},this)"></div>
       </div>`;
     }).join(''):'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhuma empresa cadastrada por aqui ainda.</p>';
@@ -2123,12 +2184,18 @@ function adOpenBiz(id){
   openRoom(r.id);
 }
 async function adToggleVitrineHidden(id,el){
-  const r=rooms.find(x=>x.id===id);if(!r)return;
-  const h=r.horario||(r.horario={});
-  h._vitrineHidden=!h._vitrineHidden;
-  el.classList.toggle('on',!h._vitrineHidden);
-  try{await sbUpdateRoom(id,{horario:h});toast(h._vitrineHidden?'Vitrine ocultada':'Vitrine visível');}
-  catch(e){toastError('Não deu pra salvar essa mudança agora');}
+  // busca direto do banco — a lista de "negócios cadastrados" é carregada à parte
+  // do array global `rooms`, então não dava pra confiar que a room já estaria lá
+  try{
+    const {data:r,error}=await sb.from('rooms').select('id,horario').eq('id',id).single();
+    if(error||!r)throw error||new Error('negócio não encontrado');
+    const h=r.horario||{};
+    h._vitrineHidden=!h._vitrineHidden;
+    await sbUpdateRoom(id,{horario:h});
+    el.classList.toggle('on',!h._vitrineHidden);
+    toast(h._vitrineHidden?'Vitrine ocultada':'Vitrine visível');
+    const gr=rooms.find(x=>x.id===id);if(gr)gr.horario=h;
+  }catch(e){toastError('Não deu pra salvar essa mudança agora');}
 }
 function devAddVitrineItem(){
   if(!currentBiz||!user||user.email!==DEV_EMAIL)return;
