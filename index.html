@@ -521,6 +521,18 @@
   .club-benefits li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--ink);padding:8px 0;border-bottom:1px solid var(--line);}
   .club-benefits li:last-child{border:none;}
   .club-benefits li .ic{font-size:18px;flex:none;}
+  .plan-card{border:1px solid var(--line-2);border-radius:16px;padding:14px 16px;margin-bottom:14px;cursor:pointer;position:relative;background:var(--card);}
+  .plan-card:active{transform:scale(.99);}
+  .plan-highlight{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);}
+  .plan-locked{cursor:default;opacity:.55;}
+  .plan-badge{position:absolute;top:-10px;left:14px;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;letter-spacing:.4px;}
+  .plan-badge-soon{background:var(--ink-3);}
+  .plan-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px;}
+  .plan-head b{font-size:15px;}
+  .plan-price{font-weight:800;color:var(--accent);font-size:15px;white-space:nowrap;}
+  .plan-price small{color:var(--ink-3);font-weight:600;font-size:11px;}
+  .plan-feats{margin:0;padding:0;list-style:none;font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+  .plan-feats li::before{content:"✓ ";color:var(--green);font-weight:800;}
 
   /* toast (avisos rápidos, não-críticos) */
   #toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;background:var(--ink-solid);color:#fff;padding:12px 20px;border-radius:18px;font-size:13.5px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;max-width:82%;text-align:center;line-height:1.4;}
@@ -1338,7 +1350,7 @@
       <div class="navitem" data-tab="chats" onclick="bizTab('chats')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg></span> Meus Chats</div>
       <div class="navitem" data-tab="boost" onclick="bizTab('boost')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3 3-3-3c-1-1-2-3-2-5 0-4 2-8 5-10Z"/><circle cx="12" cy="10" r="2"/><path d="M9 17l-2 4M15 17l2 4"/></svg></span> Boost & Destaque</div>
       <div class="navitem" data-tab="config" onclick="bizTab('config')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg></span> Configurações</div>
-      <div class="upgrade" id="biz-upgrade-box"><h4>⚡ Rolê+</h4><p>Destaque no mapa, vitrine sem limite e métricas reais.</p><button onclick="openClubModal()">Assinar por R$ 69,90/mês</button></div>
+      <div class="upgrade" id="biz-upgrade-box"><h4>⚡ Rolê+</h4><p>Destaque no mapa, vitrine sem limite e métricas reais.</p><button onclick="openClubModal()">Ver planos</button></div>
     </aside>
     <main class="bmain">
       <div class="bview show" id="bview-dash">
@@ -1443,7 +1455,7 @@
           <div class="bpanel" id="boost-club-panel">
             <h3><span class="hico"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span> Rolê+</h3>
             <p style="color:var(--ink-2);font-size:13.5px;margin-bottom:14px;">Assine e tenha o destaque sempre incluso, sem pagar Boost avulso — fora vitrine ilimitada e métricas reais.</p>
-            <button class="btn" onclick="openClubModal()">Assinar por R$ 69,90/mês</button>
+            <button class="btn" onclick="openClubModal()">Ver planos a partir de R$ 29,90/mês</button>
           </div>
         </div>
       </div>
@@ -1642,20 +1654,42 @@
     </div>
   </div>
 
-  <!-- club premium modal -->
+  <!-- club premium modal — 3 planos (Start/Plus/Premium) -->
   <div class="modal-bg" id="club-modal">
-    <div class="modal club-modal">
-      <div class="mem">⚡</div>
-      <h3>Rolê+</h3>
-      <p>Por R$ 69,90/mês, seu estabelecimento ganha:</p>
-      <ul class="club-benefits">
-        <li><span class="ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3 3-3-3c-1-1-2-3-2-5 0-4 2-8 5-10Z"/><circle cx="12" cy="10" r="2"/><path d="M9 17l-2 4M15 17l2 4"/></svg></span> Destaque incluso no mapa e no feed — sem pagar Boost à parte</li>
-        <li><span class="ic">🛍️</span> Vitrine sem limite de itens (grátis: até 3)</li>
-        <li><span class="ic">📊</span> Métricas reais de alcance, visitas e cupons</li>
-        <li><span class="ic">⭐</span> Selo Rolê+ no seu perfil e no mapa</li>
-      </ul>
-      <button class="btn" onclick="closeClubModal();startInfinitePayCheckout('club_subscription',6990,'Assinatura Rolê+',{room_id:user&&user.roomId})">Assinar por R$ 69,90/mês</button>
-      <button class="btn ghost" style="margin-top:8px;" onclick="closeClubModal()">Agora não</button>
+    <div class="modal club-modal" style="max-width:380px;">
+      <h3 style="text-align:center;margin-bottom:4px;">Rolê+</h3>
+      <p style="text-align:center;color:var(--ink-2);font-size:13px;margin-bottom:18px;">Escolha o plano do seu negócio</p>
+
+      <div class="plan-card" onclick="chooseClubPlan('start')">
+        <div class="plan-head"><b>Rolê+ Start</b><span class="plan-price">R$ 29,90<small>/mês</small></span></div>
+        <ul class="plan-feats">
+          <li>5 fotos na vitrine</li>
+          <li>7 dias de Boost incluso</li>
+          <li>Até 3 links (redes/cardápio)</li>
+        </ul>
+      </div>
+
+      <div class="plan-card plan-highlight" onclick="chooseClubPlan('plus')">
+        <div class="plan-badge">MAIS ESCOLHIDO</div>
+        <div class="plan-head"><b>Rolê+ Plus</b><span class="plan-price">R$ 59,90<small>/mês</small></span></div>
+        <ul class="plan-feats">
+          <li>12 fotos na vitrine</li>
+          <li>17 dias de Boost incluso</li>
+          <li>Até 5 links + painel com métricas reais</li>
+        </ul>
+      </div>
+
+      <div class="plan-card plan-locked">
+        <div class="plan-badge plan-badge-soon">EM BREVE</div>
+        <div class="plan-head"><b>Rolê+ Premium</b><span class="plan-price">R$ 129,90<small>/mês</small></span></div>
+        <ul class="plan-feats">
+          <li>Fotos e vitrine sem limite</li>
+          <li>30 dias de Boost incluso</li>
+          <li>Sincroniza direto com o Google (aguardando liberação da API)</li>
+        </ul>
+      </div>
+
+      <button class="btn ghost" style="margin-top:6px;" onclick="closeClubModal()">Agora não</button>
     </div>
   </div>
 
@@ -4103,6 +4137,12 @@ function buyBoost(){startInfinitePayCheckout('boost_business',boostPrice,'Boost 
 /* ---- Rolê+ ---- */
 function openClubModal(){document.getElementById('club-modal').classList.add('active');}
 function closeClubModal(){document.getElementById('club-modal').classList.remove('active');}
+function chooseClubPlan(tier){
+  const plans={start:{amount:2990,label:'Rolê+ Start'},plus:{amount:5990,label:'Rolê+ Plus'}};
+  const p=plans[tier];if(!p)return;
+  closeClubModal();
+  startInfinitePayCheckout('club_subscription',p.amount,'Assinatura '+p.label,{room_id:user&&user.roomId});
+}
 function applyClubUI(){
   const club=isClub(user);
   ['bstat-alcance','bstat-chat','bstat-cupons'].forEach(id=>{
