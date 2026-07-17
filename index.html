@@ -2019,7 +2019,7 @@ async function adOpenEdit(id){
     resetAdminForm();
     adEditingRoomId=id;
     document.getElementById('adm-cnpj').value=r.cnpj?r.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):'';
-    document.getElementById('adm-cnpj').disabled=true; // CNPJ não muda depois de catalogado, evita duplicidade
+    document.getElementById('adm-cnpj').disabled=!!r.cnpj; // já tem CNPJ salvo? trava (evita trocar por engano). Vazio? deixa preencher agora.
     document.getElementById('adm-nome').value=r.nome||'';
     document.getElementById('adm-cat').value=r.cat||'';
     const [addr,city]=(r.address||'').split(' — ');
@@ -2132,7 +2132,7 @@ async function submitAdminEmpresa(){
       showLoading('Salvando alterações…');
       await sbUpdateRoom(adEditingRoomId,{
         nome,emoji:em,cat,address,lat:coords.lat,lng:coords.lng,horario:adHorario,
-        whatsapp:phoneDigits?('55'+phoneDigits):null
+        whatsapp:phoneDigits?('55'+phoneDigits):null,cnpj:cnpjDigits||null
       });
       toast('Alterações salvas ✓');
       resetAdminForm();refreshAdminList();adCollapsePanel();
