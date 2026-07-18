@@ -28,6 +28,19 @@ async function sbSignOut() {
   await sb.auth.signOut();
 }
 
+// login social — cria conta automaticamente no primeiro acesso (sempre como
+// 'personal': Google/Apple não fornecem CNPJ/segmento/endereço, então não dá
+// pra criar um perfil de negócio completo por aqui). O redirect volta pro
+// próprio app, que já detecta a sessão sozinho no boot (supabase-js faz isso
+// automaticamente a partir da URL de retorno).
+async function sbSignInWithOAuth(provider) {
+  const { error } = await sb.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: location.origin + location.pathname }
+  });
+  if (error) throw error;
+}
+
 async function sbCurrentSession() {
   const { data } = await sb.auth.getSession();
   return data.session;

@@ -5,6 +5,15 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const INFINITEPAY_HANDLE = 'nextoria';
+// preço + dias de boost incluso por tier — validado aqui no servidor, nunca confiando
+// no que o navegador manda (o navegador só sugere o tier, o preço já foi conferido
+// contra a InfinitePay acima; aqui cruzamos os dois pra garantir que o tier alegado
+// é compatível com o valor realmente pago).
+const CLUB_PLANS: Record<string, { amountCents: number; boostDays: number }> = {
+  start: { amountCents: 2990, boostDays: 7 },
+  plus: { amountCents: 5990, boostDays: 17 },
+  // premium ainda não é comprável (sem botão na UI) — de propósito não entra aqui
+};
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -53,9 +62,18 @@ Deno.serve(async (req: Request) => {
       if (intent.payload.room_id) await supabase.from('rooms').update({ boost_until: boostUntil }).eq('id', intent.payload.room_id);
       await supabase.from('profiles').update({ boost_until: boostUntil }).eq('id', intent.user_id);
     } else if (intent.kind === 'club_subscription') {
+      const claimedTier = intent.payload?.tier;
+      const plan = claimedTier && CLUB_PLANS[claimedTier];
+      if (!plan || plan.amountCents !== intent.amount_cents) {
+        // tier ausente/desconhecido, ou não bate com o valor que o próprio intent
+        // registrou no checkout — rejeita em vez de conceder um plano genérico.
+        await supabase.from('payment_intents').update({ status: 'failed' }).eq('order_nsu', order_nsu);
+        return new Response(JSON.stringify({ error: 'tier inválido ou não confere com o valor pago' }), { status: 402, headers: CORS });
+      }
       const clubUntil = new Date(now + 30 * 24 * 3600e3).toISOString();
-      await supabase.from('profiles').update({ club_until: clubUntil }).eq('id', intent.user_id);
-      if (intent.payload.room_id) await supabase.from('rooms').update({ club_until: clubUntil }).eq('id', intent.payload.room_id);
+      const boostUntil = new Date(now + plan.boostDays * 24 * 3600e3).toISOString();
+      await supabase.from('profiles').update({ club_until: clubUntil, plan_tier: claimedTier, boost_until: boostUntil }).eq('id', intent.user_id);
+      if (intent.payload.room_id) await supabase.from('rooms').update({ club_until: clubUntil, plan_tier: claimedTier, boost_until: boostUntil }).eq('id', intent.payload.room_id);
     } else if (intent.kind === 'role_personal') {
       await supabase.from('rooms').insert({ ...intent.payload.room, owner_id: intent.user_id });
     }
