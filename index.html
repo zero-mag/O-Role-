@@ -912,7 +912,9 @@
   <!-- ===== ADICIONAR À TELA DE INÍCIO (pós-cadastro) ===== -->
   <section class="screen bg-watermark bg-watermark-dark" id="s-install">
     <div class="install-wrap">
-      <svg id="inst-svg-ios" class="inst-svg hide" viewBox="0 0 220 400" xmlns="http://www.w3.org/2000/svg">
+      <h2>Adicione o Rolê+ à tela de início</h2>
+      <p>Assim ele abre rapidinho, como um app de verdade — sem precisar procurar o link toda vez.</p>
+      <svg id="inst-svg-ios" class="inst-svg hide" viewBox="0 0 220 345" xmlns="http://www.w3.org/2000/svg">
         <rect x="16" y="6" width="188" height="308" rx="32" fill="#fff" stroke="#171717" stroke-width="6"/>
         <rect x="80" y="16" width="60" height="10" rx="5" fill="#171717"/>
         <rect x="26" y="52" width="168" height="216" rx="4" fill="url(#instGrad)"/>
@@ -932,7 +934,7 @@
           <marker id="arrIos" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#E8365B"/></marker>
         </defs>
       </svg>
-      <svg id="inst-svg-android" class="inst-svg" viewBox="0 0 220 400" xmlns="http://www.w3.org/2000/svg">
+      <svg id="inst-svg-android" class="inst-svg" viewBox="0 0 220 325" xmlns="http://www.w3.org/2000/svg">
         <rect x="16" y="6" width="188" height="308" rx="20" fill="#fff" stroke="#171717" stroke-width="6"/>
         <rect x="26" y="16" width="168" height="42" rx="4" fill="#f4f4f4" stroke="#e2e2e2" stroke-width="1"/>
         <circle cx="110" cy="37" r="17" fill="none" stroke="#E8365B" stroke-width="3">
@@ -947,8 +949,6 @@
         <text x="110" y="224" font-size="13" font-weight="800" text-anchor="middle" fill="#5a5a5a">O Rolê+</text>
         <defs><linearGradient id="instGradA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff4ef"/><stop offset="1" stop-color="#ffe6da"/></linearGradient></defs>
       </svg>
-      <h2>Adicione o Rolê+ à tela de início</h2>
-      <p>Assim ele abre rapidinho, como um app de verdade — sem precisar procurar o link toda vez.</p>
       <button class="btn" id="install-btn" onclick="doInstallOrSkip()">Pular</button>
       <label class="install-dontshow"><input type="checkbox" id="install-dontshow-chk" /> Não mostrar novamente</label>
     </div>
@@ -1866,11 +1866,13 @@ function persistInstallDontShow(){
 async function doInstallOrSkip(){
   persistInstallDontShow();
   if(deferredInstallPrompt){
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
+    // se o prompt nativo já foi usado/expirou, chamar .prompt() de novo
+    // lança erro — sem o try/catch isso travava o botão sem sair da tela
+    try{deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;}catch(e){}
     deferredInstallPrompt=null;
   }
-  routeAfterAuth(true);
+  if(user)routeAfterAuth(true);
+  else go('s-login',true);
 }
 
 /* ============ MOCKUP DO LOGIN: busca "digitando" + card trocando ============ */
