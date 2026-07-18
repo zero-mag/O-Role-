@@ -1815,8 +1815,9 @@ function toggleDarkMode(){
 applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light');
 
 /* ============ ADICIONAR À TELA DE INÍCIO (pós-cadastro) ============ */
-let deferredInstallPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;});
+// suprime o mini-banner nativo do navegador — nosso próprio botão "Pular"
+// é quem controla esse fluxo agora, nunca dispara o prompt nativo.
+window.addEventListener('beforeinstallprompt',e=>e.preventDefault());
 function isStandaloneApp(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
 function isMobileDevice(){
   return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints>1 && window.innerWidth<900);
