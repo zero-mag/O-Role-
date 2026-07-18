@@ -140,18 +140,10 @@
   .ob-dots span.active{background:var(--accent);width:22px;border-radius:5px;}
   .ob-next{width:auto;margin:0 24px;}
 
-  /* ---------- ADICIONAR À TELA DE INÍCIO ---------- */
-  #s-install{display:flex;align-items:center;justify-content:center;padding:32px;overflow-y:auto;background-color:var(--bg);z-index:60;}
-  .install-wrap{max-width:340px;text-align:center;display:flex;flex-direction:column;align-items:center;}
-  .install-ic{font-size:64px;margin-bottom:20px;filter:drop-shadow(0 10px 20px rgba(232,54,91,.2));}
-  .install-wrap h2{font-size:23px;font-weight:800;margin-bottom:10px;color:var(--ink);letter-spacing:-.3px;}
-  .install-wrap p{font-size:14.5px;color:var(--ink-2);line-height:1.6;margin-bottom:22px;}
-  .install-skip{margin-top:14px;color:var(--ink-3);font-weight:700;font-size:13.5px;}
-  .install-dontshow{display:flex;align-items:center;gap:8px;justify-content:center;font-size:13.5px;color:var(--ink-2);font-weight:600;margin-bottom:18px;cursor:pointer;}
+  /* ---------- ADICIONAR À TELA DE INÍCIO (popup) ---------- */
+  .inst-svg{width:150px;height:auto;filter:drop-shadow(0 14px 30px rgba(0,0,0,.15));}
+  .install-dontshow{display:flex;align-items:center;gap:8px;justify-content:center;font-size:13.5px;color:var(--ink-2);font-weight:600;margin-top:14px;cursor:pointer;}
   .install-dontshow input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
-
-  /* ---- mockup ilustrado (SVG, iOS/Android) mostrando onde tocar pra instalar ---- */
-  .inst-svg{width:260px;height:auto;margin-bottom:22px;filter:drop-shadow(0 14px 30px rgba(0,0,0,.15));}
 
   /* ---------- SKELETON ---------- */
   .sk{background:linear-gradient(90deg,var(--line) 25%,var(--card) 37%,var(--line) 63%);background-size:400% 100%;animation:shimmer 1.4s infinite;border-radius:8px;}
@@ -867,7 +859,7 @@
 
     /* ---- telas secundárias: card/modal central polido ---- */
     body{background-image:radial-gradient(rgba(23,23,23,.05) 1px,transparent 1px);background-size:22px 22px;}
-    #s-create.active,#s-chat.active,#s-profile.active,#s-bizprofile.active,#s-roleprofile.active,#s-myroles.active,#s-terms.active,#s-feed.active,#s-notif.active,#s-settings.active,#s-payhist.active,#s-help.active,#s-filtros.active,#s-install.active{
+    #s-create.active,#s-chat.active,#s-profile.active,#s-bizprofile.active,#s-roleprofile.active,#s-myroles.active,#s-terms.active,#s-feed.active,#s-notif.active,#s-settings.active,#s-payhist.active,#s-help.active,#s-filtros.active{
       left:50%;top:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);
       width:600px;height:min(880px,90vh);
       border-radius:24px;overflow:hidden;border:1px solid var(--line);
@@ -909,12 +901,10 @@
     <button class="btn ob-next" id="ob-next" onclick="obNext()">Próximo</button>
   </section>
 
-  <!-- ===== ADICIONAR À TELA DE INÍCIO (pós-cadastro) ===== -->
-  <section class="screen bg-watermark bg-watermark-dark" id="s-install">
-    <div class="install-wrap">
-      <h2>Adicione o Rolê+ à tela de início</h2>
-      <p>Assim ele abre rapidinho, como um app de verdade — sem precisar procurar o link toda vez.</p>
-      <svg class="inst-svg" viewBox="0 0 220 320" xmlns="http://www.w3.org/2000/svg">
+  <!-- ===== ADICIONAR À TELA DE INÍCIO (popup pós-cadastro, não bloqueia nada) ===== -->
+  <div class="modal-bg" id="install-popup">
+    <div class="modal">
+      <svg class="inst-svg" viewBox="0 0 220 320" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:14px;">
         <rect x="16" y="6" width="188" height="308" rx="32" fill="#fff" stroke="#171717" stroke-width="6"/>
         <rect x="80" y="16" width="60" height="10" rx="5" fill="#171717"/>
         <rect x="26" y="46" width="168" height="248" rx="18" fill="#faf7f7"/>
@@ -923,10 +913,12 @@
         <rect x="40" y="168" width="140" height="52" rx="14" style="fill:var(--accent)" opacity=".6"/>
         <rect x="40" y="232" width="140" height="52" rx="14" style="fill:var(--accent)" opacity=".35"/>
       </svg>
-      <button class="btn" id="install-btn" onclick="doInstallOrSkip()">Pular</button>
-      <label class="install-dontshow"><input type="checkbox" id="install-dontshow-chk" /> Não mostrar novamente</label>
+      <h3>Adicione o Rolê+ à tela de início</h3>
+      <p>Assim ele abre rapidinho, como um app de verdade — sem precisar procurar o link toda vez.</p>
+      <button class="btn" onclick="closeInstallPopup()">Entendi</button>
+      <label class="install-dontshow" style="margin-top:14px;"><input type="checkbox" id="install-dontshow-chk" /> Não mostrar novamente</label>
     </div>
-  </section>
+  </div>
 
   <!-- ===== CONFIRMAR E-MAIL (bloqueio pós-cadastro) ===== -->
   <section class="screen bg-watermark bg-watermark-light" id="s-confirm-email">
@@ -1823,22 +1815,17 @@ function isMobileDevice(){
   return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints>1 && window.innerWidth<900);
 }
 function openInstallScreen(){
-  if(isStandaloneApp()){routeAfterAuth(true);return;} // já tá instalado, não faz sentido pedir de novo
-  if(!isMobileDevice()){routeAfterAuth(true);return;} // no PC "adicionar à tela de início" não se aplica — pula direto
-  if(localStorage.getItem('zona_install_hide')){routeAfterAuth(true);return;} // usuário marcou "não mostrar novamente"
+  // não é mais uma tela própria — navega pro destino real primeiro (sempre,
+  // sem depender de mais nada), e só depois decide se mostra o popup por
+  // cima. Assim não existe "tela presa": o app de verdade já está ali embaixo.
+  routeAfterAuth(true);
+  if(isStandaloneApp()||!isMobileDevice()||localStorage.getItem('zona_install_hide'))return;
   document.getElementById('install-dontshow-chk').checked=false;
-  go('s-install',true);
+  document.getElementById('install-popup').classList.add('active');
 }
-function persistInstallDontShow(){
+function closeInstallPopup(){
   if(document.getElementById('install-dontshow-chk').checked)localStorage.setItem('zona_install_hide','1');
-}
-async function doInstallOrSkip(){
-  // "Pular" é sempre um pulo de verdade — nunca dispara o prompt nativo de
-  // instalação por conta própria (isso obrigava a pessoa a responder um
-  // popup do próprio navegador antes de conseguir seguir em frente).
-  persistInstallDontShow();
-  if(user)routeAfterAuth(true);
-  else go('s-login',true);
+  document.getElementById('install-popup').classList.remove('active');
 }
 
 /* ============ MOCKUP DO LOGIN: busca "digitando" + card trocando ============ */
