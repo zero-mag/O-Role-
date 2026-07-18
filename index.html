@@ -925,13 +925,8 @@
           <animate attributeName="opacity" values="1;0;1" dur="1.6s" repeatCount="indefinite"/>
         </circle>
         <text x="110" y="297" font-size="19" text-anchor="middle">📤</text>
-        <text x="70" y="330" font-size="15" font-weight="800" fill="#E8365B">①</text>
-        <text x="90" y="330" font-size="13" font-weight="700" fill="#5a5a5a">Toque em Compartilhar</text>
+        <text x="60" y="330" font-size="15" font-weight="800" fill="#E8365B">Toque em Compartilhar</text>
         <path d="M110 314 v14" stroke="#E8365B" stroke-width="3" stroke-linecap="round" marker-end="url(#arrIos)"/>
-        <rect x="16" y="348" width="188" height="46" rx="12" fill="#fff" stroke="#E8365B" stroke-width="2.5"/>
-        <text x="30" y="376" font-size="18">➕</text>
-        <text x="52" y="376" font-size="13" font-weight="800" fill="#171717">Adicionar à Tela de Início</text>
-        <text x="70" y="392" font-size="12" font-weight="800" fill="#E8365B">② Toque aqui</text>
         <defs>
           <linearGradient id="instGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff4ef"/><stop offset="1" stop-color="#ffe6da"/></linearGradient>
           <marker id="arrIos" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#E8365B"/></marker>
@@ -945,20 +940,16 @@
           <animate attributeName="opacity" values="1;0;1" dur="1.6s" repeatCount="indefinite"/>
         </circle>
         <text x="110" y="43" font-size="18" text-anchor="middle">⋮</text>
-        <text x="26" y="82" font-size="15" font-weight="800" fill="#E8365B">① Toque no menu ⋮</text>
+        <text x="26" y="82" font-size="15" font-weight="800" fill="#E8365B">Toque no menu ⋮</text>
         <rect x="26" y="90" width="168" height="202" rx="4" fill="url(#instGradA)"/>
         <circle cx="110" cy="174" r="32" fill="#E8365B"/>
         <text x="110" y="185" font-size="30" text-anchor="middle">🎉</text>
         <text x="110" y="224" font-size="13" font-weight="800" text-anchor="middle" fill="#5a5a5a">O Rolê+</text>
-        <rect x="16" y="322" width="188" height="46" rx="12" fill="#fff" stroke="#E8365B" stroke-width="2.5"/>
-        <text x="30" y="350" font-size="18">➕</text>
-        <text x="52" y="350" font-size="13" font-weight="800" fill="#171717">Adicionar à tela inicial</text>
-        <text x="70" y="366" font-size="12" font-weight="800" fill="#E8365B">② Toque aqui</text>
         <defs><linearGradient id="instGradA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff4ef"/><stop offset="1" stop-color="#ffe6da"/></linearGradient></defs>
       </svg>
       <h2>Adicione o Rolê+ à tela de início</h2>
       <p>Assim ele abre rapidinho, como um app de verdade — sem precisar procurar o link toda vez.</p>
-      <button class="btn" id="install-btn" onclick="doInstallOrSkip()">Adicionar agora</button>
+      <button class="btn" id="install-btn" onclick="doInstallOrSkip()">Pular</button>
       <label class="install-dontshow"><input type="checkbox" id="install-dontshow-chk" /> Não mostrar novamente</label>
     </div>
   </section>
@@ -1866,8 +1857,7 @@ function openInstallScreen(){
   document.getElementById('inst-svg-ios').classList.toggle('hide',!isIOS);
   document.getElementById('inst-svg-android').classList.toggle('hide',isIOS);
   document.getElementById('install-dontshow-chk').checked=false;
-  if(deferredInstallPrompt){btn.textContent='Adicionar agora';btn.classList.remove('hide');}
-  else{btn.classList.add('hide');}
+  btn.textContent='Pular';btn.classList.remove('hide');
   go('s-install',true);
 }
 function persistInstallDontShow(){
@@ -1882,7 +1872,6 @@ async function doInstallOrSkip(){
   }
   routeAfterAuth(true);
 }
-function skipInstall(){persistInstallDontShow();routeAfterAuth(true);}
 
 /* ============ MOCKUP DO LOGIN: busca "digitando" + card trocando ============ */
 function startPhoneDemo(){
