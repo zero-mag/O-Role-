@@ -1807,6 +1807,16 @@
     </div>
   </div>
 
+  <!-- escolher ligar ou mandar mensagem no WhatsApp -->
+  <div class="modal-bg" id="contact-choice-modal">
+    <div class="modal" style="text-align:center;">
+      <h3 style="margin-bottom:16px;">Como prefere falar?</h3>
+      <button class="btn ghost" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="contactChoiceCall()"><svg viewBox="0 0 24 24" style="width:1.1em;height:1.1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg> Ligar</button>
+      <button class="btn" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="contactChoiceWhatsapp()"><span class="ic"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.6 8.4c-.3.6-.3 1.4.2 2.3.9 1.7 2.7 3.5 4.4 4.4.9.5 1.7.5 2.3.2.3-.2.7-.6.9-1l-.2-1.1-1.7-.8c-.2-.1-.5 0-.6.2l-.4.5c-.2.2-.4.2-.6.1-.6-.3-1.6-1.2-2-1.8-.1-.2-.1-.4.1-.6l.5-.5c.2-.2.2-.4.1-.6L11 8.7c-.2-.4-.5-.4-.8-.4h-.6c-.4 0-.7.2-1 .1Z" fill="currentColor" stroke="none"/></svg></span> Mensagem no WhatsApp</button>
+      <button class="btn ghost" style="margin-top:8px;" onclick="closeContactChoice()">Cancelar</button>
+    </div>
+  </div>
+
   <!-- dev adiciona item na vitrine de qualquer negócio (só felipegust59@gmail.com) -->
   <div class="modal-bg" id="dev-add-item-modal">
     <div class="modal" style="text-align:left;">
@@ -2753,6 +2763,20 @@ async function finishClaim(){
 // nunca com pontuação — usado em todo lugar que salva o campo, pra não ter
 // mais dois formatos incompatíveis (um do form admin, outro do autocadastro)
 // disputando a mesma coluna no banco.
+let contactChoicePhone=null;
+function openContactChoice(phone){
+  contactChoicePhone=phone;
+  document.getElementById('contact-choice-modal').classList.add('active');
+}
+function closeContactChoice(){document.getElementById('contact-choice-modal').classList.remove('active');contactChoicePhone=null;}
+function contactChoiceCall(){
+  if(contactChoicePhone)location.href='tel:+'+contactChoicePhone;
+  closeContactChoice();
+}
+function contactChoiceWhatsapp(){
+  if(contactChoicePhone)window.open('https://wa.me/'+contactChoicePhone,'_blank');
+  closeContactChoice();
+}
 function normalizeWhatsapp(raw){
   let d=(raw||'').replace(/\D/g,'');
   if(!d)return '';
@@ -3953,7 +3977,7 @@ function openBizProfile(r){
   saveBtn.onclick=()=>toggleSaved(r.id);
   document.getElementById('bp-addr').innerHTML=ICON_PIN+' '+escHtml(r.address||'Endereço não informado');
   const c=document.getElementById('bp-contacts');c.innerHTML='';
-  if(r.whatsapp)c.innerHTML+=`<a href="${escHtml('https://wa.me/'+r.whatsapp)}" target="_blank" rel="noopener"><span class="ic">${ICON_WHATSAPP}</span>WhatsApp</a>`;
+  if(r.whatsapp)c.innerHTML+=`<a href="#" onclick="openContactChoice('${escHtml(r.whatsapp)}');return false;"><span class="ic">${ICON_WHATSAPP}</span>WhatsApp</a>`;
   if(r.instagram)c.innerHTML+=`<a href="${escHtml('https://instagram.com/'+(r.instagram||'').replace(/^@/,'').trim())}" target="_blank" rel="noopener"><span class="ic">${ICON_INSTAGRAM}</span>Instagram</a>`;
   if(r.site){const siteUrl=/^https?:\/\//i.test(r.site)?r.site:'https://'+r.site;c.innerHTML+=`<a href="${escHtml(siteUrl)}" target="_blank" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg></span>Cardápio</a>`;}
   (r.extraLinks||[]).forEach(l=>{
