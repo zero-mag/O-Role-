@@ -5,6 +5,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const INFINITEPAY_HANDLE = 'nextoria';
+// nome da function que recebe a confirmação de pagamento do InfinitePay —
+// nome de exibição é "payment-webhook", mas o painel implantou como "clever-action"
+// (mesma pegadinha de sempre: o slug real não segue o nome digitado)
+const WEBHOOK_FUNCTION_NAME = 'clever-action';
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -51,6 +55,10 @@ Deno.serve(async (req: Request) => {
       club_subscription: 'Assinatura Rolê+',
     };
 
+    // webhook_url: avisa o servidor assim que o pagamento é confirmado, mesmo que
+    // a pessoa nunca volte pro navegador (ex.: pagou Pix pelo celular e fechou a
+    // aba) — sem isso, a única confirmação era o retorno via redirect_url, que
+    // fica pendente pra sempre se a pessoa não voltar.
     const res = await fetch('https://api.checkout.infinitepay.io/links', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -59,6 +67,7 @@ Deno.serve(async (req: Request) => {
         items: [{ quantity: 1, price: intent.amount_cents, description: descByKind[intent.kind] || 'Rolê+' }],
         order_nsu,
         redirect_url,
+        webhook_url: Deno.env.get('SUPABASE_URL') + '/functions/v1/' + WEBHOOK_FUNCTION_NAME,
       }),
     });
     const data = await res.json();
