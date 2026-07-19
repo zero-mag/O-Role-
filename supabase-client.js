@@ -62,7 +62,7 @@ async function sbUpdateProfile(userId, fields) {
 async function sbLoadRooms() {
   const { data, error } = await sb
     .from('rooms')
-    .select('*, vitrine_items(*), promocoes(*)')
+    .select('*, vitrine_items(*), promocoes(*), business_photos(*)')
     .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString()); // esconde rolê pessoal já expirado
   if (error) throw error;
   // nome/foto de quem criou vem da view pública (profiles_public) — a tabela
@@ -158,6 +158,20 @@ async function sbMarkNotificationsRead(userId) {
   if (error) throw error;
 }
 
+function sbSubscribeNotifications(userId, cb) {
+  return sb
+    .channel('notifications-' + userId)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'user_id=eq.' + userId }, payload => cb(payload.new))
+    .subscribe();
+}
+
+/* ---------- PAGAMENTOS ---------- */
+async function sbLoadPayments(userId) {
+  const { data, error } = await sb.from('payment_intents').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50);
+  if (error) throw error;
+  return data;
+}
+
 // chama cb() toda vez que qualquer room muda (criada/editada/apagada) — é o "mapa ao vivo" de verdade
 function sbSubscribeRooms(cb) {
   return sb
@@ -178,6 +192,17 @@ async function sbUpdateVitrineItem(itemId, fields) {
 }
 async function sbDeleteVitrineItem(itemId) {
   const { error } = await sb.from('vitrine_items').delete().eq('id', itemId);
+  if (error) throw error;
+}
+
+/* ---------- FOTOS DO NEGÓCIO (galeria geral, fora da vitrine) ---------- */
+async function sbAddBusinessPhoto(roomId, imagemUrl) {
+  const { data, error } = await sb.from('business_photos').insert({ room_id: roomId, imagem_url: imagemUrl }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function sbDeleteBusinessPhoto(photoId) {
+  const { error } = await sb.from('business_photos').delete().eq('id', photoId);
   if (error) throw error;
 }
 

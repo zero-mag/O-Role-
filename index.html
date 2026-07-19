@@ -121,11 +121,34 @@
   #s-confirm-email h2{font-size:21px;font-weight:800;margin:20px 0 10px;}
   #s-confirm-email p{font-size:14px;line-height:1.6;opacity:.92;margin-bottom:6px;}
   #s-confirm-email .cve-email{font-weight:800;}
-  #cve-code{width:100%;text-align:center;font-size:26px;font-weight:800;letter-spacing:10px;padding:14px 10px 14px 20px;border-radius:14px;border:none;margin:22px 0 10px;background:rgba(255,255,255,.14);color:#fff;}
-  #cve-code::placeholder{color:rgba(255,255,255,.5);letter-spacing:normal;font-size:14px;font-weight:600;}
   #s-confirm-email .btn{background:#fff;color:var(--accent-dark);}
   #cve-resend{margin-top:16px;color:rgba(255,255,255,.85);font-weight:700;font-size:13.5px;background:none;border:none;cursor:pointer;}
   #cve-status{font-size:13px;font-weight:700;margin:10px 0;min-height:16px;}
+  .cve-spam-hint{font-size:12.5px;opacity:.75;margin-top:18px;line-height:1.5;}
+
+  /* ---------- OTP (código de 6 dígitos, em caixas) ---------- */
+  .otp-wrap{position:relative;margin:22px 0 10px;}
+  .otp-boxes{display:flex;gap:8px;}
+  .otp-boxes span{flex:1;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;transition:.15s;}
+  .otp-wrap input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:none;background:none;padding:0;margin:0;letter-spacing:normal;font-size:16px;}
+  .otp-boxes span{background:rgba(255,255,255,.14);color:#fff;}
+  .otp-boxes span.filled{background:rgba(255,255,255,.24);}
+  .otp-boxes span.active{box-shadow:inset 0 0 0 2px #fff;}
+  .otp-wrap-light .otp-boxes span{background:var(--card);color:var(--ink);border:1px solid var(--line-2);}
+  .otp-wrap-light .otp-boxes span.filled{border-color:var(--accent);}
+  .otp-wrap-light .otp-boxes span.active{box-shadow:inset 0 0 0 2px var(--accent);}
+
+  /* ---------- BANNER DE NOTIFICAÇÃO (estilo iOS, só com o app aberto) ---------- */
+  .notif-banner-stack{position:absolute;left:0;right:0;top:0;z-index:80;padding:calc(env(safe-area-inset-top) + 8px) 10px 0;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+  .notif-banner{pointer-events:auto;background:#232326;border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer;transform:translateY(-140%);transition:transform .35s cubic-bezier(.32,.9,.2,1);}
+  .notif-banner.show{transform:translateY(0);}
+  .notif-banner .nb-ic{width:32px;height:32px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex:none;}
+  .notif-banner .nb-body{flex:1;min-width:0;}
+  .notif-banner .nb-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .notif-banner .nb-app{font-size:11px;font-weight:700;color:#a9a9ac;letter-spacing:.03em;}
+  .notif-banner .nb-time{font-size:11px;color:#8a8a8d;flex:none;}
+  .notif-banner .nb-title{font-size:13.5px;font-weight:700;color:#fff;margin-top:2px;}
+  .notif-banner .nb-msg{font-size:12.5px;color:#c7c7ca;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
   /* ---------- ONBOARDING ---------- */
   #s-onboard{background:linear-gradient(160deg,#fff,#fff4ef 60%,#ffe6da);justify-content:space-between;padding:calc(env(safe-area-inset-top) + 24px) 0 calc(env(safe-area-inset-bottom) + 24px);overflow:hidden;}
@@ -339,7 +362,6 @@
   .sheet{position:absolute;left:0;right:0;bottom:0;z-index:15;height:100vh;height:100dvh;background:var(--card);border-radius:24px 24px 0 0;box-shadow:var(--shadow-lg);padding:0 0 calc(70px + env(safe-area-inset-bottom));display:flex;flex-direction:column;transform:translateY(var(--sy,52vh));transition:transform .34s cubic-bezier(.32,.72,0,1);will-change:transform;}
   .sheet.dragging{transition:none;}
   .sheet.full{z-index:25;border-radius:0;}
-  .sheet.full .sh-head h3::after{content:" ao seu redor";font-weight:500;color:var(--ink-3);}
   .sheet-grab{padding-top:8px;cursor:grab;touch-action:none;flex:none;}
   .grabber{width:38px;height:5px;border-radius:5px;background:var(--line-2);margin:0 auto 6px;}
   .sh-head{padding:6px 18px 8px;display:flex;align-items:baseline;gap:8px;}
@@ -607,7 +629,7 @@
   .bp-save-btn.saved{background:var(--accent);}
   .bp-cover.has-cover{position:relative;}
   .bp-cover.has-cover::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55));}
-  .bp-cover.has-cover>*{position:relative;z-index:1;}
+  .bp-cover.has-cover .bp-back,.bp-cover.has-cover .bp-top{position:relative;z-index:1;}
   .bp-av.img{background-size:cover;background-position:center;}
   .bp-back{font-size:26px;color:#fff;width:34px;height:34px;}
   .bp-top{display:flex;align-items:center;gap:14px;padding:14px 2px 22px;}
@@ -734,7 +756,13 @@
   .bchart .bar span{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:11px;color:var(--ink-3);}
   .prod{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);}
   .prod:last-child{border:none;}
-  .prod .em{width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;font-size:20px;}
+  .prod .em{width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;font-size:20px;background-size:cover;background-position:center;}
+  .vit-photo-btn{display:flex;align-items:center;gap:10px;justify-content:flex-start;}
+  .vit-photo-thumb{width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;font-size:18px;flex:none;background-size:cover;background-position:center;}
+  .fotos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;}
+  .fotos-grid .foto-tile{position:relative;width:100%;aspect-ratio:1;border-radius:12px;background-size:cover;background-position:center;background-color:var(--accent-soft);}
+  .fotos-grid .foto-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--accent-dark);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;line-height:1;}
+  .fotos-grid .foto-add{width:100%;aspect-ratio:1;border-radius:12px;border:1px dashed var(--line-2);background:var(--card);color:var(--ink-3);display:grid;place-items:center;font-size:24px;}
   .prod .pn{flex:1;}
   .prod .pn b{font-size:14px;}
   .prod .pn small{display:block;color:var(--ink-2);font-size:12px;margin-top:2px;}
@@ -882,6 +910,8 @@
 <body>
 <div id="root">
 
+  <div class="notif-banner-stack" id="notif-banner-stack"></div>
+
   <!-- ===== SPLASH ===== -->
   <div id="splash">
     <div class="splash-logo">O Rolê<span class="splash-plus">+</span></div>
@@ -926,15 +956,19 @@
       <div class="cve-logo">O Rolê<span class="cve-plus">+</span></div>
       <h2>Confirme seu e-mail</h2>
       <p>Mandamos um código de 6 dígitos pra <span class="cve-email" id="cve-email-txt"></span>. Digite ele abaixo pra liberar seu acesso.</p>
-      <input id="cve-code" inputmode="numeric" maxlength="6" placeholder="000000" />
+      <div class="otp-wrap">
+        <div class="otp-boxes" id="cve-code-boxes"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input id="cve-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" oninput="syncOtpBoxes('cve-code')" onfocus="syncOtpBoxes('cve-code')" onblur="syncOtpBoxes('cve-code')" />
+      </div>
       <div id="cve-status" class="hide"></div>
       <button class="btn" onclick="confirmVerifyCode()">Confirmar</button>
       <button id="cve-resend" onclick="requestVerifyCode()">Reenviar código</button>
+      <p class="cve-spam-hint">Não achou o e-mail? Dá uma olhada na caixa de <b>spam</b> ou "lixo eletrônico" — às vezes ele cai lá.</p>
     </div>
   </section>
 
   <!-- ===== LOGIN ===== -->
-  <section class="screen active" id="s-login">
+  <section class="screen" id="s-login">
     <div class="auth-hero">
       <div class="ah-inner">
         <div class="ah-brand">O Rolê+</div>
@@ -995,12 +1029,12 @@
         </ul>
       </div>
       <div class="type-card" data-type="business" onclick="selType(this)">
-        <div class="th"><div class="em">🏪</div><div><div class="tt">Business · Rolê+</div><div class="ts">Bar, academia, salão, loja, restaurante…</div></div><div class="tprice biz">Premium</div></div>
+        <div class="th"><div class="em">🏪</div><div><div class="tt">Business · Rolê+</div><div class="ts">Bar, academia, salão, loja, restaurante…</div></div><div class="tprice biz">Grátis</div></div>
         <p class="tdesc">Sua empresa ganha um <b>ponto fixo no mapa</b> pra atrair clientes que estão pertinho, com vitrine, promoções e métricas de quem viu seu negócio.</p>
         <ul>
           <li>Endereço fixo do estabelecimento no mapa</li>
           <li>Perfil completo + vitrine de produtos e promoções</li>
-          <li>Dashboard de alcance e visitas</li>
+          <li>Dashboard de alcance e visitas (métricas completas com Rolê+)</li>
           <li>Destaque no mapa (Boost) pra aparecer no topo</li>
         </ul>
       </div>
@@ -1060,10 +1094,14 @@
     <div class="scroll">
       <h1 style="font-size:21px;margin:0 0 8px;">Digite o código</h1>
       <p style="color:var(--ink-2);font-size:13.5px;line-height:1.55;margin:0 0 20px;">Mandamos 6 números pra <b id="claim-sent-to" style="color:var(--ink);"></b>.</p>
-      <div class="field"><input id="claim-code-input" inputmode="numeric" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:8px;" /></div>
+      <div class="otp-wrap otp-wrap-light">
+        <div class="otp-boxes" id="claim-code-input-boxes"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input id="claim-code-input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" oninput="syncOtpBoxes('claim-code-input')" onfocus="syncOtpBoxes('claim-code-input')" onblur="syncOtpBoxes('claim-code-input')" />
+      </div>
       <div id="claim-code-status" class="geo-status hide"></div>
       <button class="btn" onclick="submitClaimCode()">Confirmar código</button>
       <button class="btn ghost" style="margin-top:8px;" onclick="sendClaimCode()">Reenviar código</button>
+      <p style="font-size:12.5px;color:var(--ink-3);text-align:center;margin-top:16px;line-height:1.5;">Não achou o e-mail? Dá uma olhada na caixa de <b>spam</b> ou "lixo eletrônico" — às vezes ele cai lá.</p>
     </div>
   </section>
 
@@ -1240,7 +1278,7 @@
         </div>
       </div>
       <div class="toggle-row" onclick="togPriv(this)">
-        <div class="tx"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Grupo privado</b><small>Só entra quem tem a senha</small></div>
+        <div class="tx"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Sala privada</b><small>Só entra quem tem a senha</small></div>
         <div class="switch" id="priv-switch"></div>
       </div>
       <div class="field hide" id="pass-field"><label>Senha da sala</label><input id="cr-pass" placeholder="Ex: 123" /></div>
@@ -1382,13 +1420,13 @@
   <!-- ===== BUSINESS DASHBOARD (desktop) ===== -->
   <section class="screen" id="s-biz">
     <aside class="side">
-      <div class="brand">O Rolê</div><div class="biz-tag">Business</div>
+      <div class="brand">O Rolê+</div><div class="biz-tag">Business</div>
       <div class="navitem active" data-tab="dash" onclick="bizTab('dash')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 9l1-4h14l1 4"/><path d="M4 9v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M9 19v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5"/></svg></span> Minha Vitrine</div>
       <div class="navitem" data-tab="promo" onclick="bizTab('promo')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></span> Promoções</div>
       <div class="navitem" data-tab="chats" onclick="bizTab('chats')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2Z"/></svg></span> Meus Chats</div>
       <div class="navitem" data-tab="boost" onclick="bizTab('boost')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-3 3-3-3c-1-1-2-3-2-5 0-4 2-8 5-10Z"/><circle cx="12" cy="10" r="2"/><path d="M9 17l-2 4M15 17l2 4"/></svg></span> Boost & Destaque</div>
       <div class="navitem" data-tab="config" onclick="bizTab('config')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg></span> Configurações</div>
-      <div class="upgrade" id="biz-upgrade-box"><h4>⚡ Rolê+</h4><p>Destaque no mapa, vitrine sem limite e métricas reais.</p><button onclick="openClubModal()">Ver planos</button></div>
+      <div class="upgrade" id="biz-upgrade-box"><h4>⚡ Rolê+</h4><p>Destaque no mapa, mais espaço na vitrine e métricas reais.</p><button onclick="openClubModal()">Ver planos</button></div>
     </aside>
     <main class="bmain">
       <div class="bview show" id="bview-dash">
@@ -1417,16 +1455,23 @@
           <div>
             <div class="vitrine-actions">
               <button class="vitrine-action-btn" onclick="shareOwnRoom()"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.8M8.6 13.5l6.8 3.8"/></svg>Compartilhar</button>
-              <button class="vitrine-action-btn" id="vitrine-hide-btn" onclick="toggleVitrineHidden()"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16" stroke-dasharray="1 0"/></svg><span id="vitrine-hide-label">Ocultar vitrine</span></button>
+              <button class="vitrine-action-btn" id="vitrine-hide-btn" onclick="openVisibilityModal()"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>Visibilidade</button>
             </div>
-            <div class="bpanel" id="biz-vitrine-panel"><h3>Minha Vitrine <span class="live-chip" id="vitrine-live-chip"><span class="pulse"></span> no ar</span></h3>
+            <div class="bpanel" id="biz-fotos-panel">
+              <h3>Fotos do local</h3>
+              <p style="font-size:12.5px;color:var(--ink-3);margin:-6px 0 10px;">Fotos do ambiente, sem preço nem produto — dá pra ver como é o lugar.</p>
+              <div class="fotos-grid" id="biz-fotos-grid"></div>
+              <p id="biz-fotos-hint" style="font-size:12px;color:var(--ink-3);margin-top:8px;"></p>
+              <input type="file" id="file-biz-foto" accept="image/*" style="display:none" onchange="onBizFotoUpload(event)" />
+            </div>
+            <div class="bpanel" id="biz-vitrine-panel" style="margin-top:16px;"><h3>Minha Vitrine <span class="live-chip" id="vitrine-live-chip"><span class="pulse"></span> no ar</span></h3>
             <div id="biz-vitrine"></div>
             <p id="biz-vitrine-hint" style="font-size:12px;color:var(--ink-3);margin-top:8px;"></p>
             <div class="add-prod" id="vitrine-add-form">
               <select id="np-em"><option>🍔</option><option>🍺</option><option>🍻</option><option>🍕</option><option>🍹</option><option>🍔</option><option>🎶</option><option>💪</option><option>💇</option><option>💅</option><option>🎉</option><option>🎟️</option><option>☕</option><option>🛍️</option></select>
               <input id="np-nome" placeholder="Nome do produto ou promoção" />
               <div class="price-input"><span>R$</span><input id="np-preco" inputmode="numeric" placeholder="0,00 ou Grátis" oninput="maskPreco(this)" /></div>
-              <button type="button" class="btn ghost" id="np-photo-btn" onclick="pickVitrinePhoto('new')" style="background-size:cover;background-position:center;">📷 Foto (opcional)</button>
+              <button type="button" class="btn ghost vit-photo-btn" id="np-photo-btn" onclick="pickVitrinePhoto('new')"><span class="vit-photo-thumb" id="np-photo-thumb">📷</span> Foto (opcional)</button>
               <input type="file" id="file-vitrine-new" accept="image/*" style="display:none" onchange="onVitrinePhoto(event,'new')" />
               <button class="np-add" onclick="addVitrine()">+ Adicionar à vitrine</button>
             </div>
@@ -1493,7 +1538,7 @@
           </div>
           <div class="bpanel" id="boost-club-panel">
             <h3><span class="hico"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span> Rolê+</h3>
-            <p style="color:var(--ink-2);font-size:13.5px;margin-bottom:14px;">Assine e tenha o destaque sempre incluso, sem pagar Boost avulso — fora vitrine ilimitada e métricas reais.</p>
+            <p style="color:var(--ink-2);font-size:13.5px;margin-bottom:14px;">Assine e tenha o destaque sempre incluso, sem pagar Boost avulso — fora mais espaço na vitrine e métricas reais.</p>
             <button class="btn" onclick="openClubModal()">Ver planos a partir de R$ 29,90/mês</button>
           </div>
         </div>
@@ -1523,13 +1568,16 @@
             </div>
           </div>
           <div class="bpanel">
-            <h3>O que você oferece</h3>
-            <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:10px;">Aparece como filtro pra quem tá buscando no feed.</p>
-            <div class="chips" id="cfg-oferece" style="position:static;padding:0;flex-wrap:wrap;overflow:visible;"></div>
+            <div class="list-item" style="background:none;padding:0;" onclick="openOfereceEdit()"><span class="ic">🏷️</span> <span id="cfg-oferece-summary">O que você oferece</span> <span class="ch">›</span></div>
           </div>
           <div class="bpanel">
             <h3>Dados verificados</h3>
             <p style="font-size:13px;color:var(--ink-2);line-height:1.8;">Status: <b id="cfg-verified"></b><br>CNPJ: <b id="cfg-cnpj" style="color:var(--ink);"></b><br>Razão social: <span id="cfg-razao"></span></p>
+          </div>
+          <div class="bpanel">
+            <h3>Assinatura</h3>
+            <div class="list-item" onclick="openClubModal()"><span class="ic">⚡</span> <span id="cfg-plan-status">Plano atual</span> <span class="ch">›</span></div>
+            <div class="list-item" onclick="openPayHist()"><span class="ic">🧾</span> Histórico de pagamentos <span class="ch">›</span></div>
           </div>
           <div class="bpanel">
             <button class="btn ghost" onclick="logout()">Sair da conta</button>
@@ -1563,6 +1611,7 @@
         <div class="bp-addr" id="bp-addr"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> endereço</div>
         <div class="bp-hours" id="bp-hours"></div>
       </div>
+      <div class="bp-section hide" id="bp-fotos-section"><h4>📷 Fotos</h4><div class="fotos-grid" id="bp-fotos"></div></div>
       <div class="bp-section" id="bp-promo-section"><h4>🔥 Promoções</h4><div id="bp-promo"></div></div>
       <div class="bp-section" id="bp-vitrine-section"><h4>🛍️ Vitrine</h4><div id="bp-vitrine"></div><button class="btn ghost hide" id="bp-dev-add-item" style="margin-top:10px;" onclick="devAddVitrineItem()">+ Adicionar item (dev)</button></div>
     </div>
@@ -1632,6 +1681,12 @@
       <button class="btn" onclick="applyFiltros()">Aplicar filtros</button>
       <button class="btn ghost" style="margin-top:10px;" onclick="clearFiltros()">Limpar filtros</button>
     </div>
+  </section>
+
+  <!-- ===== O QUE VOCÊ OFERECE (edição, business) ===== -->
+  <section class="screen" id="s-oferece-edit">
+    <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>O que você oferece</h2></div>
+    <div class="scroll" id="oferece-edit-body"></div>
   </section>
 
   <!-- ===== CONFIGURAÇÕES ===== -->
@@ -1755,12 +1810,27 @@
         <select id="ve-em"><option>🍔</option><option>🍺</option><option>🍻</option><option>🍕</option><option>🍹</option><option>🎶</option><option>💪</option><option>💇</option><option>💅</option><option>🎉</option><option>🎟️</option><option>☕</option><option>🛍️</option></select>
         <input id="ve-nome" placeholder="Nome do produto ou promoção" />
         <div class="price-input"><span>R$</span><input id="ve-preco" inputmode="numeric" placeholder="0,00 ou Grátis" oninput="maskPreco(this)" /></div>
-        <button type="button" class="btn ghost" id="ve-photo-btn" onclick="pickVitrinePhoto('edit')" style="background-size:cover;background-position:center;">📷 Trocar foto</button>
+        <button type="button" class="btn ghost vit-photo-btn" id="ve-photo-btn" onclick="pickVitrinePhoto('edit')"><span class="vit-photo-thumb" id="ve-photo-thumb">📷</span> Trocar foto</button>
         <input type="file" id="file-vitrine-edit" accept="image/*" style="display:none" onchange="onVitrinePhoto(event,'edit')" />
       </div>
       <button class="btn" style="margin-top:14px;" onclick="saveVitrineEdit()">Salvar alterações</button>
       <button class="btn ghost" style="margin-top:8px;color:var(--red-ink);" onclick="deleteVitrineFromEdit()">Excluir item</button>
       <button class="btn ghost" style="margin-top:8px;" onclick="closeVitrineEdit()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="visibility-modal">
+    <div class="modal" style="text-align:left;">
+      <h3 style="text-align:center;margin-bottom:14px;">Visibilidade</h3>
+      <div class="toggle-row" onclick="toggleLojaHidden()">
+        <div class="tx"><b>Esconder loja</b><small>Some do mapa e da busca por inteiro — ninguém te encontra</small></div>
+        <div class="switch" id="loja-hidden-switch"></div>
+      </div>
+      <div class="toggle-row" onclick="toggleVitrineHidden()" style="margin-top:10px;">
+        <div class="tx"><b>Esconder vitrine</b><small>Sua loja continua no mapa, só a lista de produtos some do perfil</small></div>
+        <div class="switch" id="vitrine-hidden-switch"></div>
+      </div>
+      <button class="btn ghost" style="margin-top:16px;" onclick="closeVisibilityModal()">Fechar</button>
     </div>
   </div>
 
@@ -1876,10 +1946,10 @@ let boostDurH=6, boostPrice=990;
 // e passam a valer alguma coisa concreta depois de pagar (antes disso, qualquer
 // assinante virava "isClub()" e ficava idêntico a qualquer outro).
 const PLAN_LIMITS={
-  free:{vitrineItems:3,extraLinks:0},
-  start:{vitrineItems:5,extraLinks:0},
-  plus:{vitrineItems:12,extraLinks:2},
-  premium:{vitrineItems:Infinity,extraLinks:Infinity}
+  free:{vitrineItems:3,extraLinks:0,fotos:3},
+  start:{vitrineItems:5,extraLinks:0,fotos:5},
+  plus:{vitrineItems:12,extraLinks:2,fotos:12},
+  premium:{vitrineItems:Infinity,extraLinks:Infinity,fotos:Infinity}
 };
 function planLimits(u){
   // assinante de antes dessa migração (club_until ativo mas plan_tier ainda null,
@@ -2032,6 +2102,7 @@ async function doLogin(){
       if(user.type==='business')await loadRoomsFromSupabase();
       await hydrateUserFlags();
       refreshNotifBadge();
+      startNotifBannerSubscription();
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();
       if(!user.emailVerified)goVerifyEmail(()=>routeAfterAuth());
@@ -2429,6 +2500,15 @@ const SEG_GROUPS=[
 ];
 /* ---- O que o negócio oferece: atributos/estilos que ANTES eram nicho próprio, agora são tag (filtro), não categoria ---- */
 const OFERECE_TAGS=['Rodízio','Self-service','Delivery','Aceita Pix','Aceita Cartão','Estacionamento','Valet','Pet friendly','Música ao vivo','DJ ao vivo','Pista de Dança','Wi-Fi grátis','Área externa','Rooftop/Vista','Acessível','Vegetariano/Vegano','24 horas','Reserva necessária','Agendamento Online','Grupos Grandes','Espaço Kids','Ambiente Climatizado','Fumódromo','Happy Hour','Open Bar','Sinuca/Bilhar','Cardápio Digital (QR Code)','LGBTQIA+ Friendly','Cozinha Japonesa','Cozinha Árabe','Cozinha Mexicana','Cozinha Nordestina'];
+/* ---- mesma lista acima, só que organizada em categorias pra tela de edição ---- */
+const OFERECE_GROUPS=[
+  {g:'Cardápio',items:['Rodízio','Self-service','Vegetariano/Vegano','Cozinha Japonesa','Cozinha Árabe','Cozinha Mexicana','Cozinha Nordestina','Happy Hour','Open Bar']},
+  {g:'Atendimento & Serviço',items:['Delivery','24 horas','Reserva necessária','Agendamento Online','Cardápio Digital (QR Code)']},
+  {g:'Pagamento',items:['Aceita Pix','Aceita Cartão']},
+  {g:'Estrutura & Ambiente',items:['Estacionamento','Valet','Wi-Fi grátis','Área externa','Rooftop/Vista','Ambiente Climatizado','Espaço Kids','Fumódromo','Sinuca/Bilhar']},
+  {g:'Público & Acessibilidade',items:['Acessível','LGBTQIA+ Friendly','Pet friendly','Grupos Grandes']},
+  {g:'Música & Entretenimento',items:['Música ao vivo','DJ ao vivo','Pista de Dança']}
+];
 /* ---- Ícones de marca (redes sociais) — mesmo estilo stroke/currentColor usado no resto do app ---- */
 const ICON_WHATSAPP=`<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.6 8.4c-.3.6-.3 1.4.2 2.3.9 1.7 2.7 3.5 4.4 4.4.9.5 1.7.5 2.3.2.3-.2.7-.6.9-1l-.2-1.1-1.7-.8c-.2-.1-.5 0-.6.2l-.4.5c-.2.2-.4.2-.6.1-.6-.3-1.6-1.2-2-1.8-.1-.2-.1-.4.1-.6l.5-.5c.2-.2.2-.4.1-.6L11 8.7c-.2-.4-.5-.4-.8-.4h-.6c-.4 0-.7.2-1 .1Z" fill="currentColor" stroke="none"/></svg>`;
 const ICON_INSTAGRAM=`<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="16.6" cy="7.4" r=".9" fill="currentColor" stroke="none"/></svg>`;
@@ -2650,6 +2730,7 @@ async function sendClaimCode(){
     claimToken=data.claimToken;
     document.getElementById('claim-sent-to').textContent=data.sentTo;
     document.getElementById('claim-code-input').value='';
+    syncOtpBoxes('claim-code-input');
     document.getElementById('claim-code-status').classList.add('hide');
     go('s-claim-code');
   }catch(e){
@@ -2718,7 +2799,7 @@ function contactChoiceCall(){
   closeContactChoice();
 }
 function contactChoiceWhatsapp(){
-  if(contactChoicePhone)window.open('https://wa.me/'+contactChoicePhone,'_blank');
+  if(contactChoicePhone)location.href='https://wa.me/'+contactChoicePhone;
   closeContactChoice();
 }
 function normalizeWhatsapp(raw){
@@ -2793,12 +2874,26 @@ function askGPS(row){gpsOn=!gpsOn;document.getElementById('gps-switch').classLis
       e=>{document.getElementById('gps-txt').textContent='Usaremos São Paulo (permissão negada)';});
     else document.getElementById('gps-txt').textContent='GPS ativado ✓';}
   else document.getElementById('gps-txt').textContent='Precisamos do GPS pra mostrar rolês perto';}
+/* ============ OTP (código de 6 dígitos, em caixas) ============ */
+function syncOtpBoxes(id){
+  const inp=document.getElementById(id);
+  const boxes=document.getElementById(id+'-boxes');
+  if(!inp||!boxes)return;
+  const val=inp.value.replace(/\D/g,'').slice(0,6);
+  if(inp.value!==val)inp.value=val;
+  Array.from(boxes.children).forEach((b,i)=>{
+    b.textContent=val[i]||'';
+    b.classList.toggle('filled',!!val[i]);
+    b.classList.toggle('active',document.activeElement===inp&&i===val.length);
+  });
+}
 /* ============ CONFIRMAR E-MAIL (bloqueio pós-cadastro) ============ */
 let pendingVerifyCallback=null;
 async function goVerifyEmail(onVerified){
   pendingVerifyCallback=onVerified;
   document.getElementById('cve-email-txt').textContent=(user&&user.email)||'';
   document.getElementById('cve-code').value='';
+  syncOtpBoxes('cve-code');
   document.getElementById('cve-status').classList.add('hide');
   go('s-confirm-email',true);
   requestVerifyCode();
@@ -2918,7 +3013,7 @@ function fillBizSetup(){
   renderAllHorarios();
 }
 function finishBizSetup(){go('s-biz',true);fillBiz();}
-function logout(){if(SUPABASE_READY)sbSignOut();user=null;localStorage.removeItem('zona_user');document.getElementById('root').classList.remove('biz-mode');resetNav();go('s-login',true);toast('Você saiu');}
+function logout(){if(SUPABASE_READY)sbSignOut();if(notifBannerChannel){sb.removeChannel(notifBannerChannel);notifBannerChannel=null;}user=null;localStorage.removeItem('zona_user');document.getElementById('root').classList.remove('biz-mode');resetNav();go('s-login',true);toast('Você saiu');}
 
 /* ============ MAP + FEED ============ */
 const FEED_TOP5=['Bar','Restaurante','Balada','Cervejaria','Academia'];
@@ -3008,6 +3103,7 @@ function buildChips(){renderCatChips('chips',()=>{buildChips();renderPins();rend
 let searchQuery='';
 function filtered(){
   let list=rooms.filter(r=>!blocked.includes(r.id));
+  list=list.filter(r=>r.mine||!(r.horario&&r.horario._lojaHidden));
   if(activeCat!=='Tudo')list=list.filter(r=>r.cat===activeCat);
   if(activeFiltroNicho)list=list.filter(r=>r.cat===activeFiltroNicho);
   if(activeFiltroOferece.length)list=list.filter(r=>activeFiltroOferece.every(t=>(r.oferece||[]).includes(t)));
@@ -3109,7 +3205,7 @@ function renderFeed(){
     c.appendChild(section('🔥 Rolês acontecendo',roles.length));
     roles.forEach(s=>c.appendChild(cardHTML(s)));
   }
-  document.getElementById('sh-count').textContent=list.length+' perto';
+  document.getElementById('sh-count').textContent=list.length===1?'1 resultado':list.length+' resultados';
 }
 
 /* ============ BOTTOM SHEET ARRASTÁVEL ============ */
@@ -3386,6 +3482,23 @@ async function refreshNotifBadge(){
     badge.style.display=list.some(n=>!n.read)?'':'none';
   }catch(e){badge.style.display='none';}
 }
+let notifBannerChannel=null;
+function startNotifBannerSubscription(){
+  if(!SUPABASE_READY||!user||!user.id||notifBannerChannel)return;
+  notifBannerChannel=sbSubscribeNotifications(user.id,n=>{showNotifBanner(n);refreshNotifBadge();});
+}
+function showNotifBanner(n){
+  const stack=document.getElementById('notif-banner-stack');if(!stack)return;
+  const el=document.createElement('div');
+  el.className='notif-banner';
+  el.innerHTML=`<div class="nb-ic">R+</div>`+
+    `<div class="nb-body"><div class="nb-top"><span class="nb-app">ROLÊ+</span><span class="nb-time">agora</span></div>`+
+    `<div class="nb-title">${escHtml(n.title||'')}</div><div class="nb-msg">${escHtml(n.body||'')}</div></div>`;
+  el.onclick=()=>{el.remove();openNotif();};
+  stack.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);},5000);
+}
 async function openNotif(){
   const box=document.getElementById('notif-list');
   if(!SUPABASE_READY||!user||!user.id){
@@ -3403,14 +3516,33 @@ async function openNotif(){
 }
 
 /* ============ PAGAMENTOS / AJUDA / CONFIG ============ */
-const PAYHIST=[
-];
-function openPayHist(){
+const PAYHIST_INFO={
+  boost_business:{ic:'🚀',label:p=>'Boost'+(p&&p.hours?' ('+p.hours+'h)':'')},
+  club_subscription:{ic:'⚡',label:p=>'Assinatura Rolê+'+(p&&p.tier?' '+p.tier[0].toUpperCase()+p.tier.slice(1):'')},
+  role_personal:{ic:'🎉',label:p=>'Boost do rolê'+(p&&p.room&&p.room.nome?' — '+p.room.nome:'')}
+};
+const PAYHIST_STATUS={pending:'Aguardando confirmação',paid:null,failed:'Pagamento não confirmado'};
+function fmtPayValue(cents){return 'R$ '+(cents/100).toFixed(2).replace('.',',');}
+async function openPayHist(){
   const box=document.getElementById('payhist-list');
-  box.innerHTML=`<p style="color:var(--ink-2);font-size:13.5px;margin-bottom:12px;">Suas cobranças no Rolê+</p>`+
-    (PAYHIST.length?PAYHIST.map(p=>`<div class="notif"><div class="ni">${p.ic}</div><div class="nc"><b>${p.t}</b><small>${p.d} · ${p.time}</small></div><span class="pv">${p.v}</span></div>`).join('')
-      :`<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Nenhuma cobrança ainda.</p>`);
+  if(!SUPABASE_READY||!user||!user.id){
+    box.innerHTML='<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Faça login pra ver suas cobranças.</p>';
+    go('s-payhist');return;
+  }
+  box.innerHTML='<p style="color:var(--ink-2);font-size:13.5px;margin-bottom:12px;">Carregando…</p>';
   go('s-payhist');
+  try{
+    const list=await sbLoadPayments(user.id);
+    box.innerHTML=`<p style="color:var(--ink-2);font-size:13.5px;margin-bottom:12px;">Suas cobranças no Rolê+</p>`+
+      (list.length?list.map(p=>{
+        const info=PAYHIST_INFO[p.kind]||{ic:'💳',label:()=>'Cobrança'};
+        const statusNote=PAYHIST_STATUS[p.status];
+        return `<div class="notif"><div class="ni">${info.ic}</div><div class="nc"><b>${escHtml(info.label(p.payload))}</b><small>${fmtAgo(p.created_at)}${statusNote?' · '+statusNote:''}</small></div><span class="pv">${fmtPayValue(p.amount_cents)}</span></div>`;
+      }).join('')
+        :'<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Nenhuma cobrança ainda.</p>');
+  }catch(e){
+    box.innerHTML='<p style="color:var(--ink-3);font-size:13px;text-align:center;padding:20px 0;">Não deu pra carregar suas cobranças agora.</p>';
+  }
 }
 const FAQ=[
   {q:'O que é o Rolê+?',a:'Um mapa ao vivo do que está rolando perto de você — bares, eventos e rolês temporários com salas de chat que expiram.'},
@@ -3922,7 +4054,7 @@ function openBizProfile(r){
   document.getElementById('bp-addr').innerHTML=ICON_PIN+' '+escHtml(r.address||'Endereço não informado');
   const c=document.getElementById('bp-contacts');c.innerHTML='';
   if(r.whatsapp)c.innerHTML+=`<a href="#" onclick="openContactChoice('${escHtml(r.whatsapp)}');return false;"><span class="ic">${ICON_WHATSAPP}</span>WhatsApp</a>`;
-  if(r.instagram)c.innerHTML+=`<a href="${escHtml('https://instagram.com/'+(r.instagram||'').replace(/^@/,'').trim())}" target="_blank" rel="noopener"><span class="ic">${ICON_INSTAGRAM}</span>Instagram</a>`;
+  if(r.instagram)c.innerHTML+=`<a href="#" onclick="location.href='${escHtml('https://instagram.com/'+(r.instagram||'').replace(/^@/,'').trim())}';return false;"><span class="ic">${ICON_INSTAGRAM}</span>Instagram</a>`;
   if(r.site){const siteUrl=/^https?:\/\//i.test(r.site)?r.site:'https://'+r.site;c.innerHTML+=`<a href="${escHtml(siteUrl)}" target="_blank" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg></span>Cardápio</a>`;}
   (r.extraLinks||[]).forEach(l=>{
     if(!l||!l.label||!l.url)return;
@@ -3930,6 +4062,9 @@ function openBizProfile(r){
     c.innerHTML+=`<a href="${escHtml(url)}" target="_blank" rel="noopener">${escHtml(l.label)}</a>`;
   });
   c.style.display=c.innerHTML?'flex':'none';
+  const fotos=r.fotos||[];
+  document.getElementById('bp-fotos-section').classList.toggle('hide',!fotos.length);
+  document.getElementById('bp-fotos').innerHTML=fotos.map(f=>`<div class="foto-tile" style="background-image:url(${f.url})"></div>`).join('');
   const vitrineHidden=!!(r.horario&&r.horario._vitrineHidden);
   document.getElementById('bp-vitrine-section').classList.toggle('hide',vitrineHidden);
   const v=document.getElementById('bp-vitrine');
@@ -4038,12 +4173,17 @@ function onUserPhoto(e){
   };
   rd.readAsDataURL(f);
 }
+function saudacao(){
+  const h=new Date().getHours();
+  return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+}
 function fillBiz(){
   if(!user)return;
   syncBizRoom();
-  document.getElementById('biz-hi').innerHTML='Boa noite, '+escHtml(user.name)+' '+(user.emoji||'🏪')+(user.verified?' '+ICON_CHECK:'');
+  document.getElementById('biz-hi').innerHTML=saudacao()+', '+escHtml(user.name)+' '+(user.emoji||'🏪')+(user.verified?' '+ICON_CHECK:'');
   applyBizPhotos();
   renderBizVitrine();
+  renderBizFotos();
   renderAllHorarios();
   updateBoostStat();
   applyClubUI();
@@ -4116,6 +4256,10 @@ function bizTab(name){
   if(name==='config')fillBizConfig();
 }
 function fillBizConfig(){
+  const planEl=document.getElementById('cfg-plan-status');
+  if(planEl){
+    planEl.textContent=isClub(user)?'Rolê+ '+(user.planTier?user.planTier[0].toUpperCase()+user.planTier.slice(1):'Premium')+' · ativo':'Sem assinatura ativa · ver planos';
+  }
   document.getElementById('cfg-wpp').value=displayWhatsapp(user.whatsapp);
   document.getElementById('cfg-insta').value=user.instagram||'';
   document.getElementById('cfg-site').value=user.site||'';
@@ -4135,16 +4279,27 @@ function toggleHorarioFixo(){
   syncBizRoom();save();
 }
 function renderOfereceChips(){
-  const box=document.getElementById('cfg-oferece');if(!box)return;
-  const sel=user.oferece||[];
-  box.innerHTML=OFERECE_TAGS.map(t=>`<div class="chip${sel.includes(t)?' active':''}" data-tag="${t}">${t}</div>`).join('');
-  box.querySelectorAll('.chip').forEach(c=>c.onclick=()=>toggleOferece(c.dataset.tag));
+  const el=document.getElementById('cfg-oferece-summary');if(!el||!user)return;
+  const n=(user.oferece||[]).length;
+  el.textContent='O que você oferece'+(n?' · '+n+' selecionado'+(n===1?'':'s'):'');
 }
 function toggleOferece(tag){
   if(!user.oferece)user.oferece=[];
   const i=user.oferece.indexOf(tag);
   if(i>-1)user.oferece.splice(i,1);else user.oferece.push(tag);
-  syncBizRoom();save();renderOfereceChips();
+  syncBizRoom();save();renderOfereceChips();renderOfereceEditBody();
+}
+function openOfereceEdit(){renderOfereceEditBody();go('s-oferece-edit');}
+function renderOfereceEditBody(){
+  const box=document.getElementById('oferece-edit-body');if(!box||!user)return;
+  const sel=user.oferece||[];
+  box.innerHTML=OFERECE_GROUPS.map(grp=>
+    `<label class="blk-label" style="margin-top:16px;">${escHtml(grp.g)}</label>`+
+    `<div class="chips" style="position:static;padding:0;flex-wrap:wrap;overflow:visible;margin-bottom:4px;">`+
+    grp.items.map(t=>`<div class="chip${sel.includes(t)?' active':''}" data-tag="${escHtml(t)}">${escHtml(t)}</div>`).join('')+
+    `</div>`
+  ).join('');
+  box.querySelectorAll('.chip').forEach(c=>c.onclick=()=>toggleOferece(c.dataset.tag));
 }
 function saveBizContacts(){
   user.whatsapp=normalizeWhatsapp(document.getElementById('cfg-wpp').value);
@@ -4192,6 +4347,45 @@ function renderBizVitrine(){
   box.innerHTML=items.length?items.map((p,i)=>`<div class="prod"><div class="em"${p.imagem?` style="background-image:url(${p.imagem});background-size:cover;background-position:center;"`:''}>${p.imagem?'':p.em}</div><div class="pn"><b>${escHtml(p.nome)}</b><small>${escHtml(p.desc||'')}</small></div><div class="pp">${escHtml(p.preco)}</div><button class="prod-x" title="Editar" onclick="editVitrineItem(${i})"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>`).join('')
     :'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhum item ainda. Adicione produtos e promoções abaixo 👇</p>';
 }
+function renderBizFotos(){
+  const box=document.getElementById('biz-fotos-grid');if(!box||!user)return;
+  const fotos=user.fotos||[];
+  const lim=planLimits(user).fotos;
+  const atCap=fotos.length>=lim;
+  box.innerHTML=fotos.map(f=>`<div class="foto-tile" style="background-image:url(${f.url})"><span class="foto-del" onclick="deleteBizFoto('${f.id}')">✕</span></div>`).join('')
+    +(atCap?'':'<button type="button" class="foto-add" onclick="pickBizFoto()">+</button>');
+  const hint=document.getElementById('biz-fotos-hint');
+  if(hint)hint.textContent=(lim===Infinity)?`${fotos.length} foto${fotos.length===1?'':'s'}`:`${fotos.length}/${lim} fotos · ${isClub(user)?'faça upgrade de plano':'assine o Rolê+'} pra mais espaço`;
+}
+function pickBizFoto(){document.getElementById('file-biz-foto').click();}
+async function onBizFotoUpload(e){
+  const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  if(f.size>3.5e6){toast('Imagem muito grande (máx ~3MB)');return;}
+  const rd=new FileReader();
+  rd.onload=async()=>{
+    const url=rd.result;
+    if(!user.fotos)user.fotos=[];
+    const tempId='local-'+Date.now();
+    user.fotos.push({id:tempId,url});
+    renderBizFotos();save();
+    if(SUPABASE_READY&&user.roomId){
+      try{const saved=await sbAddBusinessPhoto(user.roomId,url);
+        const idx=user.fotos.findIndex(x=>x.id===tempId);if(idx>-1)user.fotos[idx].id=saved.id;
+        save();
+      }catch(e2){toastError('Não deu pra salvar a foto no servidor');}
+    }
+    toast('Foto adicionada ✓');
+  };
+  rd.readAsDataURL(f);
+}
+async function deleteBizFoto(id){
+  if(!user||!user.fotos)return;
+  user.fotos=user.fotos.filter(f=>f.id!==id);
+  renderBizFotos();save();
+  if(SUPABASE_READY&&!id.startsWith('local-')){
+    try{await sbDeleteBusinessPhoto(id);}catch(e){toastError('Não deu pra apagar a foto no servidor');}
+  }
+}
 // foto por item de vitrine — reaproveita o mesmo padrão de onPhoto/onCrPhoto
 // (base64 inline, sem infra de upload nova). newItemImagem serve o form de
 // adicionar; no modal de editar, a foto vai direto pro item sendo editado.
@@ -4204,10 +4398,10 @@ function onVitrinePhoto(e,ctx){
   rd.onload=()=>{
     if(ctx==='new'){
       newItemImagem=rd.result;
-      document.getElementById('np-photo-btn').style.backgroundImage=`url(${rd.result})`;
+      const th=document.getElementById('np-photo-thumb');th.style.backgroundImage=`url(${rd.result})`;th.textContent='';
     }else if(editingVitrineIdx!==null){
       user.vitrine[editingVitrineIdx].imagem=rd.result;
-      document.getElementById('ve-photo-btn').style.backgroundImage=`url(${rd.result})`;
+      const th=document.getElementById('ve-photo-thumb');th.style.backgroundImage=`url(${rd.result})`;th.textContent='';
     }
     toast('Foto adicionada ✓');
   };
@@ -4226,7 +4420,7 @@ async function addVitrine(){
   user.vitrine.push(item);
   document.getElementById('np-nome').value='';
   const precoEl=document.getElementById('np-preco');precoEl.value='';precoEl.closest('.price-input')?.classList.remove('free');
-  document.getElementById('np-photo-btn').style.backgroundImage='';
+  const npThumb=document.getElementById('np-photo-thumb');npThumb.style.backgroundImage='';npThumb.textContent='📷';
   const imagemToSave=newItemImagem;newItemImagem=null;
   syncBizRoom();save();renderBizVitrine();applyClubUI();toast('Item adicionado à vitrine ✓');
   if(SUPABASE_READY&&user.roomId){
@@ -4246,7 +4440,7 @@ function editVitrineItem(i){
   const wrap=precoEl.closest('.price-input');
   if(/^gr[aá]tis$/i.test(p.preco||'')){precoEl.value='Grátis';wrap.classList.add('free');}
   else{precoEl.value=(p.preco||'').replace(/^R\$\s*/,'');wrap.classList.remove('free');}
-  document.getElementById('ve-photo-btn').style.backgroundImage=p.imagem?`url(${p.imagem})`:'';
+  const veThumb=document.getElementById('ve-photo-thumb');veThumb.style.backgroundImage=p.imagem?`url(${p.imagem})`:'';veThumb.textContent=p.imagem?'':'📷';
   document.getElementById('vitrine-edit-modal').classList.add('active');
 }
 function closeVitrineEdit(){document.getElementById('vitrine-edit-modal').classList.remove('active');editingVitrineIdx=null;}
@@ -4293,12 +4487,23 @@ async function toggleVitrineHidden(){
   syncBizRoom();save();updateVitrineHiddenUI();
   toast(user.horario._vitrineHidden?'Vitrine ocultada — não aparece mais pro público':'Vitrine visível de novo ✓');
 }
+async function toggleLojaHidden(){
+  if(!user)return;
+  if(!user.horario)user.horario=defaultHorario();
+  user.horario._lojaHidden=!user.horario._lojaHidden;
+  syncBizRoom();save();updateVitrineHiddenUI();
+  toast(user.horario._lojaHidden?'Loja escondida — some do mapa e da busca':'Loja visível de novo ✓');
+}
+function openVisibilityModal(){document.getElementById('visibility-modal').classList.add('active');}
+function closeVisibilityModal(){document.getElementById('visibility-modal').classList.remove('active');}
 function updateVitrineHiddenUI(){
   if(!user)return;
-  const hidden=!!(user.horario&&user.horario._vitrineHidden);
-  const lbl=document.getElementById('vitrine-hide-label');if(lbl)lbl.textContent=hidden?'Mostrar vitrine':'Ocultar vitrine';
-  const btn=document.getElementById('vitrine-hide-btn');if(btn)btn.classList.toggle('on',hidden);
-  const chip=document.getElementById('vitrine-live-chip');if(chip)chip.innerHTML=hidden?'oculta':'<span class="pulse"></span> no ar';
+  const vitrineHidden=!!(user.horario&&user.horario._vitrineHidden);
+  const lojaHidden=!!(user.horario&&user.horario._lojaHidden);
+  const vsw=document.getElementById('vitrine-hidden-switch');if(vsw)vsw.classList.toggle('on',vitrineHidden);
+  const lsw=document.getElementById('loja-hidden-switch');if(lsw)lsw.classList.toggle('on',lojaHidden);
+  const btn=document.getElementById('vitrine-hide-btn');if(btn)btn.classList.toggle('on',vitrineHidden||lojaHidden);
+  const chip=document.getElementById('vitrine-live-chip');if(chip)chip.innerHTML=(lojaHidden||vitrineHidden)?'oculta':'<span class="pulse"></span> no ar';
 }
 async function delVitrine(i){
   const item=user.vitrine[i];
@@ -4618,6 +4823,7 @@ function sbRoomToLocal(r){
     oferece:r.oferece||[],horario:r.horario,lat:r.lat,lng:r.lng,
     vitrine:(r.vitrine_items||[]).map(v=>({id:v.id,em:v.emoji,nome:v.nome,desc:v.desc_txt,preco:v.preco,imagem:v.imagem_url})),
     promocoes:(r.promocoes||[]).map(p=>({id:p.id,em:p.emoji,titulo:p.titulo,validade:new Date(p.validade).getTime()})),
+    fotos:(r.business_photos||[]).map(f=>({id:f.id,url:f.imagem_url})),
     boost:!!(r.boost_until&&new Date(r.boost_until).getTime()>Date.now()),
     boostUntil:r.boost_until?new Date(r.boost_until).getTime():null,
     clubUntil:r.club_until?new Date(r.club_until).getTime():null,
@@ -4641,7 +4847,7 @@ async function loadRoomsFromSupabase(){
 function refreshLiveScreens(){
   if(document.getElementById('s-app').classList.contains('active')){renderPins();renderFeed();}
   if(user&&user.type==='business'&&document.getElementById('s-biz').classList.contains('active')){
-    updateBizOpenToggle();updateChatToggleUI();updateVitrineHiddenUI();updateBizHorarioResumo();applyBizPhotos();renderBizVitrine();
+    updateBizOpenToggle();updateChatToggleUI();updateVitrineHiddenUI();updateBizHorarioResumo();applyBizPhotos();renderBizVitrine();renderBizFotos();
   }
   if(currentBiz&&document.getElementById('s-bizprofile').classList.contains('active')){
     const fresh=rooms.find(x=>x.id===currentBiz.id);
@@ -4671,6 +4877,7 @@ function hydrateBizUserFromRoom(){
   user.roomId=r.id;
   user.vitrine=(r.vitrine||[]).map(v=>({...v}));
   user.promocoes=(r.promocoes||[]).map(p=>({...p}));
+  user.fotos=(r.fotos||[]).map(f=>({...f}));
   user.horario=r.horario||user.horario;
   user.whatsapp=r.whatsapp||user.whatsapp;
   user.instagram=r.instagram||user.instagram;
@@ -4694,6 +4901,7 @@ async function bootSequence(){
     await loadRoomsFromSupabase();
     await hydrateUserFlags();
     refreshNotifBadge();
+    startNotifBannerSubscription();
     sbSubscribeRooms(()=>{loadRoomsFromSupabase();});
     await checkPaymentReturn();
   }

@@ -82,7 +82,7 @@ Deno.serve(async (req: Request) => {
 
     const notifByKind: Record<string, { title: string; body: string }> = {
       boost_business: { title: 'Boost ativado! 🚀', body: 'Seu negócio está em destaque no mapa e no feed.' },
-      club_subscription: { title: 'Bem-vindo ao Rolê+! ⭐', body: 'Sua assinatura está ativa — vitrine ilimitada e métricas reais liberadas.' },
+      club_subscription: { title: 'Bem-vindo ao Rolê+! ⭐', body: 'Sua assinatura está ativa — mais espaço na vitrine e métricas reais liberadas.' },
       role_personal: { title: 'Rolê publicado! 🎉', body: 'Seu rolê já está no mapa pra galera encontrar.' },
     };
     const n = notifByKind[intent.kind];
