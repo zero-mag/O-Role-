@@ -4061,7 +4061,7 @@ document.getElementById('boost-dur-picker').addEventListener('click',e=>{
   document.querySelectorAll('#boost-dur-picker .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');
   boostDurH=+o.dataset.h;boostPrice=+o.dataset.price;
 });
-let lpMap=null,lpMarker=null,lpCoords=null,lpAddr='',lpTimer=null,lpTargetMode='role';
+let lpMap=null,lpMarker=null,lpCoords=null,lpAddr='',lpAddrParts=null,lpTimer=null,lpTargetMode='role';
 const PIN_SVG='<div class="lp-marker"><svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7Z" fill="var(--accent)" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg></div>';
 // mode: 'role' (criar rolê pessoal, comportamento original), 'biz' (autocadastro
 // de negócio) ou 'admin' (ferramenta de catalogação) — reaproveita o mesmo
@@ -4099,11 +4099,12 @@ function lpReverse(lat,lng){
     try{
       const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&lat='+lat+'&lon='+lng);
       const d=await r.json(),a=d.address||{};
+      lpAddrParts={road:a.road||'',houseNumber:a.house_number||'',suburb:a.suburb||a.neighbourhood||'',city:a.city||a.town||a.municipality||'',state:a.state_code||a['ISO3166-2-lvl4']?.split('-')[1]||''};
       const rua=[a.road,a.house_number].filter(Boolean).join(', ');
       const area=[a.suburb||a.neighbourhood,a.city||a.town].filter(Boolean).join(' — ');
       lpAddr=[rua,area].filter(Boolean).join(' — ')||d.display_name||'Local no mapa';
       el.innerHTML=ICON_PIN+' '+escHtml(lpAddr);
-    }catch(e){lpAddr='Local no mapa';el.innerHTML=ICON_PIN+' Local selecionado';}
+    }catch(e){lpAddr='Local no mapa';lpAddrParts=null;el.innerHTML=ICON_PIN+' Local selecionado';}
   },450);
 }
 async function geocodeQuery(q){
@@ -4131,6 +4132,14 @@ function confirmLoc(){
   if(!lpCoords){toast('Toque no mapa pra marcar o local');return;}
   if(lpTargetMode==='biz'){
     bizCoords={lat:lpCoords.lat,lng:lpCoords.lng};
+    if(lpAddrParts){
+      // o pin no mapa passa a ser a fonte da verdade — se a pessoa moveu o marcador
+      // porque o endereço puxado pelo CNPJ tava errado, os campos têm que acompanhar
+      if(lpAddrParts.road)document.getElementById('biz-address').value=lpAddrParts.road;
+      if(lpAddrParts.houseNumber)document.getElementById('biz-num').value=lpAddrParts.houseNumber;
+      if(lpAddrParts.suburb)document.getElementById('biz-bairro').value=lpAddrParts.suburb;
+      if(lpAddrParts.city)document.getElementById('biz-city').value=lpAddrParts.city+(lpAddrParts.state?' - '+lpAddrParts.state:'');
+    }
     const st=document.getElementById('biz-cep-status');
     if(st){st.classList.remove('hide');st.style.color='var(--green)';st.textContent='✓ Localização confirmada no mapa: '+(lpAddr||'local selecionado');}
     toast('Localização confirmada ✓');
@@ -4139,6 +4148,11 @@ function confirmLoc(){
   }
   if(lpTargetMode==='admin'){
     adCoords={lat:lpCoords.lat,lng:lpCoords.lng};
+    if(lpAddrParts){
+      const ruaBairro=[[lpAddrParts.road,lpAddrParts.houseNumber].filter(Boolean).join(', '),lpAddrParts.suburb].filter(Boolean).join(', ');
+      if(ruaBairro)document.getElementById('adm-address').value=ruaBairro;
+      if(lpAddrParts.city)document.getElementById('adm-city').value=lpAddrParts.city+(lpAddrParts.state?' - '+lpAddrParts.state:'');
+    }
     const cb=document.getElementById('adm-geo-status');
     if(cb){cb.classList.remove('hide');cb.style.color='var(--green)';cb.textContent='✓ Localização confirmada no mapa: '+(lpAddr||'local selecionado');}
     toast('Localização confirmada ✓');
