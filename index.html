@@ -2400,9 +2400,11 @@ function maskCnpjAdmin(el){
   else if(d.length>2)v=d.slice(0,2)+'.'+d.slice(2);
   el.value=v;
   const st=document.getElementById('adm-cnpj-status');
+  const refreshBtn=document.getElementById('adm-refresh-suggest-btn');
   adCnpjBlocked=false;
-  if(d.length<14){st.classList.add('hide');return;}
-  if(!isValidCNPJ(d)){st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='⚠️ CNPJ inválido. Confira os números.';adCnpjBlocked=true;return;}
+  if(d.length<14){st.classList.add('hide');refreshBtn.classList.add('hide');return;}
+  if(!isValidCNPJ(d)){st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='⚠️ CNPJ inválido. Confira os números.';adCnpjBlocked=true;refreshBtn.classList.add('hide');return;}
+  refreshBtn.classList.remove('hide'); // sempre visível com um CNPJ válido — pode tocar de novo a qualquer momento pra repuxar categoria/horário/oferece
   buscarCnpjAdmin(d);
 }
 function adRefreshSuggestions(){
