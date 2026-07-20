@@ -1122,6 +1122,23 @@
     </div>
   </section>
 
+  <!-- ===== CADASTRO DIRETO DE NEGÓCIO: CONFIRMAR POSSE DO CNPJ ===== -->
+  <section class="screen" id="s-cnpj-verify">
+    <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Confirmar CNPJ</h2></div>
+    <div class="scroll">
+      <h1 style="font-size:21px;margin:0 0 8px;">Digite o código</h1>
+      <p style="color:var(--ink-2);font-size:13.5px;line-height:1.55;margin:0 0 20px;">Pra garantir que você é o dono desse CNPJ, mandamos 6 números pra <b id="cnpjv-sent-to" style="color:var(--ink);"></b> — o e-mail oficial da Receita Federal, não o que você digitou no cadastro.</p>
+      <div class="otp-wrap otp-wrap-light">
+        <div class="otp-boxes" id="cnpjv-code-input-boxes"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input id="cnpjv-code-input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" oninput="syncOtpBoxes('cnpjv-code-input')" onfocus="syncOtpBoxes('cnpjv-code-input')" onblur="syncOtpBoxes('cnpjv-code-input')" />
+      </div>
+      <div id="cnpjv-code-status" class="geo-status hide"></div>
+      <button class="btn" onclick="submitCnpjSignupCode()">Confirmar código</button>
+      <button class="btn ghost" style="margin-top:8px;" onclick="startCnpjOwnershipVerify()">Reenviar código</button>
+      <p style="font-size:12.5px;color:var(--ink-3);text-align:center;margin-top:16px;line-height:1.5;">Não achou o e-mail? Dá uma olhada na caixa de <b>spam</b> ou "lixo eletrônico" — às vezes ele cai lá.</p>
+    </div>
+  </section>
+
   <!-- ===== ENCONTRE A SUA EMPRESA (passo 4 — criar senha) ===== -->
   <section class="screen" id="s-claim-password">
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Quase lá</h2></div>
@@ -1331,6 +1348,7 @@
       <!-- ---- ABA: ADICIONAR EMPRESA ---- -->
       <div id="adm-pane-add" class="hide">
         <div class="field"><label>CNPJ</label><input id="adm-cnpj" placeholder="00.000.000/0000-00" oninput="maskCnpjAdmin(this)" /></div>
+        <button type="button" class="btn ghost hide" id="adm-refresh-suggest-btn" style="margin-bottom:12px;" onclick="adRefreshSuggestions()">🔄 Buscar sugestões automáticas (CNAE/horário/oferece)</button>
         <div id="adm-cnpj-status" class="geo-status hide"></div>
         <div id="adm-cnae-box" class="admin-cnae box-card hide"></div>
         <div class="field"><label>Nome do negócio</label><input id="adm-nome" placeholder="Nome que aparece pros clientes" /></div>
@@ -2012,7 +2030,7 @@ function planLimits(u){
   if(u&&isClub(u)&&!u.planTier)return PLAN_LIMITS.premium;
   return PLAN_LIMITS[(u&&u.planTier)||'free']||PLAN_LIMITS.free;
 }
-let bizCoords=null, bizSeg='Bar', bizEm='🍺', bizCnpjRazao='', bizCnpjBlocked=false, tier3Acked=false;
+let bizCoords=null, bizSeg='Bar', bizEm='🍺', bizCnpjRazao='', bizCnpjBlocked=false, tier3Acked=false, bizSuggestedHorario=null, bizSuggestedOferece=[], cnpjVerifyToken=null, cnpjOwnershipVerified=false;
 let roleCoords=null;
 const durPrice={1:0,3:490,6:790,12:1290,24:1990};
 let map,markers=[];
@@ -2229,6 +2247,7 @@ function resetAdminForm(){
   adEditingRoomId=null;
   document.getElementById('adm-cnpj').value='';
   document.getElementById('adm-cnpj').disabled=false;
+  document.getElementById('adm-refresh-suggest-btn').classList.add('hide');
   document.getElementById('adm-cnpj-status').classList.add('hide');
   document.getElementById('adm-cnae-box').classList.add('hide');
   document.getElementById('adm-nome').value='';
@@ -2259,6 +2278,7 @@ async function adOpenEdit(id){
     adEditingRoomId=id;
     document.getElementById('adm-cnpj').value=r.cnpj?r.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):'';
     document.getElementById('adm-cnpj').disabled=!!r.cnpj; // já tem CNPJ salvo? trava (evita trocar por engano). Vazio? deixa preencher agora.
+    document.getElementById('adm-refresh-suggest-btn').classList.toggle('hide',!r.cnpj); // CNPJ travado não dispara busca sozinho — esse botão permite atualizar as sugestões de um negócio já cadastrado
     document.getElementById('adm-nome').value=r.nome||'';
     if(r.cat)adPickCat(r.cat,r.emoji||emojiForSeg(r.cat));
     const [addr,city]=(r.address||'').split(' — ');
@@ -2384,6 +2404,11 @@ function maskCnpjAdmin(el){
   if(d.length<14){st.classList.add('hide');return;}
   if(!isValidCNPJ(d)){st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='⚠️ CNPJ inválido. Confira os números.';adCnpjBlocked=true;return;}
   buscarCnpjAdmin(d);
+}
+function adRefreshSuggestions(){
+  const digits=document.getElementById('adm-cnpj').value.replace(/\D/g,'');
+  if(digits.length!==14||!isValidCNPJ(digits)){toast('Esse negócio não tem um CNPJ válido salvo');return;}
+  buscarCnpjAdmin(digits);
 }
 async function buscarCnpjAdmin(cnpj){
   const st=document.getElementById('adm-cnpj-status'),cb=document.getElementById('adm-cnae-box');
@@ -2792,6 +2817,18 @@ function isValidCNPJ(cnpj){
   };
   return calc(12)==cnpj.charAt(12) && calc(13)==cnpj.charAt(13);
 }
+function clearBizCnpjDerivedFields(){
+  // tudo aqui só existe porque um CNPJ anterior preencheu — se o CNPJ muda/some, essas infos não podem ficar presas na tela
+  document.getElementById('biz-cep').value='';
+  document.getElementById('biz-address').value='';
+  document.getElementById('biz-num').value='';
+  document.getElementById('biz-bairro').value='';
+  document.getElementById('biz-city').value='';
+  const cepSt=document.getElementById('biz-cep-status');if(cepSt)cepSt.classList.add('hide');
+  const sug=document.getElementById('biz-cnpj-suggest');if(sug){sug.classList.add('hide');sug.innerHTML='';}
+  bizSuggestedName='';bizCoords=null;bizSuggestedHorario=null;bizSuggestedOferece=[];
+  cnpjOwnershipVerified=false;cnpjVerifyToken=null; // CNPJ mudou — a verificação de posse anterior não vale mais pra esse novo número
+}
 function maskCnpj(el){
   const d=el.value.replace(/\D/g,'').slice(0,14);
   let v=d;
@@ -2802,6 +2839,7 @@ function maskCnpj(el){
   el.value=v;
   const st=document.getElementById('biz-cnpj-status');
   bizCnpjRazao='';bizCnpjBlocked=false;
+  clearBizCnpjDerivedFields();
   if(d.length<14){st.classList.add('hide');return;}
   if(!isValidCNPJ(d)){
     st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='⚠️ CNPJ inválido. Confira os números.';
@@ -2856,6 +2894,8 @@ async function buscarCnpj(cnpj){
     if(d.numero)document.getElementById('biz-num').value=d.numero;
     if(d.bairro)document.getElementById('biz-bairro').value=d.bairro;
     if(d.municipio)document.getElementById('biz-city').value=d.municipio+(d.uf?' - '+d.uf:'');
+    if(d.ddd_telefone_1)document.getElementById('biz-wpp').value=d.ddd_telefone_1;
+    else if(d.ddd_telefone_2)document.getElementById('biz-wpp').value=d.ddd_telefone_2;
     const cepSt=document.getElementById('biz-cep-status');
     if(cepSt){cepSt.classList.remove('hide');cepSt.style.color='var(--green)';cepSt.textContent='✓ Endereço preenchido pelo CNPJ. Confira o número.';}
     geocodeBiz({logradouro:d.logradouro,localidade:d.municipio,uf:d.uf});
@@ -2973,6 +3013,54 @@ async function submitClaimCode(){
     st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='⚠️ '+(e.message||'Erro');
   }
 }
+/* ============ CADASTRO DIRETO DE NEGÓCIO: CONFIRMAR POSSE DO CNPJ ============
+   Diferente da reivindicação acima (que é pra negócio JÁ catalogado): aqui é
+   pra "Com CNPJ, sem catálogo prévio" — antes só checava CNPJ válido/ativo,
+   sem provar que quem cadastra é o dono de verdade. */
+async function startCnpjOwnershipVerify(){
+  const cnpjDigits=document.getElementById('biz-cnpj').value.replace(/\D/g,'');
+  showLoading('Enviando código de confirmação…');
+  try{
+    const res=await fetch(window.SUPABASE_URL+'/functions/v1/start-cnpj-verify',{ // TROCAR pela URL real que a Supabase gerar ao publicar esta função (ver LEIA-ME sobre nomes que mudam a cada deploy)
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+window.SUPABASE_ANON_KEY},
+      body:JSON.stringify({cnpj:cnpjDigits})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Não deu pra enviar o código agora');
+    if(data.needsManualReview){
+      toastError('Não conseguimos confirmar automaticamente esse CNPJ. Fale com a gente pra revisão manual.');
+      return;
+    }
+    cnpjVerifyToken=data.verifyToken;
+    document.getElementById('cnpjv-sent-to').textContent=data.sentTo;
+    document.getElementById('cnpjv-code-input').value='';
+    syncOtpBoxes('cnpjv-code-input');
+    document.getElementById('cnpjv-code-status').classList.add('hide');
+    go('s-cnpj-verify');
+  }catch(e){
+    toastError('Não deu: '+(e.message||e));
+  }finally{hideLoading();}
+}
+async function submitCnpjSignupCode(){
+  const code=document.getElementById('cnpjv-code-input').value.trim();
+  const st=document.getElementById('cnpjv-code-status');
+  if(code.length!==6){st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='Digite os 6 números do código.';return;}
+  showLoading('Confirmando…');
+  try{
+    const res=await fetch(window.SUPABASE_URL+'/functions/v1/verify-cnpj-code',{ // TROCAR pela URL real que a Supabase gerar ao publicar esta função
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+window.SUPABASE_ANON_KEY},
+      body:JSON.stringify({verifyToken:cnpjVerifyToken,code})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Código incorreto');
+    cnpjOwnershipVerified=true;
+    doSignup();
+  }catch(e){
+    st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='⚠️ '+(e.message||'Erro');
+  }finally{hideLoading();}
+}
 async function finishClaim(){
   const email=document.getElementById('claim-email').value.trim().toLowerCase();
   const pass=document.getElementById('claim-pass').value;
@@ -3060,10 +3148,18 @@ async function geocodeBiz(d){
   const st=document.getElementById('biz-cep-status');
   try{
     const q=encodeURIComponent([d.logradouro,d.localidade,d.uf,'Brasil'].filter(Boolean).join(', '));
-    const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+q);
+    const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+q);
     const arr=await r.json();
     if(arr&&arr[0]){
       bizCoords={lat:+arr[0].lat,lng:+arr[0].lon};
+      // sugestões via OpenStreetMap (dado aberto, mesma lógica da ferramenta de admin) — aplicadas só na criação da conta, o dono confere depois em Configurações
+      const tags=arr[0].extratags||{};
+      const parsedHorario=parseOsmOpeningHours(tags.opening_hours);
+      if(parsedHorario)bizSuggestedHorario=parsedHorario;
+      bizSuggestedOferece=osmOfereceSuggestions(tags);
+      if(!document.getElementById('biz-wpp').value.trim()&&(tags.phone||tags['contact:phone'])){
+        document.getElementById('biz-wpp').value=tags.phone||tags['contact:phone'];
+      }
     }else{
       // não achou o endereço no mapa — não inventa uma posição, avisa e deixa
       // o dono confirmar manualmente antes de publicar (nunca mais cai em
@@ -3192,6 +3288,7 @@ async function doSignup(){
       const cnpjDigits=cnpj.replace(/\D/g,'');
       if(cnpjDigits.length!==14||!isValidCNPJ(cnpjDigits)){toast('Informe um CNPJ válido, ou escolha "Não tenho CNPJ"');return;}
       if(bizCnpjBlocked){toast('Esse CNPJ não foi encontrado como ativo na Receita Federal. Confira os números.');return;}
+      if(!cnpjOwnershipVerified){startCnpjOwnershipVerify();return;}
     }
     const cep=document.getElementById('biz-cep').value.trim();
     const rua=document.getElementById('biz-address').value.trim();
@@ -3219,17 +3316,19 @@ async function doSignup(){
       const authUser=await sbSignUp({email,password:pass,name,type:user.type});
       if(user.type==='business'){
         const co=user.coords;
+        const horarioFinal=bizSuggestedHorario||defaultHorario(); // sugestão via OSM, quando existe — sempre conferível depois em Configurações
+        const ofereceFinal=bizSuggestedOferece.slice();
         await sbUpdateProfile(authUser.id,{
           segment:user.segment,emoji:user.emoji,cep:user.cep,address:user.address,
           lat:co.lat,lng:co.lng,cnpj:user.cnpj,razao_social:user.razaoSocial,verified:user.verified,
-          whatsapp:user.whatsapp,instagram:user.instagram,site:user.site,horario:defaultHorario()
+          whatsapp:user.whatsapp,instagram:user.instagram,site:user.site,horario:horarioFinal
         });
         const room=await sbCreateRoom({
           owner_id:authUser.id,is_business:true,nome:user.name,emoji:user.emoji,cat:user.segment,
           address:user.address,lat:co.lat,lng:co.lng,whatsapp:user.whatsapp,instagram:user.instagram,
-          site:user.site,verified:user.verified,horario:defaultHorario()
+          site:user.site,verified:user.verified,horario:horarioFinal,oferece:ofereceFinal
         });
-        user.roomId=room.id;user.vitrine=[];user.promocoes=[];user.oferece=[];user.horario=defaultHorario();
+        user.roomId=room.id;user.vitrine=[];user.promocoes=[];user.oferece=ofereceFinal;user.horario=horarioFinal;
       }
       user.id=authUser.id;
       save();
@@ -3292,7 +3391,7 @@ function renderUserDot(){
 let userWatchId=null,hasRealLocation=false,followUser=false,gotQuickFix=false,lastDistRefresh=0;
 function recenterToMe(){
   if(!hasRealLocation){toast('Ative sua localização pra recentralizar');return;}
-  followUser=true;
+  // recentraliza só uma vez (não liga o "modo seguir") — depois disso o mapa continua livre pra navegar
   if(map)map.setView([userPos.lat,userPos.lng],Math.max(map.getZoom(),15),{animate:true});
 }
 function refreshFeedDistances(){
