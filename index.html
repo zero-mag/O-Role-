@@ -5296,7 +5296,13 @@ async function bootSequence(){
   setTimeout(()=>{
     hideSplash();
     try{
-      if(user&&!user.emailVerified){goVerifyEmail(()=>{routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);});}
+      if(user&&!user.emailVerified&&user.type==='personal'&&SKIP_EMAIL_VERIFY_PERSONAL){
+        user.emailVerified=true;
+        if(SUPABASE_READY&&user.id)sbUpdateProfile(user.id,{email_verified:true}).catch(()=>{});
+        save();
+        routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);
+      }
+      else if(user&&!user.emailVerified){goVerifyEmail(()=>{routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);});}
       else if(user){routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);}
       else if(!localStorage.getItem('zona_onboarded')){go('s-onboard',true);}
       else{go('s-login',true);}

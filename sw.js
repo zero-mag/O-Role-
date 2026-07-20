@@ -1,6 +1,6 @@
 // O Rolê+ — Service Worker (network-first: sempre pega a versão nova quando online,
 // e usa o cache só como reserva offline). Evita servir HTML/CSS/JS desatualizado.
-const CACHE = 'role-v42';
+const CACHE = 'role-v43';
 const ASSETS = [
   './',
   './index.html',
