@@ -95,7 +95,7 @@ async function sbLoadPersonalAccounts() {
   return data;
 }
 async function sbLoadCatalogedRooms() {
-  const { data, error } = await sb.from('rooms').select('id,nome,owner_id,claim_started_at,horario')
+  const { data, error } = await sb.from('rooms').select('id,nome,owner_id,claim_started_at,horario,cat,address')
     .not('cataloged_by', 'is', null).order('id', { ascending: false });
   if (error) throw error;
   return data;

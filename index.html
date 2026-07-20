@@ -254,7 +254,9 @@
   .admin-cnae{font-size:12.5px;color:var(--ink-2);background:var(--bg);margin-bottom:12px;}
   .admin-google-link{display:block;font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:6px;}
   .admin-biz-item{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);}
-  .admin-biz-item .nm{flex:1;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .admin-biz-item .nm-col{flex:1;min-width:0;cursor:pointer;}
+  .admin-biz-item .nm{font-weight:700;display:flex;align-items:center;gap:8px;}
+  .admin-biz-item .sub{font-size:12px;color:var(--ink-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .admin-view-btn{background:none;border:none;color:var(--ink-3);flex:none;display:flex;align-items:center;justify-content:center;padding:4px;}
   .admin-dot{width:9px;height:9px;border-radius:50%;flex:none;}
   .admin-dot.laranja{background:#f59e0b;}
@@ -1347,7 +1349,7 @@
 
       <!-- ---- ABA: ADICIONAR EMPRESA ---- -->
       <div id="adm-pane-add" class="hide">
-        <div class="field"><label>CNPJ</label><input id="adm-cnpj" placeholder="00.000.000/0000-00" oninput="maskCnpjAdmin(this)" /></div>
+        <div class="field"><label>CNPJ</label><input id="adm-cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" oninput="maskCnpjAdmin(this)" /></div>
         <button type="button" class="btn ghost hide" id="adm-refresh-suggest-btn" style="margin-bottom:12px;" onclick="adRefreshSuggestions()">🔄 Buscar sugestões automáticas (CNAE/horário/oferece)</button>
         <div id="adm-cnpj-status" class="geo-status hide"></div>
         <div id="adm-cnae-box" class="admin-cnae box-card hide"></div>
@@ -1361,6 +1363,7 @@
         <a id="adm-google-link" href="#" target="_blank" rel="noopener" class="admin-google-link"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M13 3v6h6M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6H8Z"/><path d="M8 13h8M8 17h5"/></svg> Ver no Google (conferir horário e dados)</a>
         <h3 style="margin-top:16px;">Horário de funcionamento</h3>
         <div class="box-card box-card-tight"><div id="adm-horario"></div></div>
+        <button type="button" class="btn ghost" style="margin-top:8px;" onclick="adApplyHorarioToAll()">📋 Aplicar horário de segunda a todos os dias</button>
         <h3 style="margin-top:16px;">O que oferece <small style="color:var(--ink-3);font-weight:600;">(ajuda como filtro de busca)</small></h3>
         <div class="ofr-search-wrap"><span class="ofr-search-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><input type="text" id="adm-ofr-search" placeholder="Buscar: delivery, wi-fi, pet friendly…" autocomplete="off" oninput="ofrFilter('adm-ofr',this.value)" /></div>
         <div id="adm-ofr-box" class="ofr-box"></div>
@@ -1386,6 +1389,7 @@
       </div>
 
       <h3 style="margin-top:28px;">Negócios cadastrados</h3>
+      <div class="ofr-search-wrap"><span class="ofr-search-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><input type="text" id="adm-lista-search" placeholder="Buscar por nome, endereço ou categoria…" autocomplete="off" oninput="filterAdminList(this.value)"></div>
       <div id="adm-lista-negocios"></div>
     </div>
   </section>
@@ -2510,6 +2514,12 @@ function adRenderHorario(){
   }).join('');
 }
 function adTogHorarioDia(k){adHorario[k].aberto=!adHorario[k].aberto;adRenderHorario();}
+function adApplyHorarioToAll(){
+  const src=adHorario['seg'];
+  DIAS.forEach(([k])=>{if(k!=='seg')adHorario[k]={aberto:src.aberto,ini:src.ini,fim:src.fim};});
+  adRenderHorario();
+  toast('Horário de segunda aplicado a todos os dias — ajuste o que for diferente');
+}
 function adSetHorarioPart(k,field,part,value){
   const [hh,mm]=(adHorario[k][field]||'00:00').split(':');
   adHorario[k][field]=part==='h'?(value+':'+mm):(hh+':'+value);
@@ -2537,6 +2547,8 @@ async function submitAdminEmpresa(){
       resetAdminForm();refreshAdminList();adCollapsePanel();
       return;
     }
+    const dup=findLikelyDuplicate(nome,address);
+    if(dup&&!confirm(`Já existe um negócio parecido cadastrado: "${dup.nome}". Cadastrar mesmo assim?`))return;
     showLoading('Cadastrando negócio…');
     const room=await sbCreateRoom({
       owner_id:null,is_business:true,cataloged_by:user.id,nome,emoji:em,cat,
@@ -2549,7 +2561,8 @@ async function submitAdminEmpresa(){
       if(inome)await sbAddVitrineItem(room.id,{emoji:em,nome:inome,preco:ipreco||'—',added_by:user.id});
     }
     toast('Empresa adicionada ✓');
-    resetAdminForm();refreshAdminPoints();refreshAdminList();adCollapsePanel();
+    resetAdminForm();refreshAdminPoints();refreshAdminList();
+    document.getElementById('adm-cnpj').focus(); // painel fica aberto, pronto pro próximo — cataloga vários sem reabrir a aba toda vez
   }catch(e){toastError('Não deu: '+(e.message||e));}
   finally{hideLoading();}
 }
@@ -2561,21 +2574,45 @@ async function refreshAdminPoints(){
     document.getElementById('adm-pts-vit').textContent=vit*3;
   }catch(e){console.error('Falha ao calcular pontos do admin',e);}
 }
+let adCatalogedList=[];
+/* ---- checagem de duplicata antes de cadastrar: nome parecido + mesma cidade — comparado contra a lista já carregada, sem chamada extra ---- */
+function findLikelyDuplicate(nome,address){
+  const qName=normSeg(nome);
+  const qCity=normSeg((address.split(' — ')[1]||'').trim());
+  return adCatalogedList.find(r=>{
+    const rName=normSeg(r.nome||'');
+    if(!(rName===qName||rName.includes(qName)||qName.includes(rName)))return false;
+    const rCity=normSeg((r.address||'').split(' — ')[1]||'');
+    return !qCity||!rCity||rCity===qCity;
+  });
+}
 async function refreshAdminList(){
   const box=document.getElementById('adm-lista-negocios');if(!box)return;
   if(!SUPABASE_READY){box.innerHTML='';return;}
   try{
-    const list=await sbLoadCatalogedRooms();
-    box.innerHTML=list.length?list.map(r=>{
-      const dot=r.owner_id?'verde':(r.claim_started_at?'azul':'laranja');
-      const hidden=!!(r.horario&&r.horario._vitrineHidden);
-      return `<div class="admin-biz-item">
-        <div class="nm" onclick="adOpenEdit(${r.id})" title="Editar"><span class="admin-dot ${dot}" title="${dot==='verde'?'Já tem dono':(dot==='azul'?'Alguém reivindicando':'Sem dono ainda')}"></span>${escHtml(r.nome)}</div>
-        <button class="admin-view-btn" onclick="event.stopPropagation();adOpenBiz(${r.id})" title="Ver vitrine pública"><svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        <div class="switch sm${hidden?'':' on'}" onclick="adToggleVitrineHidden(${r.id},this)"></div>
-      </div>`;
-    }).join(''):'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">Nenhuma empresa cadastrada por aqui ainda.</p>';
+    adCatalogedList=await sbLoadCatalogedRooms();
+    const si=document.getElementById('adm-lista-search');if(si)si.value='';
+    renderAdminList('');
   }catch(e){console.error('Falha ao carregar lista de negócios cadastrados',e);}
+}
+function filterAdminList(term){renderAdminList(term);}
+function renderAdminList(term){
+  const box=document.getElementById('adm-lista-negocios');if(!box)return;
+  const q=term?normSeg(term):'';
+  const list=q?adCatalogedList.filter(r=>normSeg([r.nome,r.cat,r.address].filter(Boolean).join(' ')).includes(q)):adCatalogedList;
+  box.innerHTML=list.length?list.map(r=>{
+    const dot=r.owner_id?'verde':(r.claim_started_at?'azul':'laranja');
+    const hidden=!!(r.horario&&r.horario._vitrineHidden);
+    const sub=[r.cat,r.address].filter(Boolean).join(' · ');
+    return `<div class="admin-biz-item">
+      <div class="nm-col" onclick="adOpenEdit(${r.id})" title="Editar">
+        <div class="nm"><span class="admin-dot ${dot}" title="${dot==='verde'?'Já tem dono':(dot==='azul'?'Alguém reivindicando':'Sem dono ainda')}"></span>${escHtml(r.nome)}</div>
+        ${sub?`<div class="sub">${escHtml(sub)}</div>`:''}
+      </div>
+      <button class="admin-view-btn" onclick="event.stopPropagation();adOpenBiz(${r.id})" title="Ver vitrine pública"><svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <div class="switch sm${hidden?'':' on'}" onclick="adToggleVitrineHidden(${r.id},this)"></div>
+    </div>`;
+  }).join(''):`<p style="color:var(--ink-3);font-size:13px;padding:10px 0;">${q?'Nenhum negócio encontrado.':'Nenhuma empresa cadastrada por aqui ainda.'}</p>`;
 }
 function adOpenBiz(id){
   const r=rooms.find(x=>x.id===id);
