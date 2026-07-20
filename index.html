@@ -3021,7 +3021,7 @@ async function startCnpjOwnershipVerify(){
   const cnpjDigits=document.getElementById('biz-cnpj').value.replace(/\D/g,'');
   showLoading('Enviando código de confirmação…');
   try{
-    const res=await fetch(window.SUPABASE_URL+'/functions/v1/start-cnpj-verify',{ // TROCAR pela URL real que a Supabase gerar ao publicar esta função (ver LEIA-ME sobre nomes que mudam a cada deploy)
+    const res=await fetch(window.SUPABASE_URL+'/functions/v1/super-function',{ // nome de exibição é "start-cnpj-verify" no painel
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+window.SUPABASE_ANON_KEY},
       body:JSON.stringify({cnpj:cnpjDigits})
@@ -3048,7 +3048,7 @@ async function submitCnpjSignupCode(){
   if(code.length!==6){st.classList.remove('hide');st.style.color='var(--accent-dark)';st.textContent='Digite os 6 números do código.';return;}
   showLoading('Confirmando…');
   try{
-    const res=await fetch(window.SUPABASE_URL+'/functions/v1/verify-cnpj-code',{ // TROCAR pela URL real que a Supabase gerar ao publicar esta função
+    const res=await fetch(window.SUPABASE_URL+'/functions/v1/swift-action',{ // nome de exibição é "verify-cnpj-code" no painel
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+window.SUPABASE_ANON_KEY},
       body:JSON.stringify({verifyToken:cnpjVerifyToken,code})
