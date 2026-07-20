@@ -1,6 +1,6 @@
 // O Rolê+ — Service Worker (network-first: sempre pega a versão nova quando online,
 // e usa o cache só como reserva offline). Evita servir HTML/CSS/JS desatualizado.
-const CACHE = 'role-v39';
+const CACHE = 'role-v40';
 const ASSETS = [
   './',
   './index.html',
@@ -25,7 +25,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then(res => {
+    fetch(e.request, { cache: 'no-store' }).then(res => {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
       return res;

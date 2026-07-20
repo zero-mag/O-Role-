@@ -5289,7 +5289,32 @@ bootSequence();
 setTimeout(hideSplash,3000);
 
 /* PWA */
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    // detecta atualização mesmo pra quem já está com o app aberto/logado — sem isso,
+    // a pessoa só via a versão nova depois de fechar e reabrir por conta própria
+    reg.addEventListener('updatefound',()=>{
+      const novo=reg.installing;if(!novo)return;
+      novo.addEventListener('statechange',()=>{
+        if(novo.state==='installed'&&navigator.serviceWorker.controller)showUpdateBanner();
+      });
+    });
+    setInterval(()=>reg.update().catch(()=>{}),5*60*1000); // o navegador sozinho só confere de vez em quando — força a checagem
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});
+  }).catch(()=>{});
+}
+function showUpdateBanner(){
+  const stack=document.getElementById('notif-banner-stack');
+  if(!stack||document.getElementById('update-banner'))return;
+  const el=document.createElement('div');
+  el.className='notif-banner';el.id='update-banner';
+  el.innerHTML=`<div class="nb-ic">↻</div>`+
+    `<div class="nb-body"><div class="nb-top"><span class="nb-app">ROLÊ+</span></div>`+
+    `<div class="nb-title">Nova versão disponível</div><div class="nb-msg">Toque pra atualizar agora</div></div>`;
+  el.onclick=()=>location.reload();
+  stack.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+}
 </script>
 </body>
 </html>
