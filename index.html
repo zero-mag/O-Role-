@@ -2177,7 +2177,12 @@ async function doLogin(){
       startNotifBannerSubscription();
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();
-      if(!user.emailVerified)goVerifyEmail(()=>routeAfterAuth());
+      if(!user.emailVerified&&user.type==='personal'&&SKIP_EMAIL_VERIFY_PERSONAL){
+        user.emailVerified=true;
+        await sbUpdateProfile(authUser.id,{email_verified:true});
+        save();
+        routeAfterAuth();
+      }else if(!user.emailVerified)goVerifyEmail(()=>routeAfterAuth());
       else routeAfterAuth();
     }catch(e){
       const msg=(e&&e.message)||'';
@@ -3276,6 +3281,11 @@ async function confirmCancelSignup(){
 function openTier3Notice(){document.getElementById('tier3-notice-modal').classList.add('active');}
 function closeTier3Notice(){document.getElementById('tier3-notice-modal').classList.remove('active');}
 function confirmTier3Notice(){tier3Acked=true;closeTier3Notice();doSignup();}
+// TEMPORÁRIO (2026-07-20): Resend só manda e-mail pro dono da conta até verificar um domínio,
+// então confirmação de e-mail tá quebrada pra qualquer pessoa nova. Só pula pra conta PESSOAL
+// (negócio continua exigindo verificação de CNPJ normalmente). Tirar esse bypass assim que o
+// domínio for verificado no Resend e o remetente das Edge Functions for trocado.
+const SKIP_EMAIL_VERIFY_PERSONAL=true;
 async function doSignup(){
   const name=document.getElementById('su-name').value.trim();
   const email=document.getElementById('su-email').value.trim();
@@ -3333,8 +3343,15 @@ async function doSignup(){
         user.roomId=room.id;user.vitrine=[];user.promocoes=[];user.oferece=ofereceFinal;user.horario=horarioFinal;
       }
       user.id=authUser.id;
-      save();
-      goVerifyEmail(()=>openInstallScreen());
+      if(user.type==='personal'&&SKIP_EMAIL_VERIFY_PERSONAL){
+        user.emailVerified=true;
+        await sbUpdateProfile(authUser.id,{email_verified:true});
+        save();
+        openInstallScreen();
+      }else{
+        save();
+        goVerifyEmail(()=>openInstallScreen());
+      }
     }catch(e){const pt=traduzErro(e&&e.message);toastError('Não deu pra criar a conta'+(pt?': '+pt:'. Tente de novo em instantes.'));}
     finally{hideLoading();}
     return;
