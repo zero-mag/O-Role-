@@ -4556,7 +4556,7 @@ function ofrRender(prefix){
   const sel=ofrStateFor(prefix);
   box.innerHTML=groups.length?groups.map(grp=>
     `<label class="blk-label" style="margin-top:14px;">${escHtml(grp.g)}</label>`+
-    `<div class="chips ofr-chips">`+
+    `<div class="ofr-chips">`+
     grp.items.map(t=>`<div class="chip${sel.includes(t)?' active':''}" data-tag="${escHtml(t)}">${escHtml(t)}</div>`).join('')+
     `</div>`
   ).join(''):'<p style="color:var(--ink-3);font-size:13px;padding:10px 0;text-align:center;">Nenhuma opção encontrada.</p>';
