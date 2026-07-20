@@ -2338,6 +2338,16 @@ const CNAE_CAT_MAP={
   '4711301':'Mercado','4711302':'Mercado','4712100':'Mercado',
   '4520001':'Serviço Automotivo'
 };
+/* ---- Nominatim (geocoding do OpenStreetMap) exige no máximo 1 requisição por segundo — sem isso, catalogar vários negócios
+   em sequência rápida (ex: painel que agora fica aberto pra fluxo contínuo) passa a ser bloqueado/rate-limited pelo serviço,
+   e a partir daí a localização simplesmente para de funcionar. Toda chamada ao Nominatim passa por aqui, sempre respeitando o intervalo. ---- */
+let lastNominatimCallAt=0;
+async function fetchNominatim(url){
+  const wait=1100-(Date.now()-lastNominatimCallAt);
+  if(wait>0)await new Promise(r=>setTimeout(r,wait));
+  lastNominatimCallAt=Date.now();
+  return fetch(url);
+}
 /* ---- sugestão de tags "o que oferece" a partir de tags abertas do OpenStreetMap (extratags) — sempre pré-marcado, admin confere ---- */
 function osmOfereceSuggestions(tags){
   if(!tags)return[];
@@ -2462,7 +2472,7 @@ async function buscarCnpjAdmin(cnpj){
     const gst=document.getElementById('adm-geo-status');
     adCoords=null;
     try{
-      const gr=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+encodeURIComponent([rua,d.municipio,d.uf,'Brasil'].filter(Boolean).join(', ')));
+      const gr=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+encodeURIComponent([rua,d.municipio,d.uf,'Brasil'].filter(Boolean).join(', ')));
       const arr=await gr.json();
       if(arr&&arr[0]){
         adCoords={lat:+arr[0].lat,lng:+arr[0].lon};
@@ -3192,7 +3202,7 @@ async function geocodeBiz(d){
   const st=document.getElementById('biz-cep-status');
   try{
     const q=encodeURIComponent([d.logradouro,d.localidade,d.uf,'Brasil'].filter(Boolean).join(', '));
-    const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+q);
+    const r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+q);
     const arr=await r.json();
     if(arr&&arr[0]){
       bizCoords={lat:+arr[0].lat,lng:+arr[0].lon};
@@ -4097,7 +4107,7 @@ function lpReverse(lat,lng){
   clearTimeout(lpTimer);
   lpTimer=setTimeout(async()=>{
     try{
-      const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&lat='+lat+'&lon='+lng);
+      const r=await fetchNominatim('https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&lat='+lat+'&lon='+lng);
       const d=await r.json(),a=d.address||{};
       lpAddrParts={road:a.road||'',houseNumber:a.house_number||'',suburb:a.suburb||a.neighbourhood||'',city:a.city||a.town||a.municipality||'',state:a.state_code||a['ISO3166-2-lvl4']?.split('-')[1]||''};
       const rua=[a.road,a.house_number].filter(Boolean).join(', ');
@@ -4108,7 +4118,7 @@ function lpReverse(lat,lng){
   },450);
 }
 async function geocodeQuery(q){
-  try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q+', São Paulo, Brasil'));const a=await r.json();if(a&&a[0])return{lat:+a[0].lat,lng:+a[0].lon};}catch(e){}
+  try{const r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q+', São Paulo, Brasil'));const a=await r.json();if(a&&a[0])return{lat:+a[0].lat,lng:+a[0].lon};}catch(e){}
   return null;
 }
 async function lpSearch(){
@@ -4171,7 +4181,7 @@ function useCurrentAsRole(){
   navigator.geolocation.getCurrentPosition(async p=>{
     roleCoords={lat:p.coords.latitude,lng:p.coords.longitude};
     let label='Minha localização atual';
-    try{const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&lat='+p.coords.latitude+'&lon='+p.coords.longitude);const d=await r.json(),a=d.address||{};label=[a.road,a.suburb||a.neighbourhood].filter(Boolean).join(' — ')||'Minha localização atual';}catch(e){}
+    try{const r=await fetchNominatim('https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&lat='+p.coords.latitude+'&lon='+p.coords.longitude);const d=await r.json(),a=d.address||{};label=[a.road,a.suburb||a.neighbourhood].filter(Boolean).join(' — ')||'Minha localização atual';}catch(e){}
     document.getElementById('cr-loc').value=label;
     document.getElementById('cr-loc-label').textContent=label;
     document.getElementById('cr-loc-btn').classList.add('picked');
