@@ -252,6 +252,12 @@
   .admin-point b{display:block;font-size:24px;color:var(--accent);margin-top:2px;}
   .admin-point small{color:var(--ink-3);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.3px;}
   .admin-cnae{font-size:12.5px;color:var(--ink-2);background:var(--bg);margin-bottom:12px;}
+  .admin-name-results{border:1px solid var(--line-2);border-radius:14px;background:var(--card);margin-bottom:12px;overflow:hidden;}
+  .admin-name-result{padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;}
+  .admin-name-result:last-child{border-bottom:none;}
+  .admin-name-result:active{background:var(--bg);}
+  .admin-name-result b{display:block;font-size:14px;}
+  .admin-name-result small{color:var(--ink-3);font-size:12px;}
   .admin-google-link{display:block;font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:6px;}
   .admin-biz-item{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);}
   .admin-biz-item .nm-col{flex:1;min-width:0;cursor:pointer;}
@@ -1349,6 +1355,17 @@
 
       <!-- ---- ABA: ADICIONAR EMPRESA ---- -->
       <div id="adm-pane-add" class="hide">
+        <div id="adm-name-search-block">
+          <div class="field"><label>Buscar por nome <small style="color:var(--ink-3);font-weight:600;">(ainda sem CNPJ? comece por aqui, tipo Google Maps)</small></label>
+            <div style="display:flex;gap:8px;">
+              <input id="adm-name-search" placeholder="Ex: Barley's Tap House" style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();adSearchByName();}" />
+              <button type="button" class="btn ghost" style="width:auto;padding:0 18px;flex:none;" onclick="adSearchByName()">🔎 Buscar</button>
+            </div>
+          </div>
+          <div id="adm-name-status" class="geo-status hide"></div>
+          <div id="adm-name-results" class="admin-name-results hide"></div>
+          <div class="or-line">ou, se já tiver o CNPJ</div>
+        </div>
         <div class="field"><label>CNPJ</label><input id="adm-cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" oninput="maskCnpjAdmin(this)" /></div>
         <button type="button" class="btn ghost hide" id="adm-refresh-suggest-btn" style="margin-bottom:12px;" onclick="adRefreshSuggestions()">🔄 Buscar sugestões automáticas (CNAE/horário/oferece)</button>
         <div id="adm-cnpj-status" class="geo-status hide"></div>
@@ -2254,6 +2271,11 @@ function adCollapsePanel(){
 }
 function resetAdminForm(){
   adEditingRoomId=null;
+  document.getElementById('adm-name-search-block').classList.remove('hide');
+  document.getElementById('adm-name-search').value='';
+  document.getElementById('adm-name-status').classList.add('hide');
+  document.getElementById('adm-name-results').classList.add('hide');
+  adNameResults=[];
   document.getElementById('adm-cnpj').value='';
   document.getElementById('adm-cnpj').disabled=false;
   document.getElementById('adm-refresh-suggest-btn').classList.add('hide');
@@ -2285,6 +2307,7 @@ async function adOpenEdit(id){
     if(error||!r)throw error||new Error('negócio não encontrado');
     resetAdminForm();
     adEditingRoomId=id;
+    document.getElementById('adm-name-search-block').classList.add('hide'); // editando um negócio já cadastrado — busca por nome não se aplica aqui
     document.getElementById('adm-cnpj').value=r.cnpj?r.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):'';
     document.getElementById('adm-cnpj').disabled=!!r.cnpj; // já tem CNPJ salvo? trava (evita trocar por engano). Vazio? deixa preencher agora.
     document.getElementById('adm-refresh-suggest-btn').classList.toggle('hide',!r.cnpj); // CNPJ travado não dispara busca sozinho — esse botão permite atualizar as sugestões de um negócio já cadastrado
@@ -2410,6 +2433,80 @@ function parseOsmOpeningHours(str){
     return h;
   }catch(e){return null;}
 }
+/* ---- aplica horário/telefone/"o que oferece" sugeridos a partir das extratags do OSM no formulário do admin —
+   usado tanto pela busca por CNPJ quanto pela busca por nome, pra não duplicar a mesma lógica duas vezes ---- */
+function applyOsmTagsToAdminForm(tags,notes){
+  if(!tags)return;
+  let usedOsm=false;
+  const parsedHorario=parseOsmOpeningHours(tags.opening_hours);
+  if(parsedHorario){
+    adHorario=parsedHorario;adRenderHorario();
+    notes.push('🕒 Horário sugerido a partir do OpenStreetMap — confira antes de salvar.');
+    usedOsm=true;
+  }else{
+    // sem opening_hours no OSM (comum em negócio pequeno/local) ou formato que não conseguimos ler —
+    // avisa explicitamente em vez de deixar o horário parado no padrão (18h-00h) sem dizer nada, o que
+    // parecia "preenchido" mas na verdade não veio de lugar nenhum.
+    notes.push('🕒 Não achamos horário de funcionamento pra esse local no OpenStreetMap — preencha manualmente abaixo.');
+  }
+  if(!document.getElementById('adm-phone').value.trim()&&(tags.phone||tags['contact:phone'])){
+    document.getElementById('adm-phone').value=tags.phone||tags['contact:phone'];
+    usedOsm=true;
+  }
+  const ofrSug=osmOfereceSuggestions(tags);
+  if(ofrSug.length){
+    ofrSug.forEach(t=>{if(!adOferece.includes(t))adOferece.push(t);});
+    ofrRender('adm-ofr');
+    notes.push('🏷️ "O que oferece" pré-marcado via OpenStreetMap: '+ofrSug.join(', ')+' — confira, pode desmarcar.');
+    usedOsm=true;
+  }
+  if(usedOsm)notes.push('Dados de localização/horário: © colaboradores do OpenStreetMap.');
+}
+/* ---- busca por nome (sem CNPJ) — mesma ideia de procurar no Google Maps, mas via Nominatim (dado aberto do
+   OpenStreetMap), pra permitir catalogar um "ponto fictício" (owner_id null) só com o nome do lugar, adicionando
+   o CNPJ depois (quando o dono reivindicar, ou quando o admin descobrir). Nunca automatizado em lote — sempre
+   um nome buscado manualmente de cada vez, igual ao resto da ferramenta. ---- */
+let adNameResults=[];
+async function adSearchByName(){
+  const q=document.getElementById('adm-name-search').value.trim();
+  if(!q){toast('Digite o nome do negócio');return;}
+  const st=document.getElementById('adm-name-status'),box=document.getElementById('adm-name-results');
+  st.classList.remove('hide');st.style.color='var(--amber)';st.textContent='🔎 Buscando no mapa…';
+  box.classList.add('hide');box.innerHTML='';
+  try{
+    const r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&extratags=1&q='+encodeURIComponent(q+', Brasil'));
+    const arr=await r.json();
+    if(!arr||!arr.length){st.style.color='var(--accent-dark)';st.textContent='⚠️ Não encontramos nada com esse nome — tente incluir a cidade (ex: "Barley\'s Sorocaba") ou cadastre manualmente abaixo.';return;}
+    adNameResults=arr;
+    st.classList.add('hide');
+    box.classList.remove('hide');
+    box.innerHTML=arr.map((res,i)=>{
+      const parts=(res.display_name||'').split(',');
+      const nome=parts[0].trim(),resto=parts.slice(1,4).join(',').trim();
+      return `<div class="admin-name-result" onclick="adPickNameResult(${i})"><b>${escHtml(nome)}</b><small>${escHtml(resto)}</small></div>`;
+    }).join('');
+  }catch(e){st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra buscar agora.';}
+}
+function adPickNameResult(i){
+  const r=adNameResults[i];if(!r)return;
+  document.getElementById('adm-name-results').classList.add('hide');
+  const a=r.address||{};
+  const nome=(r.display_name||'').split(',')[0].trim();
+  document.getElementById('adm-nome').value=nome;
+  const rua=[a.road,a.house_number].filter(Boolean).join(', ');
+  document.getElementById('adm-address').value=[rua,a.suburb||a.neighbourhood].filter(Boolean).join(', ');
+  document.getElementById('adm-city').value=[a.city||a.town||a.municipality,a.state].filter(Boolean).join(' - ');
+  adCoords={lat:+r.lat,lng:+r.lon};
+  document.getElementById('adm-google-link').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(r.display_name||nome);
+  const gst=document.getElementById('adm-geo-status');
+  gst.classList.remove('hide');gst.style.color='var(--green)';gst.textContent='✓ Localização encontrada a partir do nome — confira antes de salvar.';
+  const cnaeNotes=['Cadastrado a partir do nome, sem CNPJ ainda — pode ser adicionado depois (pelo dono, ao reivindicar, ou por você quando descobrir).'];
+  applyOsmTagsToAdminForm(r.extratags||{},cnaeNotes);
+  const cb=document.getElementById('adm-cnae-box');
+  cb.innerHTML=cnaeNotes.map(n=>`<div>${escHtml(n)}</div>`).join('');
+  cb.classList.remove('hide');
+  toast('Dados encontrados — confira e escolha a categoria');
+}
 function maskCnpjAdmin(el){
   const d=el.value.replace(/\D/g,'').slice(0,14);
   let v=d;
@@ -2490,26 +2587,7 @@ async function buscarCnpjAdmin(cnpj){
       if(arr&&arr[0]){
         adCoords={lat:+arr[0].lat,lng:+arr[0].lon};
         if(gst){gst.classList.remove('hide');gst.style.color='var(--green)';gst.textContent='✓ Localização encontrada no mapa.';}
-        const tags=arr[0].extratags||{};
-        let usedOsm=false;
-        const parsedHorario=parseOsmOpeningHours(tags.opening_hours);
-        if(parsedHorario){
-          adHorario=parsedHorario;adRenderHorario();
-          cnaeNotes.push('🕒 Horário sugerido a partir do OpenStreetMap — confira antes de salvar.');
-          usedOsm=true;
-        }
-        if(!document.getElementById('adm-phone').value.trim()&&(tags.phone||tags['contact:phone'])){
-          document.getElementById('adm-phone').value=tags.phone||tags['contact:phone'];
-          usedOsm=true;
-        }
-        const ofrSug=osmOfereceSuggestions(tags);
-        if(ofrSug.length){
-          ofrSug.forEach(t=>{if(!adOferece.includes(t))adOferece.push(t);});
-          ofrRender('adm-ofr');
-          cnaeNotes.push('🏷️ "O que oferece" pré-marcado via OpenStreetMap: '+ofrSug.join(', ')+' — confira, pode desmarcar.');
-          usedOsm=true;
-        }
-        if(usedOsm)cnaeNotes.push('Dados de localização/horário: © colaboradores do OpenStreetMap.');
+        applyOsmTagsToAdminForm(arr[0].extratags||{},cnaeNotes);
       }else if(gst){
         gst.classList.remove('hide');gst.style.color='var(--accent-dark)';gst.textContent='⚠️ Não conseguimos localizar esse endereço no mapa — confirme manualmente acima.';
       }
