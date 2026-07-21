@@ -2433,8 +2433,21 @@ function adRefreshSuggestions(){
 }
 async function buscarCnpjAdmin(cnpj){
   const st=document.getElementById('adm-cnpj-status'),cb=document.getElementById('adm-cnae-box');
-  st.classList.remove('hide');st.style.color='var(--amber)';st.textContent='🔎 Verificando CNPJ na Receita Federal…';
+  st.classList.remove('hide');st.style.color='var(--amber)';st.textContent='🔎 Verificando CNPJ…';
   cb.classList.add('hide');
+  // trava por CNPJ duplicado: só faz sentido checar em cadastro novo — editando, o próprio negócio já tem esse CNPJ
+  if(!adEditingRoomId){
+    try{
+      const {data:existingRoom}=await sb.from('rooms').select('id,nome').eq('cnpj',cnpj).maybeSingle();
+      if(existingRoom){
+        st.style.color='var(--accent-dark)';
+        st.innerHTML='⚠️ Esse CNPJ já está cadastrado: <b>'+escHtml(existingRoom.nome)+'</b> — <a href="#" onclick="event.preventDefault();adOpenEdit('+existingRoom.id+')" style="color:inherit;text-decoration:underline;">editar esse negócio</a>';
+        adCnpjBlocked=true;
+        return;
+      }
+    }catch(e){/* falha na checagem não deve travar o cadastro — segue o fluxo normal */}
+  }
+  st.textContent='🔎 Verificando CNPJ na Receita Federal…';
   try{
     const r=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpj);
     if(!r.ok){st.style.color='var(--accent-dark)';st.textContent='⚠️ CNPJ não encontrado na Receita Federal.';return;}
