@@ -2478,22 +2478,27 @@ function adNameSearchDebounced(){
 async function adSearchByName(){
   const q=document.getElementById('adm-name-search').value.trim();
   if(!q){toast('Digite o nome do negócio');return;}
+  // remove apóstrofo/aspas do texto buscado — o OSM costuma indexar o nome sem
+  // esse caractere (ex: "Barleys Tap House", não "Barley's"), e a pontuação
+  // atrapalha o match de texto mesmo o lugar existindo no mapa.
+  const qClean=q.replace(/['’‘`]/g,'');
   const st=document.getElementById('adm-name-status'),box=document.getElementById('adm-name-results');
   st.classList.remove('hide');st.style.color='var(--amber)';st.textContent='🔎 Buscando no mapa…';
   box.classList.add('hide');box.innerHTML='';
+  adNameResults=[]; // limpa resultado antigo já no início — nunca deixa um resultado de busca anterior "grudado" se essa aqui falhar
   try{
     // 1ª tentativa: qualquer lugar do mapa (não só negócio/nicho — endereço, rua, ponto
     // de referência, o que for), com leve preferência pro Brasil via countrycodes
     // (parâmetro estrutural do Nominatim, não texto solto) pra rankear melhor o que é local.
-    let r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&extratags=1&countrycodes=br&q='+encodeURIComponent(q));
+    let r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&extratags=1&countrycodes=br&q='+encodeURIComponent(qClean));
     let arr=await r.json();
     if(!arr||!arr.length){
       // 2ª tentativa: busca global, sem restrição nenhuma — conhecimento geral do mapa,
       // não só do nosso nicho nem só do Brasil, o que a pessoa digitar ele tenta achar.
-      r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&extratags=1&q='+encodeURIComponent(q));
+      r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&extratags=1&q='+encodeURIComponent(qClean));
       arr=await r.json();
     }
-    if(!arr||!arr.length){st.style.color='var(--accent-dark)';st.textContent='⚠️ Não encontramos nada com esse nome no mapa aberto — tente incluir a cidade (ex: "Barley\'s Sorocaba") ou cadastre manualmente abaixo.';return;}
+    if(!arr||!arr.length){st.style.color='var(--accent-dark)';st.textContent='⚠️ Não encontramos nada com esse nome no mapa aberto — tente incluir a cidade (ex: "Barleys Sorocaba") ou cadastre manualmente abaixo.';return;}
     adNameResults=arr;
     st.classList.add('hide');
     box.classList.remove('hide');
@@ -2502,7 +2507,7 @@ async function adSearchByName(){
       const nome=parts[0].trim(),resto=parts.slice(1,4).join(',').trim();
       return `<div class="admin-name-result" onclick="adPickNameResult(${i})"><b>${escHtml(nome)}</b><small>${escHtml(resto)}</small></div>`;
     }).join('');
-  }catch(e){st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra buscar agora.';}
+  }catch(e){adNameResults=[];st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra buscar agora.';}
 }
 function adPickNameResult(i){
   const r=adNameResults[i];if(!r)return;
