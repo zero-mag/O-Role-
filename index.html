@@ -230,17 +230,17 @@
   .loc-hint{font-size:12.5px;color:var(--ink-2);background:var(--accent-soft);border:1px solid var(--accent-soft-2);border-radius:12px;padding:11px 13px;margin-bottom:14px;line-height:1.45;}
   .geo-status{font-size:12.5px;font-weight:700;color:var(--green);background:var(--green-soft);border:1px solid var(--green-soft-2);border-radius:12px;padding:10px 13px;margin-bottom:12px;display:flex;gap:8px;align-items:center;}
   /* ---- padrão de "box" reutilizável — usar em qualquer cartão novo pra manter consistência ---- */
-  .box-card{border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--card);}
+  .box-card{border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--card);box-shadow:var(--shadow-sm);}
   .box-card input,.box-card select{background:var(--bg);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;}
   .box-card input:focus,.box-card select:focus{border-color:var(--accent);}
   .box-card small{color:var(--ink-3);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:.3px;}
 
   /* ---- picker "o que oferece" reutilizável (busca + chips), usado no painel do negócio e na ferramenta de admin ---- */
   .ofr-search-wrap{position:relative;margin-bottom:10px;}
-  .ofr-search-wrap input{width:100%;box-sizing:border-box;padding:11px 14px 11px 38px;border:1.5px solid var(--line-2);border-radius:12px;background:var(--card);color:var(--ink);font-size:14px;font-family:inherit;outline:none;}
+  .ofr-search-wrap input{width:100%;box-sizing:border-box;padding:11px 14px 11px 38px;border:1.5px solid var(--line-2);border-radius:12px;background:var(--card);color:var(--ink);font-size:14px;font-family:inherit;outline:none;box-shadow:var(--shadow-sm);}
   .ofr-search-wrap input:focus{border-color:var(--accent);}
   .ofr-search-ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3);pointer-events:none;}
-  .ofr-box{border:1px solid var(--line-2);border-radius:14px;padding:4px 14px 14px;background:var(--card);}
+  .ofr-box{border:1.5px solid var(--line-2);border-radius:14px;padding:4px 14px 14px;background:var(--card);box-shadow:var(--shadow-sm);}
   .ofr-chips{position:static;display:flex;flex-wrap:wrap;gap:8px;overflow:visible;padding:0;margin-bottom:4px;}
 
   .admin-tabs{display:flex;gap:8px;margin-bottom:16px;}
@@ -2865,7 +2865,17 @@ const SEG_GROUPS=[
   {g:'Hospedagem',items:[['Hospedagem','🏨']]},
   {g:'Referência (perto de você)',items:[['Posto de Gasolina','⛽',2],['Farmácia','💊',2]]},
   {g:'Varejo & Serviços',items:[['Loja','🛍️',3],['Livraria/Papelaria','📖',3],['Floricultura','💐',3],['Pet Shop','🐾',3],['Mercado','🛒',3],['Serviços','🔧',3],['Clínica Médica','⚕️',3],['Clínica Odontológica','🦷',3],['Caixa Eletrônico','🏧',3]]},
-  {g:'Automotivo',items:[['Serviço Automotivo','🚗',3]]},
+  {g:'Automotivo',items:[['Serviço Automotivo','🚗',3],['Oficina Mecânica','🔩',3],['Lava-Rápido','🚿',3],['Auto Peças','🛠️',3],['Concessionária','🚙',3],['Borracharia','🛞',3],['Guincho','🚛',3],['Locadora de Veículos','🔑',3]]},
+  {g:'Saúde',items:[['Fisioterapia','🦵',3],['Psicologia/Psiquiatria','🧠',3],['Nutricionista','🥗',3],['Laboratório de Análises','🧪',3],['Óptica','👓',3],['Veterinária','🐶',3],['Hospital/Pronto-Socorro','🏥',3],['Fonoaudiologia','🗣️',3],['Home Care','🏠',3]]},
+  {g:'Casa & Construção',items:[['Material de Construção','🧱',3],['Móveis & Decoração','🛋️',3],['Marcenaria','🪵',3],['Serralheria','🔧',3],['Elétrica/Hidráulica','💡',3],['Jardinagem/Paisagismo','🌿',3],['Chaveiro','🔑',3],['Limpeza/Faxina','🧹',3]]},
+  {g:'Profissionais & Escritórios',items:[['Advocacia','⚖️',3],['Contabilidade','📊',3],['Imobiliária','🏢',3],['Arquitetura/Engenharia','📐',3],['Agência de Marketing','📣',3],['Consultoria','💼',3],['Despachante','📄',3],['Gráfica/Impressão','🖨️',3]]},
+  {g:'Educação',items:[['Escola','🏫',3],['Curso de Idiomas','🗣️',3],['Autoescola','🚗',3],['Creche','🧸',3],['Reforço Escolar/Cursinho','📚',3],['Escola de Música','🎵',3],['Escola de Dança','💃',3]]},
+  {g:'Compras & Varejo',items:[['Moda/Vestuário','👗',3],['Calçados','👟',3],['Eletrônicos','🔌',3],['Presentes/Utilidades','🎁',3],['Joalheria/Relojoaria','💍',3],['Brechó','👕',3],['Papelaria Criativa','✂️',3],['Loja de Bebidas','🍾',3]]},
+  {g:'Pet & Animais',items:[['Banho e Tosa','🛁',3],['Adestramento','🐕',3],['Agropecuária','🐓',3]]},
+  {g:'Infantil & Família',items:[['Buffet Infantil','🎈',3],['Brinquedoteca','🧸',3],['Escola de Natação','🏊',3]]},
+  {g:'Religião',items:[['Igreja/Templo','⛪',3],['Centro Espírita/Terreiro','🕯️',3]]},
+  {g:'Serviços Financeiros',items:[['Banco/Agência','🏦',3],['Correspondente Bancário','💳',3],['Cooperativa de Crédito','🤝',3]]},
+  {g:'Turismo & Transporte',items:[['Agência de Viagens','✈️',3],['Ponto de Táxi/Transporte','🚕',3]]},
 ];
 /* ---- tier de um nicho pelo nome — o que não está na taxonomia curada (ex: descrição de CNAE crua) é tratado como tier 3 por padrão ---- */
 function segTier(seg){
@@ -2901,16 +2911,17 @@ function renderCatPickerList(term){
   box.querySelectorAll('.est').forEach(el=>{el.onclick=()=>catPickerPick(el.dataset.seg,el.dataset.em);});
 }
 /* ---- O que o negócio oferece: atributos/estilos que ANTES eram nicho próprio, agora são tag (filtro), não categoria ---- */
-const OFERECE_TAGS=['Rodízio','Self-service','Delivery','Drive-thru','Retirada no local','Aceita Pix','Aceita Cartão','Aceita Vale-Refeição/Alimentação','Estacionamento','Valet','Pet friendly','Música ao vivo','DJ ao vivo','Pista de Dança','Wi-Fi grátis','Área externa','Rooftop/Vista','Acessível','Vegetariano/Vegano','Sem Glúten','Sem Lactose','24 horas','Reserva necessária','Agendamento Online','Grupos Grandes','Espaço Kids','Ambiente Climatizado','Fumódromo','Happy Hour','Open Bar','Sinuca/Bilhar','Cardápio Digital (QR Code)','LGBTQIA+ Friendly','Cozinha Japonesa','Cozinha Árabe','Cozinha Mexicana','Cozinha Nordestina','Câmeras de Segurança','Ambiente Instagramável','Ideal pra Encontro a Dois'];
+const OFERECE_TAGS=['Rodízio','Self-service','Delivery','Drive-thru','Retirada no local','Aceita Pix','Aceita Cartão','Aceita Vale-Refeição/Alimentação','Estacionamento','Valet','Pet friendly','Música ao vivo','DJ ao vivo','Pista de Dança','Wi-Fi grátis','Área externa','Rooftop/Vista','Acessível','Vegetariano/Vegano','Sem Glúten','Sem Lactose','24 horas','Reserva necessária','Agendamento Online','Grupos Grandes','Espaço Kids','Ambiente Climatizado','Fumódromo','Happy Hour','Open Bar','Sinuca/Bilhar','Cardápio Digital (QR Code)','LGBTQIA+ Friendly','Cozinha Japonesa','Cozinha Árabe','Cozinha Mexicana','Cozinha Nordestina','Câmeras de Segurança','Ambiente Instagramável','Ideal pra Encontro a Dois','Orçamento Grátis','Atende por WhatsApp','Entrega Grátis','Garantia de Serviço','Aceita Convênio','Busca e Entrega','Loja Física','Somente Online','Parcelamento no Cartão','Atendimento Domiciliar'];
 /* ---- mesma lista acima, só que organizada em categorias pra tela de edição ---- */
 const OFERECE_GROUPS=[
   {g:'Cardápio',items:['Rodízio','Self-service','Vegetariano/Vegano','Sem Glúten','Sem Lactose','Cozinha Japonesa','Cozinha Árabe','Cozinha Mexicana','Cozinha Nordestina','Happy Hour','Open Bar']},
   {g:'Atendimento & Serviço',items:['Delivery','Drive-thru','Retirada no local','24 horas','Reserva necessária','Agendamento Online','Cardápio Digital (QR Code)']},
-  {g:'Pagamento',items:['Aceita Pix','Aceita Cartão','Aceita Vale-Refeição/Alimentação']},
+  {g:'Pagamento',items:['Aceita Pix','Aceita Cartão','Aceita Vale-Refeição/Alimentação','Parcelamento no Cartão']},
   {g:'Estrutura & Ambiente',items:['Estacionamento','Valet','Wi-Fi grátis','Área externa','Rooftop/Vista','Ambiente Climatizado','Espaço Kids','Fumódromo','Sinuca/Bilhar','Câmeras de Segurança']},
   {g:'Público & Acessibilidade',items:['Acessível','LGBTQIA+ Friendly','Pet friendly','Grupos Grandes']},
   {g:'Música & Entretenimento',items:['Música ao vivo','DJ ao vivo','Pista de Dança']},
-  {g:'Vibe',items:['Ambiente Instagramável','Ideal pra Encontro a Dois']}
+  {g:'Vibe',items:['Ambiente Instagramável','Ideal pra Encontro a Dois']},
+  {g:'Serviços Gerais',items:['Orçamento Grátis','Atende por WhatsApp','Entrega Grátis','Garantia de Serviço','Aceita Convênio','Busca e Entrega','Loja Física','Somente Online','Atendimento Domiciliar']}
 ];
 /* ---- Ícones de marca (redes sociais) — mesmo estilo stroke/currentColor usado no resto do app ---- */
 const ICON_WHATSAPP=`<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.6 8.4c-.3.6-.3 1.4.2 2.3.9 1.7 2.7 3.5 4.4 4.4.9.5 1.7.5 2.3.2.3-.2.7-.6.9-1l-.2-1.1-1.7-.8c-.2-.1-.5 0-.6.2l-.4.5c-.2.2-.4.2-.6.1-.6-.3-1.6-1.2-2-1.8-.1-.2-.1-.4.1-.6l.5-.5c.2-.2.2-.4.1-.6L11 8.7c-.2-.4-.5-.4-.8-.4h-.6c-.4 0-.7.2-1 .1Z" fill="currentColor" stroke="none"/></svg>`;
