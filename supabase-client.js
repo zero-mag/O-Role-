@@ -108,8 +108,12 @@ async function sbCreateRoom(room) {
 }
 
 async function sbUpdateRoom(roomId, fields) {
-  const { error } = await sb.from('rooms').update(fields).eq('id', roomId);
+  // sem .select(), um update bloqueado por RLS não dá erro nenhum — só silenciosamente
+  // não muda nada (comportamento padrão do PostgREST), e o app achava que tinha salvo.
+  // Com .select(), dá pra conferir se alguma linha voltou de verdade.
+  const { data, error } = await sb.from('rooms').update(fields).eq('id', roomId).select();
   if (error) throw error;
+  if (!data || !data.length) throw new Error('Nada foi salvo — provavelmente sem permissão pra editar esse negócio (confira se sua conta está marcada como admin).');
 }
 
 async function sbDeleteRoom(roomId) {
