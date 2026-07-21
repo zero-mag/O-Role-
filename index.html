@@ -1358,7 +1358,7 @@
         <div id="adm-name-search-block">
           <div class="field"><label>Buscar por nome <small style="color:var(--ink-3);font-weight:600;">(ainda sem CNPJ? comece por aqui, tipo Google Maps)</small></label>
             <div style="display:flex;gap:8px;">
-              <input id="adm-name-search" placeholder="Ex: Barley's Tap House" style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();adSearchByName();}" />
+              <input id="adm-name-search" placeholder="Ex: Barley's Tap House" style="flex:1;" oninput="adNameSearchDebounced()" onkeydown="if(event.key==='Enter'){event.preventDefault();clearTimeout(adNameSearchTimer);adSearchByName();}" />
               <button type="button" class="btn ghost" style="width:auto;padding:0 18px;flex:none;" onclick="adSearchByName()">🔎 Buscar</button>
             </div>
           </div>
@@ -2272,6 +2272,7 @@ function adCollapsePanel(){
 function resetAdminForm(){
   adEditingRoomId=null;
   document.getElementById('adm-name-search-block').classList.remove('hide');
+  clearTimeout(adNameSearchTimer);
   document.getElementById('adm-name-search').value='';
   document.getElementById('adm-name-status').classList.add('hide');
   document.getElementById('adm-name-results').classList.add('hide');
@@ -2467,6 +2468,13 @@ function applyOsmTagsToAdminForm(tags,notes){
    o CNPJ depois (quando o dono reivindicar, ou quando o admin descobrir). Nunca automatizado em lote — sempre
    um nome buscado manualmente de cada vez, igual ao resto da ferramenta. ---- */
 let adNameResults=[];
+let adNameSearchTimer=null;
+function adNameSearchDebounced(){
+  clearTimeout(adNameSearchTimer);
+  const q=document.getElementById('adm-name-search').value.trim();
+  if(q.length<3)return; // muito curto ainda — evita buscar a cada letra sem sentido
+  adNameSearchTimer=setTimeout(adSearchByName,700);
+}
 async function adSearchByName(){
   const q=document.getElementById('adm-name-search').value.trim();
   if(!q){toast('Digite o nome do negócio');return;}
