@@ -1031,7 +1031,7 @@
         <button class="btn" onclick="doLogin()">Entrar</button>
         <div class="oauth-divider"><span>ou continue com</span></div>
         <div class="oauth-row">
-          <button type="button" class="btn ghost oauth-btn plan-locked" style="flex:1;position:relative;" disabled><span class="plan-badge plan-badge-soon" style="top:-10px;left:50%;transform:translateX(-50%);">EM BREVE</span><svg viewBox="0 0 24 24" style="width:18px;height:18px;"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47c-.28 1.5-1.13 2.78-2.4 3.63v3.02h3.88c2.27-2.09 3.57-5.17 3.57-8.84Z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.26v3.12C3.24 21.3 7.28 24 12 24Z"/><path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1-.38-2.27c0-.79.14-1.55.38-2.27V6.61H1.26A11.98 11.98 0 0 0 0 12c0 1.94.46 3.77 1.26 5.39l4.01-3.12Z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.28 0 3.24 2.7 1.26 6.61l4.01 3.12C6.22 6.86 8.87 4.75 12 4.75Z"/></svg> Continuar com Google</button>
+          <button type="button" class="btn ghost oauth-btn" style="flex:1;position:relative;" onclick="googleAuthGate()"><svg viewBox="0 0 24 24" style="width:18px;height:18px;"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47c-.28 1.5-1.13 2.78-2.4 3.63v3.02h3.88c2.27-2.09 3.57-5.17 3.57-8.84Z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.26v3.12C3.24 21.3 7.28 24 12 24Z"/><path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1-.38-2.27c0-.79.14-1.55.38-2.27V6.61H1.26A11.98 11.98 0 0 0 0 12c0 1.94.46 3.77 1.26 5.39l4.01-3.12Z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.28 0 3.24 2.7 1.26 6.61l4.01 3.12C6.22 6.86 8.87 4.75 12 4.75Z"/></svg> Continuar com Google</button>
         </div>
         <div class="alt">Não tem conta? <b onclick="go('s-type')">Criar agora</b></div>
       </div>
@@ -1839,15 +1839,9 @@
         </ul>
       </div>
 
-      <div class="plan-card plan-locked">
-        <div class="plan-badge plan-badge-soon">EM BREVE</div>
-        <div class="plan-head"><b>Rolê+ Premium</b><span class="plan-price">R$ 129,90<small>/mês</small></span></div>
-        <ul class="plan-feats">
-          <li>Fotos e vitrine sem limite</li>
-          <li>30 dias de Boost incluso</li>
-          <li>Sincroniza direto com o Google (aguardando liberação da API)</li>
-        </ul>
-      </div>
+      <!-- Rolê+ Premium escondido por enquanto (2026-07-23): depende da API do Google Business
+           Profile, ainda não aprovada — sem função hoje além de mostrar "EM BREVE" pra sempre.
+           Reintroduzir quando a sincronia com Google estiver pronta pra valer. -->
 
       <button class="btn ghost" style="margin-top:6px;" onclick="closeClubModal()">Agora não</button>
     </div>
@@ -3457,6 +3451,12 @@ function confirmTier3Notice(){tier3Acked=true;closeTier3Notice();doSignup();}
 // (negócio continua exigindo verificação de CNPJ normalmente). Tirar esse bypass assim que o
 // domínio for verificado no Resend e o remetente das Edge Functions for trocado.
 const SKIP_EMAIL_VERIFY_PERSONAL=true;
+// TEMPORÁRIO (2026-07-23): mesmo motivo acima — start-cnpj-verify também manda e-mail via Resend,
+// então a prova de posse do CNPJ também tá travada pra negócios novos. Pula essa etapa (o negócio
+// nasce SEM o selo "Verificado", nunca com ele) até o domínio ser verificado; a partir daí, tirar
+// esse bypass volta a exigir a prova real antes de conceder o selo. Não afeta o fluxo "Encontre a
+// sua empresa" (reivindicação de negócio já catalogado), que é um caminho separado.
+const SKIP_CNPJ_OWNERSHIP_VERIFY=true;
 async function doSignup(){
   const name=document.getElementById('su-name').value.trim();
   const email=document.getElementById('su-email').value.trim();
@@ -3471,7 +3471,7 @@ async function doSignup(){
       const cnpjDigits=cnpj.replace(/\D/g,'');
       if(cnpjDigits.length!==14||!isValidCNPJ(cnpjDigits)){toast('Informe um CNPJ válido, ou escolha "Não tenho CNPJ"');return;}
       if(bizCnpjBlocked){toast('Esse CNPJ não foi encontrado como ativo na Receita Federal. Confira os números.');return;}
-      if(!cnpjOwnershipVerified){startCnpjOwnershipVerify();return;}
+      if(!cnpjOwnershipVerified&&!SKIP_CNPJ_OWNERSHIP_VERIFY){startCnpjOwnershipVerify();return;}
     }
     const cep=document.getElementById('biz-cep').value.trim();
     const rua=document.getElementById('biz-address').value.trim();
@@ -3482,7 +3482,7 @@ async function doSignup(){
     if(!bizCoords){toast('Confirme a localização do seu negócio no mapa antes de continuar');openLocPicker('biz');return;}
     const fullAddr=[rua+(num?', '+num:''),bairro,city].filter(Boolean).join(' — ')+(cep?'  ·  '+cep:'');
     user={type:'business',name,email,cep,address:fullAddr,coords:bizCoords,
-      segment:bizSeg,emoji:bizEm,cnpj,razaoSocial:bizHasCnpj?bizCnpjRazao:'',verified:bizHasCnpj,
+      segment:bizSeg,emoji:bizEm,cnpj,razaoSocial:bizHasCnpj?bizCnpjRazao:'',verified:bizHasCnpj&&cnpjOwnershipVerified,
       whatsapp:normalizeWhatsapp(document.getElementById('biz-wpp').value),
       instagram:document.getElementById('biz-insta').value.trim(),
       site:document.getElementById('biz-site').value.trim()};
@@ -4109,7 +4109,7 @@ function openHelp(){
 function tgSet(el,name){el.classList.toggle('on');toast(name+(el.classList.contains('on')?' ativado':' desativado'));}
 
 /* ============ TERMOS / PRIVACIDADE ============ */
-let termsReturn='s-form',termsAccepted=false,termsAcceptedAt=null;
+let termsReturn='s-form',termsAccepted=false,termsAcceptedAt=null,termsGateAction=null;
 function openTerms(which){
   termsReturn=document.querySelector('.screen.active').id;
   document.getElementById('terms-title').textContent=which==='privacidade'?'Política de Privacidade':'Termos de Uso';
@@ -4133,11 +4133,23 @@ function enableAccept(){
 function acceptTerms(){
   if(termsAccepted)return;
   termsAccepted=true;termsAcceptedAt=new Date().toISOString();
+  localStorage.setItem('zona_terms_ever_accepted','1');
   const row=document.getElementById('lgpd-row');if(row)row.classList.add('done');
   toast('Termos aceitos ✓');
-  goBack();
+  if(termsGateAction){const cb=termsGateAction;termsGateAction=null;cb();}
+  else goBack();
 }
 function closeTerms(){goBack();}
+// login/cadastro social ainda não passa pela tela de termos do formulário normal (essa só roda
+// dentro do fluxo de e-mail+senha) — sem isso, dava pra criar conta via Google sem nunca ver os
+// termos. Se o navegador já aceitou uma vez, pula direto pro Google; senão mostra os termos antes
+// e só dispara o redirect depois de aceitar.
+function googleAuthGate(){
+  if(!SUPABASE_READY){toast('Sem conexão com o servidor');return;}
+  if(localStorage.getItem('zona_terms_ever_accepted')){loginWithOAuth('google');return;}
+  termsGateAction=()=>loginWithOAuth('google');
+  openTerms('uso');
+}
 const TERMS_HTML=`
 <div class="legal">
   <h4>1. Sobre o Rolê+</h4>
