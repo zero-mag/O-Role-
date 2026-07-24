@@ -1325,9 +1325,14 @@
           <div class="opt" data-h="24">24h<small>R$ 19,90</small></div>
         </div>
       </div>
-      <div class="field hide" id="cr-mkt-dur-field"><label>Duração livre (horas) <small style="color:var(--ink-3);font-weight:600;">— sem limite de 24h, é modo marketing</small></label>
-        <input id="cr-mkt-hours" type="number" min="1" inputmode="numeric" placeholder="Ex: 168 (7 dias)" oninput="updateMktDaysHint()" />
-        <small id="cr-mkt-days-hint" style="color:var(--accent);font-weight:700;display:block;margin-top:6px;"></small>
+      <div class="field hide" id="cr-mkt-dur-field"><label>Duração livre (dias) <small style="color:var(--ink-3);font-weight:600;">— sem limite de 24h, é modo marketing</small></label>
+        <div class="seg" id="cr-mkt-dur">
+          <div class="opt sel" data-d="1">1 dia</div>
+          <div class="opt" data-d="3">3 dias</div>
+          <div class="opt" data-d="7">7 dias</div>
+          <div class="opt" data-d="15">15 dias</div>
+          <div class="opt" data-d="30">30 dias</div>
+        </div>
       </div>
       <div class="toggle-row" onclick="togPriv(this)">
         <div class="tx"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Sala privada</b><small>Só entra quem tem a senha</small></div>
@@ -2036,7 +2041,14 @@ const CENTER=[-23.5545,-46.687];
 // depois que alguém cria conta/rolê pelo Supabase (ver loadRoomsFromSupabase).
 let rooms=SUPABASE_READY?[]:(JSON.parse(localStorage.getItem('zona_rooms')||'null')||[]);
 let user=JSON.parse(localStorage.getItem('zona_user')||'null');
-let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null, mktMode=false;
+let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null, mktMode=false, mktDays=1;
+function setMktDays(d){
+  const opts=[...document.querySelectorAll('#cr-mkt-dur .opt')];
+  let best=opts[0],bestDiff=Infinity;
+  opts.forEach(o=>{const diff=Math.abs(+o.dataset.d-d);if(diff<bestDiff){bestDiff=diff;best=o;}});
+  mktDays=+best.dataset.d;
+  opts.forEach(o=>o.classList.toggle('sel',o===best));
+}
 let boostDurH=6, boostPrice=990;
 // limites reais por plano — Start/Plus/Premium deixam de ser só rótulo de preço
 // e passam a valer alguma coisa concreta depois de pagar (antes disso, qualquer
@@ -4219,6 +4231,10 @@ document.getElementById('cr-dur').addEventListener('click',e=>{
   document.querySelectorAll('#cr-dur .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');
   durH=+o.dataset.h;updatePrice();
 });
+document.getElementById('cr-mkt-dur').addEventListener('click',e=>{
+  const o=e.target.closest('.opt');if(!o)return;
+  setMktDays(+o.dataset.d);
+});
 document.getElementById('boost-dur-picker').addEventListener('click',e=>{
   const o=e.target.closest('.opt');if(!o)return;
   document.querySelectorAll('#boost-dur-picker .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');
@@ -4344,14 +4360,6 @@ function useCurrentAsRole(){
 function togPriv(r){priv=!priv;document.getElementById('priv-switch').classList.toggle('on',priv);document.getElementById('pass-field').classList.toggle('hide',!priv);}
 function togBoost(r){boost=!boost;document.getElementById('boost-switch').classList.toggle('on',boost);updatePrice();}
 function freeCooldownMs(){const t=+localStorage.getItem('zona_freecd')||0;return Math.max(0,t-Date.now());}
-function updateMktDaysHint(){
-  const h=+document.getElementById('cr-mkt-hours').value||0;
-  const hint=document.getElementById('cr-mkt-days-hint');
-  if(h<=0){hint.textContent='';return;}
-  const dias=h/24;
-  const diasFmt=dias>=10?Math.round(dias):(Math.round(dias*10)/10);
-  hint.textContent='≈ '+diasFmt+(diasFmt===1?' dia':' dias');
-}
 function togMkt(el){
   if(!(user&&user.email===DEV_EMAIL))return;
   mktMode=!mktMode;
@@ -4397,7 +4405,7 @@ async function submitRole(){
     mktName=document.getElementById('cr-mkt-name').value.trim();
     if(!mktName){toast('Dê um nome de exibição pra persona');return;}
   }
-  const mktHours=mkt?Math.max(1,+document.getElementById('cr-mkt-hours').value||24):null;
+  const mktHours=mkt?mktDays*24:null;
   const emoji='🎲',cat='Pessoas'; // rolê de pessoa comum: ícone e categoria fixos, não é um estabelecimento
   const locText=document.getElementById('cr-loc').value.trim();
   // ---- modo edição: atualiza o rolê existente ----
@@ -4493,8 +4501,7 @@ function resetCreate(){
   document.getElementById('cr-mkt-name-field').classList.add('hide');
   document.getElementById('cr-mkt-name').value='';
   document.getElementById('cr-mkt-dur-field').classList.add('hide');
-  document.getElementById('cr-mkt-hours').value='';
-  updateMktDaysHint();
+  setMktDays(1);
   document.getElementById('cr-dur-field').classList.remove('hide');
   document.getElementById('cr-price').classList.remove('hide');
   document.getElementById('cr-mkt-row').classList.toggle('hide',!(user&&user.email===DEV_EMAIL));
@@ -4686,8 +4693,7 @@ function editMyRole(){
   document.getElementById('cr-mkt-name').value=mktMode?(r.creator||''):'';
   document.getElementById('cr-dur-field').classList.toggle('hide',mktMode);
   document.getElementById('cr-mkt-dur-field').classList.toggle('hide',!mktMode);
-  document.getElementById('cr-mkt-hours').value=mktMode?Math.max(1,Math.round((r.expiresAt-Date.now())/3600e3)):'';
-  updateMktDaysHint();
+  setMktDays(mktMode?Math.max(1,Math.round((r.expiresAt-Date.now())/86400e3)):1);
   document.querySelector('#s-create .appbar h2').textContent='Editar rolê';
   setEditUI(true,r);
   go('s-create');
