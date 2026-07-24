@@ -1299,6 +1299,11 @@
       <input type="file" id="file-cover-cr" accept="image/*" style="display:none" onchange="onCrPhoto(event,'cover')" />
       <input type="file" id="file-avatar-cr" accept="image/*" style="display:none" onchange="onCrPhoto(event,'avatar')" />
       <div class="field"><label>Nome do rolê</label><input id="cr-name" placeholder="Ex: Happy hour no Bar do Zé" /></div>
+      <div class="toggle-row hide" id="cr-mkt-row" onclick="togMkt(this)">
+        <div class="tx"><b>🎭 Rolê de marketing (dev)</b><small>Nome de exibição fictício, duração livre, boost sem pagar</small></div>
+        <div class="switch" id="mkt-switch"></div>
+      </div>
+      <div class="field hide" id="cr-mkt-name-field"><label>Nome de exibição (persona)</label><input id="cr-mkt-name" placeholder="Ex: Turma do Rolê" /></div>
       <div class="field"><label>Descrição <span style="color:var(--ink-3);font-weight:600;">(o que vai rolar?)</span></label>
         <textarea id="cr-desc" rows="3" placeholder="Conte pra galera: o que é, quem pode ir, o clima do rolê…"></textarea>
       </div>
@@ -1319,6 +1324,10 @@
           <div class="opt" data-h="12">12h<small>R$ 12,90</small></div>
           <div class="opt" data-h="24">24h<small>R$ 19,90</small></div>
         </div>
+      </div>
+      <div class="field hide" id="cr-mkt-dur-field"><label>Duração livre (horas) <small style="color:var(--ink-3);font-weight:600;">— sem limite de 24h, é modo marketing</small></label>
+        <input id="cr-mkt-hours" type="number" min="1" inputmode="numeric" placeholder="Ex: 168 (7 dias)" oninput="updateMktDaysHint()" />
+        <small id="cr-mkt-days-hint" style="color:var(--accent);font-weight:700;display:block;margin-top:6px;"></small>
       </div>
       <div class="toggle-row" onclick="togPriv(this)">
         <div class="tx"><b><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg> Sala privada</b><small>Só entra quem tem a senha</small></div>
@@ -2027,7 +2036,7 @@ const CENTER=[-23.5545,-46.687];
 // depois que alguém cria conta/rolê pelo Supabase (ver loadRoomsFromSupabase).
 let rooms=SUPABASE_READY?[]:(JSON.parse(localStorage.getItem('zona_rooms')||'null')||[]);
 let user=JSON.parse(localStorage.getItem('zona_user')||'null');
-let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null;
+let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null, mktMode=false;
 let boostDurH=6, boostPrice=990;
 // limites reais por plano — Start/Plus/Premium deixam de ser só rótulo de preço
 // e passam a valer alguma coisa concreta depois de pagar (antes disso, qualquer
@@ -3943,7 +3952,15 @@ function renderMyRoles(){
   const label=mrTab==='saved'?`${list.length} lugar(es) salvo(s)`:(mrTab==='joined'?`${list.length} chat(s) que você participa`:`${list.length} rolê(s) criado(s) por você`);
   box.innerHTML=`<p style="color:var(--ink-2);font-size:13.5px;margin-bottom:12px;">${label}</p>`;
   const wrap=document.createElement('div');wrap.style.cssText='display:flex;flex-direction:column;gap:10px;';
-  list.forEach(s=>{const el=cardHTML(s);el.onclick=()=>openRoom(s.id);wrap.appendChild(el);});
+  list.forEach(s=>{const el=cardHTML(s);el.onclick=()=>openRoom(s.id);
+    if(mrTab==='mine'&&s.isMarketing&&user&&user.email===DEV_EMAIL){
+      el.style.position='relative';
+      const b=document.createElement('span');
+      b.textContent='🎭 marketing';
+      b.style.cssText='position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;z-index:2;pointer-events:none;';
+      el.appendChild(b);
+    }
+    wrap.appendChild(el);});
   box.appendChild(wrap);
 }
 function emptySaved(){return `<div class="empty-cta">
@@ -4327,7 +4344,31 @@ function useCurrentAsRole(){
 function togPriv(r){priv=!priv;document.getElementById('priv-switch').classList.toggle('on',priv);document.getElementById('pass-field').classList.toggle('hide',!priv);}
 function togBoost(r){boost=!boost;document.getElementById('boost-switch').classList.toggle('on',boost);updatePrice();}
 function freeCooldownMs(){const t=+localStorage.getItem('zona_freecd')||0;return Math.max(0,t-Date.now());}
+function updateMktDaysHint(){
+  const h=+document.getElementById('cr-mkt-hours').value||0;
+  const hint=document.getElementById('cr-mkt-days-hint');
+  if(h<=0){hint.textContent='';return;}
+  const dias=h/24;
+  const diasFmt=dias>=10?Math.round(dias):(Math.round(dias*10)/10);
+  hint.textContent='≈ '+diasFmt+(diasFmt===1?' dia':' dias');
+}
+function togMkt(el){
+  if(!(user&&user.email===DEV_EMAIL))return;
+  mktMode=!mktMode;
+  document.getElementById('mkt-switch').classList.toggle('on',mktMode);
+  document.getElementById('cr-mkt-name-field').classList.toggle('hide',!mktMode);
+  document.getElementById('cr-dur-field').classList.toggle('hide',mktMode);
+  document.getElementById('cr-mkt-dur-field').classList.toggle('hide',!mktMode);
+  document.getElementById('cr-price').classList.toggle('hide',mktMode);
+  updatePrice();
+}
 function updatePrice(){
+  if(mktMode){
+    document.getElementById('cr-cd').classList.add('hide');
+    const btn=document.getElementById('cr-btn');
+    btn.textContent='Publicar rolê de marketing (grátis)';btn.classList.remove('disabled');
+    return;
+  }
   const base=durPrice[durH];const total=base+(boost?990:0);
   document.getElementById('pr-dur').textContent=durH+'h — '+(base?brl(base):'Grátis');
   document.getElementById('pr-boost-row').style.display=boost?'flex':'none';
@@ -4345,31 +4386,61 @@ function updatePrice(){
 }
 let editingId=null;
 async function submitRole(){
-  const total=durPrice[durH]+(boost?990:0);
-  if(!editingId && total===0){const rem=freeCooldownMs();if(rem>0){toast('Aguarde '+fmtRemaining(Date.now()+rem)+' pra criar outro rolê grátis');return;}}
+  const mkt=mktMode&&user&&user.email===DEV_EMAIL; // modo marketing: dev-only, checado de novo aqui (não só na UI)
+  const total=mkt?0:durPrice[durH]+(boost?990:0);
+  if(!editingId && !mkt && total===0){const rem=freeCooldownMs();if(rem>0){toast('Aguarde '+fmtRemaining(Date.now()+rem)+' pra criar outro rolê grátis');return;}}
   const name=document.getElementById('cr-name').value.trim();
   if(!name){toast('Dê um nome ao rolê');return;}
   if(priv&&!document.getElementById('cr-pass').value.trim()){toast('Defina a senha da sala');return;}
+  let mktName=null;
+  if(mkt){
+    mktName=document.getElementById('cr-mkt-name').value.trim();
+    if(!mktName){toast('Dê um nome de exibição pra persona');return;}
+  }
+  const mktHours=mkt?Math.max(1,+document.getElementById('cr-mkt-hours').value||24):null;
   const emoji='🎲',cat='Pessoas'; // rolê de pessoa comum: ícone e categoria fixos, não é um estabelecimento
   const locText=document.getElementById('cr-loc').value.trim();
   // ---- modo edição: atualiza o rolê existente ----
   if(editingId){
-    const r=rooms.find(x=>x.id===editingId);
-    if(r){r.nome=name;r.emoji=emoji;r.cat=cat;r.desc=document.getElementById('cr-desc').value.trim();
-      r.priv=priv;r.pass=priv?document.getElementById('cr-pass').value.trim():null;r.boost=boost;
-      r.cover=crCover;r.avatar=crAvatar;
-      if(roleCoords){r.lat=roleCoords.lat;r.lng=roleCoords.lng;}
-      if(locText)r.address=locText;}
-    save();editingId=null;resetCreate();toast('Rolê atualizado ✓');go('s-app');return;
+    const fields={
+      nome:name,desc_txt:document.getElementById('cr-desc').value.trim(),
+      priv,pass_hash:priv?document.getElementById('cr-pass').value.trim():null,
+      cover_url:crCover||null,avatar_url:crAvatar||null
+    };
+    if(roleCoords){fields.lat=roleCoords.lat;fields.lng=roleCoords.lng;}
+    if(locText)fields.address=locText;
+    if(mkt){
+      fields.is_marketing=true;
+      fields.creator_name_override=mktName;
+      fields.expires_at=new Date(Date.now()+mktHours*3600e3).toISOString();
+      fields.boost_until=boost?new Date(Date.now()+mktHours*3600e3).toISOString():null;
+    }
+    if(SUPABASE_READY&&user&&user.id){
+      showLoading('Salvando…');
+      try{await sbUpdateRoom(editingId,fields);await loadRoomsFromSupabase();}
+      catch(e){toastError('Não deu pra salvar agora');}
+      finally{hideLoading();}
+    }else{
+      const r=rooms.find(x=>x.id===editingId);
+      if(r){r.nome=name;r.desc=fields.desc_txt;r.priv=priv;r.pass=fields.pass_hash;r.boost=boost;
+        r.cover=crCover;r.avatar=crAvatar;
+        if(roleCoords){r.lat=roleCoords.lat;r.lng=roleCoords.lng;}
+        if(locText)r.address=locText;
+        if(mkt){r.isMarketing=true;r.creator=mktName;}}
+      save();
+    }
+    editingId=null;resetCreate();toast('Rolê atualizado ✓');go('s-app');return;
   }
   // coordenadas vêm do seletor de mapa; fallback pra posição atual
   const coords=roleCoords||{lat:userPos.lat+(Math.random()-.5)*.004,lng:userPos.lng+(Math.random()-.5)*.004};
-  pendingRoom={id:Date.now(),nome:name,emoji,cat,membros:1,dist:0,timer:durH+'h',durH,priv,mine:true,free:total===0,
-    desc:document.getElementById('cr-desc').value.trim(),creator:(user&&user.name)||'Anônimo',creatorAvatar:(user&&user.avatar)||'',
+  const durationMs=(mkt?mktHours:durH)*3600e3;
+  pendingRoom={id:Date.now(),nome:name,emoji,cat,membros:1,dist:0,timer:(mkt?mktHours:durH)+'h',durH:mkt?null:durH,priv,mine:true,free:total===0,
+    desc:document.getElementById('cr-desc').value.trim(),
+    creator:mkt?mktName:((user&&user.name)||'Anônimo'),creatorAvatar:mkt?'':((user&&user.avatar)||''),
     address:locText||'Perto de você · Vila Madalena',cover:crCover,avatar:crAvatar,
-    pass:priv?document.getElementById('cr-pass').value.trim():null,expiresAt:Date.now()+durH*3600e3,
-    lat:coords.lat,lng:coords.lng,boost};
-  if(total>0){
+    pass:priv?document.getElementById('cr-pass').value.trim():null,expiresAt:Date.now()+durationMs,
+    lat:coords.lat,lng:coords.lng,boost,isMarketing:mkt,mktName:mkt?mktName:null};
+  if(!mkt&&total>0){
     startInfinitePayCheckout('role_personal',total,'Rolê: '+name,{room:{
       nome:pendingRoom.nome,emoji:pendingRoom.emoji,cat:pendingRoom.cat,is_business:false,
       desc_txt:pendingRoom.desc,address:pendingRoom.address,priv:pendingRoom.priv,pass_hash:pendingRoom.pass,
@@ -4380,7 +4451,8 @@ async function submitRole(){
   }else{publishPending();}
 }
 async function publishPending(){
-  if(pendingRoom.free){localStorage.setItem('zona_freecd',pendingRoom.expiresAt+3600e3);}
+  const wasMkt=!!pendingRoom.isMarketing;
+  if(pendingRoom.free&&!wasMkt){localStorage.setItem('zona_freecd',pendingRoom.expiresAt+3600e3);}
   if(SUPABASE_READY&&user&&user.id){
     showLoading('Publicando seu rolê…');
     try{
@@ -4390,7 +4462,8 @@ async function publishPending(){
         cover_url:pendingRoom.cover||null,avatar_url:pendingRoom.avatar||null,
         pass_hash:pendingRoom.pass||null,lat:pendingRoom.lat,lng:pendingRoom.lng,
         expires_at:new Date(pendingRoom.expiresAt).toISOString(),
-        boost_until:pendingRoom.boost?new Date(Date.now()+durH*3600e3).toISOString():null
+        boost_until:pendingRoom.boost?new Date(pendingRoom.expiresAt).toISOString():null,
+        is_marketing:wasMkt,creator_name_override:wasMkt?pendingRoom.mktName:null
       });
       await loadRoomsFromSupabase();
     }catch(e){toastError('Não deu pra publicar no servidor — salvo só localmente');rooms.unshift(pendingRoom);}
@@ -4399,7 +4472,7 @@ async function publishPending(){
     rooms.unshift(pendingRoom);save();
   }
   pendingRoom=null;
-  resetCreate();toast('Rolê publicado no mapa! 🚀');go('s-app');
+  resetCreate();toast(wasMkt?'Rolê de marketing publicado! 🎭':'Rolê publicado no mapa! 🚀');go('s-app');
 }
 function resetCreate(){
   document.getElementById('cr-name').value='';document.getElementById('cr-pass').value='';
@@ -4415,6 +4488,16 @@ function resetCreate(){
   priv=false;boost=false;durH=1;
   document.getElementById('priv-switch').classList.remove('on');document.getElementById('boost-switch').classList.remove('on');
   document.getElementById('pass-field').classList.add('hide');
+  mktMode=false;
+  document.getElementById('mkt-switch').classList.remove('on');
+  document.getElementById('cr-mkt-name-field').classList.add('hide');
+  document.getElementById('cr-mkt-name').value='';
+  document.getElementById('cr-mkt-dur-field').classList.add('hide');
+  document.getElementById('cr-mkt-hours').value='';
+  updateMktDaysHint();
+  document.getElementById('cr-dur-field').classList.remove('hide');
+  document.getElementById('cr-price').classList.remove('hide');
+  document.getElementById('cr-mkt-row').classList.toggle('hide',!(user&&user.email===DEV_EMAIL));
   document.querySelectorAll('#cr-dur .opt').forEach((x,i)=>x.classList.toggle('sel',i===0));updatePrice();
 }
 function openCreate(){resetCreate();go('s-create');}
@@ -4596,6 +4679,15 @@ function editMyRole(){
   priv=!!r.priv;document.getElementById('priv-switch').classList.toggle('on',priv);document.getElementById('pass-field').classList.toggle('hide',!priv);
   if(priv)document.getElementById('cr-pass').value=r.pass||'';
   boost=!!r.boost;document.getElementById('boost-switch').classList.toggle('on',boost);
+  mktMode=!!r.isMarketing;
+  document.getElementById('cr-mkt-row').classList.toggle('hide',!(user&&user.email===DEV_EMAIL));
+  document.getElementById('mkt-switch').classList.toggle('on',mktMode);
+  document.getElementById('cr-mkt-name-field').classList.toggle('hide',!mktMode);
+  document.getElementById('cr-mkt-name').value=mktMode?(r.creator||''):'';
+  document.getElementById('cr-dur-field').classList.toggle('hide',mktMode);
+  document.getElementById('cr-mkt-dur-field').classList.toggle('hide',!mktMode);
+  document.getElementById('cr-mkt-hours').value=mktMode?Math.max(1,Math.round((r.expiresAt-Date.now())/3600e3)):'';
+  updateMktDaysHint();
   document.querySelector('#s-create .appbar h2').textContent='Editar rolê';
   setEditUI(true,r);
   go('s-create');
@@ -5414,7 +5506,11 @@ function sbRoomToLocal(r){
     clubUntil:r.club_until?new Date(r.club_until).getTime():null,
     planTier:r.plan_tier||null,
     expiresAt:r.expires_at?new Date(r.expires_at).getTime():null,
-    creator:(r.profiles&&r.profiles.name)||'Anônimo',creatorAvatar:(r.profiles&&r.profiles.avatar_url)||'',
+    isMarketing:!!r.is_marketing,
+    // rolê de marketing: nunca usa nome/foto reais do dono, mesmo sem override definido —
+    // não pode cair no fallback do perfil real, ou a persona fictícia vaza a identidade dele.
+    creator:r.is_marketing?(r.creator_name_override||'Anônimo'):((r.profiles&&r.profiles.name)||'Anônimo'),
+    creatorAvatar:r.is_marketing?(r.creator_avatar_override||''):((r.profiles&&r.profiles.avatar_url)||''),
     mine:!!(user&&user.id===r.owner_id),ownerId:r.owner_id,profileViews:r.profile_views||0,
     desc:r.desc_txt,cover:r.cover_url,avatar:r.avatar_url
   };
