@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#ffffff" />
 <script>
 (function(){
-  var saved=localStorage.getItem('role_theme');
+  var saved=null;try{saved=localStorage.getItem('role_theme');}catch(e){}
   var dark = saved ? saved==='dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   if(dark)document.documentElement.setAttribute('data-theme','dark');
 })();
@@ -1972,7 +1972,7 @@ function applyTheme(theme){
 }
 function toggleDarkMode(){
   const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
-  localStorage.setItem('role_theme',next);
+  lsSet('role_theme',next);
   applyTheme(next);
 }
 applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light');
@@ -1990,12 +1990,12 @@ function openInstallScreen(){
   // sem depender de mais nada), e só depois decide se mostra o popup por
   // cima. Assim não existe "tela presa": o app de verdade já está ali embaixo.
   routeAfterAuth(true);
-  if(isStandaloneApp()||!isMobileDevice()||localStorage.getItem('zona_install_hide'))return;
+  if(isStandaloneApp()||!isMobileDevice()||lsGet('zona_install_hide'))return;
   document.getElementById('install-dontshow-chk').checked=false;
   document.getElementById('install-popup').classList.add('active');
 }
 function closeInstallPopup(){
-  if(document.getElementById('install-dontshow-chk').checked)localStorage.setItem('zona_install_hide','1');
+  if(document.getElementById('install-dontshow-chk').checked)lsSet('zona_install_hide','1');
   document.getElementById('install-popup').classList.remove('active');
 }
 
@@ -2039,8 +2039,20 @@ startPhoneDemo();
 const CENTER=[-23.5545,-46.687];
 // Produção: sem dado de mentira. Rooms começam vazios e só existem de verdade
 // depois que alguém cria conta/rolê pelo Supabase (ver loadRoomsFromSupabase).
-let rooms=SUPABASE_READY?[]:(JSON.parse(localStorage.getItem('zona_rooms')||'null')||[]);
-let user=JSON.parse(localStorage.getItem('zona_user')||'null');
+// wrappers seguros pro localStorage — nunca deixa uma falha (cota estourada,
+// modo privado que bloqueia storage, extensão do navegador, etc.) travar o
+// resto do app. Usado em todo lugar que grava/lê/apaga algo local a partir daqui.
+function lsGet(key){try{return localStorage.getItem(key);}catch(e){return null;}}
+function lsSet(key,val){try{localStorage.setItem(key,val);}catch(e){console.error('localStorage.setItem falhou:',key,e);}}
+function lsRemove(key){try{localStorage.removeItem(key);}catch(e){}}
+let rooms=SUPABASE_READY?[]:(JSON.parse(lsGet('zona_rooms')||'null')||[]);
+let user=JSON.parse(lsGet('zona_user')||'null');
+// zona_rooms nunca é lida de volta quando o Supabase é a fonte de verdade (rooms
+// sempre recarrega do zero via loadRoomsFromSupabase) — era peso morto crescendo
+// a cada negócio catalogado com foto (tudo em base64), até estourar a cota do
+// localStorage e quebrar save() (login, criar rolê, etc.) com um erro genérico
+// que não dizia o motivo real. Limpa o que já tiver acumulado de sessões antigas.
+if(SUPABASE_READY)lsRemove('zona_rooms');
 let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null, mktMode=false, mktDays=1;
 function setMktDays(d){
   const opts=[...document.querySelectorAll('#cr-mkt-dur .opt')];
@@ -2071,7 +2083,10 @@ let roleCoords=null;
 const durPrice={1:0,3:490,6:790,12:1290,24:1990};
 let map,markers=[];
 
-function save(){localStorage.setItem('zona_rooms',JSON.stringify(rooms));localStorage.setItem('zona_user',JSON.stringify(user));}
+function save(){
+  if(!SUPABASE_READY)lsSet('zona_rooms',JSON.stringify(rooms));
+  lsSet('zona_user',JSON.stringify(user));
+}
 function brl(c){return 'R$ '+(c/100).toFixed(2).replace('.',',');}
 function maskPreco(el){
   const wrap=el.closest('.price-input');
@@ -3455,7 +3470,7 @@ async function confirmCancelSignup(){
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'não deu pra cancelar a conta');
     await sbSignOut();
-    user=null;localStorage.removeItem('zona_user');
+    user=null;lsRemove('zona_user');
     document.getElementById('root').classList.remove('biz-mode');
     resetNav();go('s-login',true);
     toast('Conta cancelada — pode criar de novo quando quiser');
@@ -3566,7 +3581,7 @@ function fillBizSetup(){
   renderAllHorarios();
 }
 function finishBizSetup(){go('s-biz',true);fillBiz();}
-function logout(){if(SUPABASE_READY)sbSignOut();if(notifBannerChannel){sb.removeChannel(notifBannerChannel);notifBannerChannel=null;}user=null;localStorage.removeItem('zona_user');document.getElementById('root').classList.remove('biz-mode');resetNav();go('s-login',true);toast('Você saiu');}
+function logout(){if(SUPABASE_READY)sbSignOut();if(notifBannerChannel){sb.removeChannel(notifBannerChannel);notifBannerChannel=null;}user=null;lsRemove('zona_user');document.getElementById('root').classList.remove('biz-mode');resetNav();go('s-login',true);toast('Você saiu');}
 
 /* ============ MAP + FEED ============ */
 const FEED_TOP5=['Bar','Restaurante','Balada','Cervejaria','Academia'];
@@ -3890,9 +3905,9 @@ function clearRoute(keepBanner){
 }
 
 /* ============ MEUS ROLÊS ============ */
-let joined=JSON.parse(localStorage.getItem('zona_joined')||'[]');
-let savedPlaces=JSON.parse(localStorage.getItem('zona_saved')||'[]');
-let blocked=JSON.parse(localStorage.getItem('zona_blocked')||'[]');
+let joined=JSON.parse(lsGet('zona_joined')||'[]');
+let savedPlaces=JSON.parse(lsGet('zona_saved')||'[]');
+let blocked=JSON.parse(lsGet('zona_blocked')||'[]');
 // puxa salvos/entrou/bloqueados de verdade do servidor (localStorage era só
 // cache local — sumia ao trocar de aparelho ou limpar o navegador)
 async function hydrateUserFlags(){
@@ -3902,15 +3917,15 @@ async function hydrateUserFlags(){
     savedPlaces=flags.filter(f=>f.flag==='saved').map(f=>f.room_id);
     joined=flags.filter(f=>f.flag==='joined').map(f=>f.room_id);
     blocked=flags.filter(f=>f.flag==='blocked').map(f=>f.room_id);
-    localStorage.setItem('zona_saved',JSON.stringify(savedPlaces));
-    localStorage.setItem('zona_joined',JSON.stringify(joined));
-    localStorage.setItem('zona_blocked',JSON.stringify(blocked));
+    lsSet('zona_saved',JSON.stringify(savedPlaces));
+    lsSet('zona_joined',JSON.stringify(joined));
+    lsSet('zona_blocked',JSON.stringify(blocked));
   }catch(e){console.error('Falha ao carregar salvos/entrou/bloqueados',e);}
 }
 async function toggleSaved(id){
   const i=savedPlaces.indexOf(id);
   if(i>-1){savedPlaces.splice(i,1);}else{savedPlaces.push(id);}
-  localStorage.setItem('zona_saved',JSON.stringify(savedPlaces));
+  lsSet('zona_saved',JSON.stringify(savedPlaces));
   const isSaved=savedPlaces.includes(id);
   document.querySelectorAll(`.save-btn[data-id="${id}"]`).forEach(b=>b.classList.toggle('saved',isSaved));
   toast(isSaved?'Local salvo 🔖':'Removido dos salvos');
@@ -3922,7 +3937,7 @@ async function toggleSaved(id){
 }
 function markJoined(id){
   if(!joined.includes(id)){
-    joined.push(id);localStorage.setItem('zona_joined',JSON.stringify(joined));
+    joined.push(id);lsSet('zona_joined',JSON.stringify(joined));
     if(SUPABASE_READY&&user&&user.id)sbAddFlag(user.id,id,'joined').catch(()=>{});
   }
 }
@@ -3932,7 +3947,7 @@ function closeChatMenu(){document.getElementById('chat-menu').classList.remove('
 function leaveRoom(){
   closeChatMenu();
   if(chatRoom){
-    joined=joined.filter(id=>id!==chatRoom.id);localStorage.setItem('zona_joined',JSON.stringify(joined));
+    joined=joined.filter(id=>id!==chatRoom.id);lsSet('zona_joined',JSON.stringify(joined));
     if(SUPABASE_READY&&user&&user.id)sbRemoveFlag(user.id,chatRoom.id,'joined').catch(()=>{});
   }
   toast('Você saiu da sala');goBack();
@@ -3945,10 +3960,10 @@ function blockRoom(){
   closeChatMenu();
   if(chatRoom){
     if(!blocked.includes(chatRoom.id)){
-      blocked.push(chatRoom.id);localStorage.setItem('zona_blocked',JSON.stringify(blocked));
+      blocked.push(chatRoom.id);lsSet('zona_blocked',JSON.stringify(blocked));
       if(SUPABASE_READY&&user&&user.id)sbAddFlag(user.id,chatRoom.id,'blocked').catch(()=>{});
     }
-    joined=joined.filter(id=>id!==chatRoom.id);localStorage.setItem('zona_joined',JSON.stringify(joined));
+    joined=joined.filter(id=>id!==chatRoom.id);lsSet('zona_joined',JSON.stringify(joined));
     if(SUPABASE_READY&&user&&user.id)sbRemoveFlag(user.id,chatRoom.id,'joined').catch(()=>{});
   }
   toast('🚫 Bloqueado. Você não vê mais essa sala.');goBack();
@@ -4162,7 +4177,7 @@ function enableAccept(){
 function acceptTerms(){
   if(termsAccepted)return;
   termsAccepted=true;termsAcceptedAt=new Date().toISOString();
-  localStorage.setItem('zona_terms_ever_accepted','1');
+  lsSet('zona_terms_ever_accepted','1');
   const row=document.getElementById('lgpd-row');if(row)row.classList.add('done');
   toast('Termos aceitos ✓');
   if(termsGateAction){const cb=termsGateAction;termsGateAction=null;cb();}
@@ -4175,7 +4190,7 @@ function closeTerms(){goBack();}
 // e só dispara o redirect depois de aceitar.
 function googleAuthGate(){
   if(!SUPABASE_READY){toast('Sem conexão com o servidor');return;}
-  if(localStorage.getItem('zona_terms_ever_accepted')){loginWithOAuth('google');return;}
+  if(lsGet('zona_terms_ever_accepted')){loginWithOAuth('google');return;}
   termsGateAction=()=>loginWithOAuth('google');
   openTerms('uso');
 }
@@ -4359,7 +4374,7 @@ function useCurrentAsRole(){
 }
 function togPriv(r){priv=!priv;document.getElementById('priv-switch').classList.toggle('on',priv);document.getElementById('pass-field').classList.toggle('hide',!priv);}
 function togBoost(r){boost=!boost;document.getElementById('boost-switch').classList.toggle('on',boost);updatePrice();}
-function freeCooldownMs(){const t=+localStorage.getItem('zona_freecd')||0;return Math.max(0,t-Date.now());}
+function freeCooldownMs(){const t=+lsGet('zona_freecd')||0;return Math.max(0,t-Date.now());}
 function togMkt(el){
   if(!(user&&user.email===DEV_EMAIL))return;
   mktMode=!mktMode;
@@ -4460,7 +4475,7 @@ async function submitRole(){
 }
 async function publishPending(){
   const wasMkt=!!pendingRoom.isMarketing;
-  if(pendingRoom.free&&!wasMkt){localStorage.setItem('zona_freecd',pendingRoom.expiresAt+3600e3);}
+  if(pendingRoom.free&&!wasMkt){lsSet('zona_freecd',pendingRoom.expiresAt+3600e3);}
   if(SUPABASE_READY&&user&&user.id){
     showLoading('Publicando seu rolê…');
     try{
@@ -4703,7 +4718,7 @@ function cancelMyRole(){
   const r=currentRole;if(!r)return;
   if(!confirm('Cancelar o rolê "'+r.nome+'"? Isso remove a sala do mapa.'))return;
   rooms=rooms.filter(x=>x.id!==r.id);
-  joined=joined.filter(id=>id!==r.id);localStorage.setItem('zona_joined',JSON.stringify(joined));
+  joined=joined.filter(id=>id!==r.id);lsSet('zona_joined',JSON.stringify(joined));
   save();toast('Rolê cancelado');goBack();
 }
 let currentBiz=null;
@@ -5480,7 +5495,7 @@ function updateOb(){
   document.querySelectorAll('#ob-dots span').forEach((d,i)=>d.classList.toggle('active',i===obIndex));
   document.getElementById('ob-next').textContent=obIndex===2?'Começar 🚀':'Próximo';
 }
-function finishOnboard(){localStorage.setItem('zona_onboarded','1');go('s-login',true);}
+function finishOnboard(){lsSet('zona_onboarded','1');go('s-login',true);}
 
 /* ============ BOOT (resiliente — a splash nunca pode travar) ============ */
 try{initExpiry();}catch(e){}
@@ -5603,7 +5618,7 @@ async function bootSequence(){
       }
       else if(user&&!user.emailVerified){goVerifyEmail(()=>{routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);});}
       else if(user){routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);}
-      else if(!localStorage.getItem('zona_onboarded')){go('s-onboard',true);}
+      else if(!lsGet('zona_onboarded')){go('s-onboard',true);}
       else{go('s-login',true);}
     }catch(e){go('s-login',true);}
   },1300);
