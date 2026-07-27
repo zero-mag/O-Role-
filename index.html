@@ -56,7 +56,18 @@
   /* device frame */
   #root{position:relative;height:100vh;height:100dvh;max-width:480px;margin:0 auto;overflow:hidden;background:var(--card);box-shadow:0 0 60px rgba(0,0,0,.06);}
   .screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);}
-  .screen.active{display:flex;animation:fade .25s ease;}
+  .screen.active{display:flex;z-index:2;}
+  /* transição entre telas: a que sai fica visível (z-index mais baixo) animando
+     pra fora enquanto a que entra já aparece por cima — sem esse overlap dava
+     um "pulo" (a tela antiga sumia na mesma hora que a nova começava do zero). */
+  .screen.entering{animation:screenIn .28s cubic-bezier(.22,.8,.36,1) both;}
+  .screen.entering.is-modal{animation:sheetIn .32s cubic-bezier(.22,.8,.36,1) both;}
+  .screen.leaving{display:flex;z-index:1;animation:screenOut .22s ease both;}
+  .screen.leaving.is-modal{animation:sheetOut .24s ease both;}
+  @keyframes screenIn{from{opacity:0;transform:scale(.97);}to{opacity:1;transform:scale(1);}}
+  @keyframes screenOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.98);}}
+  @keyframes sheetIn{from{opacity:0;transform:translateY(36px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes sheetOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(22px);}}
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
   @keyframes modalIn{from{opacity:0;transform:translate(-50%,-46%) scale(.98);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
 
@@ -2142,11 +2153,34 @@ setInterval(cleanupExpiredRoles,15000);
 const MODALS=['s-create','s-pay','s-chat','s-profile','s-bizprofile','s-roleprofile','s-myroles','s-terms','s-feed','s-notif','s-settings','s-payhist','s-help','s-admin-tool'];
 let navHistory=[];
 function go(id,replace){
-  const cur=document.querySelector('.screen.active');
+  const next=document.getElementById(id);
+  const cur=document.querySelector('.screen.active:not(.leaving)');
+  if(cur===next)return; // já está nessa tela, nada pra transicionar
   if(cur&&!replace&&cur.id!==id){navHistory.push(cur.id);if(navHistory.length>25)navHistory.shift();}
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.getElementById('root').classList.toggle('modal-mode',MODALS.includes(id));
+  // limpa qualquer transição anterior que ainda não tenha terminado (navegação
+  // rápida em sequência) — evita duas telas "leaving" acumuladas ao mesmo tempo,
+  // e garante que a checagem de visibilidade logo abaixo não seja enganada por
+  // uma classe "leaving" que ainda não tinha sido limpa.
+  document.querySelectorAll('.screen.leaving').forEach(s=>{clearTimeout(s._leaveTimer);s.classList.remove('active','leaving','entering','is-modal');});
+  // "next" pode já estar visível por baixo de um modal (ex: s-app fica visível
+  // atrás de qualquer tela-modal aberta) — nesse caso não tem o que "entrar",
+  // senão ela pisca fazendo a animação de entrada em cima do que já tava lá.
+  const nextAlreadyVisible=getComputedStyle(next).display!=='none';
+  const enteringModal=MODALS.includes(id);
+  if(cur){
+    const wasModal=MODALS.includes(cur.id);
+    cur.classList.remove('entering');
+    cur.classList.add('leaving');
+    cur.classList.toggle('is-modal',wasModal);
+    cur._leaveTimer=setTimeout(()=>{cur.classList.remove('active','leaving','is-modal');},wasModal?260:240);
+  }
+  next.classList.add('active');
+  if(!nextAlreadyVisible){
+    next.classList.add('entering');
+    next.classList.toggle('is-modal',enteringModal);
+    setTimeout(()=>next.classList.remove('entering','is-modal'),enteringModal?340:300);
+  }
+  document.getElementById('root').classList.toggle('modal-mode',enteringModal);
   if(id!=='s-chat')currentChatExp=null;
   if(id==='s-app'){setTimeout(initMap,60);}
   if(id==='s-create')updatePrice();
@@ -4155,7 +4189,7 @@ function tgSet(el,name){el.classList.toggle('on');toast(name+(el.classList.conta
 /* ============ TERMOS / PRIVACIDADE ============ */
 let termsReturn='s-form',termsAccepted=false,termsAcceptedAt=null,termsGateAction=null;
 function openTerms(which){
-  termsReturn=document.querySelector('.screen.active').id;
+  termsReturn=document.querySelector('.screen.active:not(.leaving)').id;
   document.getElementById('terms-title').textContent=which==='privacidade'?'Política de Privacidade':'Termos de Uso';
   document.getElementById('terms-body').innerHTML=TERMS_HTML;
   document.getElementById('terms-body').scrollTop=0;
