@@ -4748,12 +4748,21 @@ function editMyRole(){
   go('s-create');
   document.getElementById('cr-btn').textContent='Salvar alterações';
 }
-function cancelMyRole(){
+async function cancelMyRole(){
   const r=currentRole;if(!r)return;
   if(!confirm('Cancelar o rolê "'+r.nome+'"? Isso remove a sala do mapa.'))return;
-  rooms=rooms.filter(x=>x.id!==r.id);
+  if(SUPABASE_READY&&user&&user.id){
+    showLoading('Cancelando…');
+    try{
+      await sbDeleteRoom(r.id);
+      await loadRoomsFromSupabase();
+    }catch(e){toastError('Não deu pra cancelar agora');hideLoading();return;}
+    hideLoading();
+  }else{
+    rooms=rooms.filter(x=>x.id!==r.id);save();
+  }
   joined=joined.filter(id=>id!==r.id);lsSet('zona_joined',JSON.stringify(joined));
-  save();toast('Rolê cancelado');goBack();
+  toast('Rolê cancelado');goBack();
 }
 let currentBiz=null;
 function openBizProfile(r){
