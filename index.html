@@ -4002,6 +4002,7 @@ async function clearRoomChat(){
     await sbClearRoomMessages(chatRoom.id);
     document.getElementById('msgs').innerHTML='';
     addMsg('Bem-vindo à sala de '+chatRoom.nome+'!','them','Sistema');
+    renderBizChats(); // atualiza "Conversas recentes" no painel do negócio, se existir
     toast('Conversa limpa ✓');
   }catch(e){toastError('Não deu pra limpar a conversa agora');}
   finally{hideLoading();}
@@ -4893,6 +4894,7 @@ async function enterChat(r){
       addMsg(msg.texto,'them',msg.sender_name,msg.id);
     },delId=>{
       const el=document.querySelector('#msgs [data-id="'+delId+'"]');if(el)el.remove();
+      renderBizChats();
     });
   }else{
     addMsg('Bem-vindo à sala de '+r.nome+(r.isBusiness?'!':'! A sala expira em '+r.timer+'.'),'them','Sistema');
@@ -4922,7 +4924,7 @@ function bindMsgLongPress(el,msgId){
 }
 async function deleteMsg(msgId,el){
   if(!confirm('Apagar essa mensagem pra todo mundo? Não dá pra desfazer.'))return;
-  try{await sbDeleteMessage(msgId);el.remove();}
+  try{await sbDeleteMessage(msgId);el.remove();renderBizChats();}
   catch(e){toastError('Não deu pra apagar essa mensagem agora');}
 }
 /* ---- Moderação: negócios catalogados por nós (sem dono ativo ainda) não têm quem module o chat manualmente,
