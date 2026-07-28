@@ -4321,7 +4321,7 @@ function enterGoogleBusinessUpgrade(){
 }
 // URL provisória — troca pela real assim que a função for deployada (nome
 // aleatório de sempre, confira a coluna URL no painel do Supabase)
-const UPGRADE_TO_BUSINESS_URL='/functions/v1/upgrade-to-business';
+const UPGRADE_TO_BUSINESS_URL='/functions/v1/quick-responder'; // nome de exibição é "upgrade-to-business" no painel
 async function finishGoogleBusinessUpgrade(){
   if(!user||!user.id){toast('Sessão inválida — tente entrar de novo');return;}
   const name=document.getElementById('su-name').value.trim();
