@@ -2265,7 +2265,7 @@ async function doLogin(){
       startNotifBannerSubscription();
       toast('Bem-vindo(a), '+user.name+'! 👋');
       save();
-      if(!user.emailVerified&&user.type==='personal'&&SKIP_EMAIL_VERIFY_PERSONAL){
+      if(!user.emailVerified&&SKIP_EMAIL_VERIFY){
         user.emailVerified=true;
         await sbUpdateProfile(authUser.id,{email_verified:true});
         save();
@@ -3523,11 +3523,13 @@ async function confirmCancelSignup(){
 function openTier3Notice(){document.getElementById('tier3-notice-modal').classList.add('active');}
 function closeTier3Notice(){document.getElementById('tier3-notice-modal').classList.remove('active');}
 function confirmTier3Notice(){tier3Acked=true;closeTier3Notice();doSignup();}
-// TEMPORÁRIO (2026-07-20): Resend só manda e-mail pro dono da conta até verificar um domínio,
-// então confirmação de e-mail tá quebrada pra qualquer pessoa nova. Só pula pra conta PESSOAL
-// (negócio continua exigindo verificação de CNPJ normalmente). Tirar esse bypass assim que o
-// domínio for verificado no Resend e o remetente das Edge Functions for trocado.
-const SKIP_EMAIL_VERIFY_PERSONAL=true;
+// TEMPORÁRIO (2026-07-20, ampliado pra negócio em 2026-07-28): Resend só manda
+// e-mail pro dono da conta até verificar um domínio, então confirmação de
+// e-mail tá quebrada pra qualquer pessoa nova — pessoal OU negócio (achado ao
+// vivo: cadastro de negócio ficava preso esperando um e-mail que nunca
+// chegava). Tirar esse bypass assim que o domínio for verificado no Resend e
+// o remetente das Edge Functions for trocado.
+const SKIP_EMAIL_VERIFY=true;
 // (2026-07-27) Desde a reforma do cadastro de negócio, doSignup() nem chama mais
 // startCnpjOwnershipVerify() — CNPJ virou campo opcional, sem verificação de posse
 // nesse ponto do fluxo. Essa constante ficou sem uso por enquanto (a tela/Edge
@@ -3595,7 +3597,7 @@ async function doSignup(){
         user.roomId=room.id;user.vitrine=[];user.promocoes=[];user.oferece=ofereceFinal;user.horario=horarioFinal;
       }
       user.id=authUser.id;
-      if(user.type==='personal'&&SKIP_EMAIL_VERIFY_PERSONAL){
+      if(SKIP_EMAIL_VERIFY){
         user.emailVerified=true;
         await sbUpdateProfile(authUser.id,{email_verified:true});
         save();
@@ -5719,7 +5721,7 @@ async function bootSequence(){
   setTimeout(()=>{
     hideSplash();
     try{
-      if(user&&!user.emailVerified&&user.type==='personal'&&SKIP_EMAIL_VERIFY_PERSONAL){
+      if(user&&!user.emailVerified&&SKIP_EMAIL_VERIFY){
         user.emailVerified=true;
         if(SUPABASE_READY&&user.id)sbUpdateProfile(user.id,{email_verified:true}).catch(()=>{});
         save();
