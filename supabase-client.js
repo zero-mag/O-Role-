@@ -232,16 +232,32 @@ async function sbLoadMessages(roomId) {
 
 async function sbSendMessage(roomId, senderName, texto) {
   const { data: { user } } = await sb.auth.getUser();
-  const { error } = await sb.from('messages').insert({
+  const { data, error } = await sb.from('messages').insert({
     room_id: roomId, sender_id: user ? user.id : null, sender_name: senderName, texto
-  });
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function sbDeleteMessage(msgId) {
+  const { error } = await sb.from('messages').delete().eq('id', msgId);
   if (error) throw error;
 }
 
-// chama cb(novaMensagem) em tempo real pra quem está na sala
-function sbSubscribeMessages(roomId, cb) {
-  return sb
+// dono da sala apaga tudo de uma vez (botão "Limpar conversa" e limpeza automática ao reabrir)
+async function sbClearRoomMessages(roomId) {
+  const { error } = await sb.from('messages').delete().eq('room_id', roomId);
+  if (error) throw error;
+}
+
+// chama cb(novaMensagem) em tempo real pra quem está na sala; cbDelete(idApagado)
+// quando alguém apaga uma mensagem (a própria, ou o dono limpando a conversa)
+function sbSubscribeMessages(roomId, cb, cbDelete) {
+  const channel = sb
     .channel('messages-room-' + roomId)
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'room_id=eq.' + roomId }, payload => cb(payload.new))
-    .subscribe();
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'room_id=eq.' + roomId }, payload => cb(payload.new));
+  if (cbDelete) {
+    channel.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages', filter: 'room_id=eq.' + roomId }, payload => cbDelete(payload.old.id));
+  }
+  return channel.subscribe();
 }

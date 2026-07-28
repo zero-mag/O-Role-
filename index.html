@@ -580,6 +580,8 @@
   .msg .who{font-size:11px;font-weight:800;margin-bottom:3px;color:var(--accent-dark);}
   .msg.them{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px;}
   .msg.me{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:5px;}
+  .msg.deletable{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  .msg.pressing{opacity:.6;transform:scale(.96);transition:.15s;}
   .composer{display:flex;gap:8px;padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);background:var(--card);border-top:1px solid var(--line);}
   .composer input{flex:1;min-width:0;padding:13px 16px;border-radius:100px;border:1px solid var(--line-2);background:var(--bg);font-size:14px;color:var(--ink);}
   .composer input:focus{outline:none;border-color:var(--accent);}
@@ -1832,6 +1834,7 @@
     <div class="sm-backdrop" onclick="closeChatMenu()"></div>
     <div class="sm-card">
       <div class="sm-title" id="sm-room-name">Sala</div>
+      <button class="sm-item hide" id="sm-clear-chat" onclick="clearRoomChat()"><span class="sm-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span> Limpar conversa</button>
       <button class="sm-item" onclick="leaveRoom()"><span class="sm-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></span> Sair da sala</button>
       <button class="sm-item warn" onclick="reportRoom()"><span class="sm-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5"/></svg></span> Denunciar sala</button>
       <button class="sm-item warn" onclick="blockRoom()"><span class="sm-ic"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/></svg></span> Bloquear e não ver mais</button>
@@ -3984,7 +3987,25 @@ function markJoined(id){
   }
 }
 /* ===== segurança: sair / denunciar / bloquear ===== */
-function openChatMenu(){if(!chatRoom)return;document.getElementById('sm-room-name').textContent=chatRoom.nome;document.getElementById('chat-menu').classList.add('active');}
+function openChatMenu(){
+  if(!chatRoom)return;
+  document.getElementById('sm-room-name').textContent=chatRoom.nome;
+  document.getElementById('sm-clear-chat').classList.toggle('hide',!chatRoom.mine);
+  document.getElementById('chat-menu').classList.add('active');
+}
+async function clearRoomChat(){
+  if(!chatRoom)return;
+  closeChatMenu();
+  if(!confirm('Apagar toda a conversa dessa sala pra todo mundo? Não dá pra desfazer.'))return;
+  showLoading('Limpando conversa…');
+  try{
+    await sbClearRoomMessages(chatRoom.id);
+    document.getElementById('msgs').innerHTML='';
+    addMsg('Bem-vindo à sala de '+chatRoom.nome+'!','them','Sistema');
+    toast('Conversa limpa ✓');
+  }catch(e){toastError('Não deu pra limpar a conversa agora');}
+  finally{hideLoading();}
+}
 function closeChatMenu(){document.getElementById('chat-menu').classList.remove('active');}
 function leaveRoom(){
   closeChatMenu();
@@ -4854,23 +4875,55 @@ async function enterChat(r){
   const m=document.getElementById('msgs');m.innerHTML='';
   if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}
   if(SUPABASE_READY){
+    // o dono reabrindo o próprio negócio depois de fechado limpa a conversa antes
+    // de carregar — "renasce" vazia pra ele e pra qualquer visitante que entrar
+    // depois. Só dispara pro dono (é quem tem permissão de apagar mensagem
+    // alheia) e só quando fechou pelo horário, não quando o chat foi desligado
+    // manualmente.
+    if(r.mine&&r.isBusiness&&statusHorario(r).state==='fechado'){
+      try{await sbClearRoomMessages(r.id);}catch(e){}
+    }
     addMsg('Bem-vindo à sala de '+r.nome+(r.isBusiness?'!':'! A sala expira em '+r.timer+'.'),'them','Sistema');
     try{
       const history=await sbLoadMessages(r.id);
-      history.forEach(msg=>addMsg(msg.texto,(user&&msg.sender_id===user.id)?'me':'them',msg.sender_name));
+      history.forEach(msg=>addMsg(msg.texto,(user&&msg.sender_id===user.id)?'me':'them',msg.sender_name,msg.id));
     }catch(e){console.error('Falha ao carregar histórico do chat',e);addMsg('Não consegui carregar as mensagens antigas dessa sala.','them','Sistema');}
     chatChannel=sbSubscribeMessages(r.id,msg=>{
       if(user&&msg.sender_id===user.id)return; // já mostramos a nossa mensagem na hora de enviar
-      addMsg(msg.texto,'them',msg.sender_name);
+      addMsg(msg.texto,'them',msg.sender_name,msg.id);
+    },delId=>{
+      const el=document.querySelector('#msgs [data-id="'+delId+'"]');if(el)el.remove();
     });
   }else{
     addMsg('Bem-vindo à sala de '+r.nome+(r.isBusiness?'!':'! A sala expira em '+r.timer+'.'),'them','Sistema');
   }
   go('s-chat');
 }
-function addMsg(t,cls,who){
+function addMsg(t,cls,who,id){
   const m=document.getElementById('msgs');const d=document.createElement('div');d.className='msg '+cls;
-  d.innerHTML=(cls==='them'&&who?`<div class="who">${escHtml(who)}</div>`:'')+escHtml(t);m.appendChild(d);m.scrollTop=m.scrollHeight;
+  d.innerHTML=(cls==='them'&&who?`<div class="who">${escHtml(who)}</div>`:'')+escHtml(t);
+  // segurar a mensagem apaga — a sua própria sempre, e o dono da sala pode
+  // apagar qualquer uma (moderação). Mensagem de sistema (sem id) nunca apaga.
+  if(id){
+    d.dataset.id=id;
+    if(cls==='me'||(chatRoom&&chatRoom.mine)){d.classList.add('deletable');bindMsgLongPress(d,id);}
+  }
+  m.appendChild(d);m.scrollTop=m.scrollHeight;
+  return d;
+}
+function bindMsgLongPress(el,msgId){
+  let timer=null;
+  const start=e=>{el.classList.add('pressing');timer=setTimeout(()=>{el.classList.remove('pressing');deleteMsg(msgId,el);},480);};
+  const cancel=()=>{clearTimeout(timer);el.classList.remove('pressing');};
+  el.addEventListener('pointerdown',start);
+  el.addEventListener('pointerup',cancel);
+  el.addEventListener('pointerleave',cancel);
+  el.addEventListener('pointercancel',cancel);
+}
+async function deleteMsg(msgId,el){
+  if(!confirm('Apagar essa mensagem pra todo mundo? Não dá pra desfazer.'))return;
+  try{await sbDeleteMessage(msgId);el.remove();}
+  catch(e){toastError('Não deu pra apagar essa mensagem agora');}
 }
 /* ---- Moderação: negócios catalogados por nós (sem dono ativo ainda) não têm quem module o chat manualmente,
    então bloqueamos ofensas na entrada da mensagem antes de publicar ---- */
@@ -4879,9 +4932,12 @@ function containsOffensiveWords(t){const n=normSeg(t);return PALAVRAS_BLOQUEADAS
 async function sendMsg(){
   const i=document.getElementById('msg-input');const t=i.value.trim();if(!t)return;
   if(containsOffensiveWords(t)){toast('Essa mensagem tem linguagem imprópria e não foi enviada 🚫');return;}
-  addMsg(t,'me');i.value='';
+  const el=addMsg(t,'me');i.value='';
   if(SUPABASE_READY&&chatRoom){
-    try{await sbSendMessage(chatRoom.id,(user&&user.name)||'Você',t);}
+    try{
+      const saved=await sbSendMessage(chatRoom.id,(user&&user.name)||'Você',t);
+      if(saved&&saved.id){el.dataset.id=saved.id;el.classList.add('deletable');bindMsgLongPress(el,saved.id);}
+    }
     catch(e){toastError('Mensagem não foi salva — verifique sua conexão');}
   }
 }
