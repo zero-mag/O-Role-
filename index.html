@@ -5777,6 +5777,7 @@ function sbRoomToLocal(r){
     boostUntil:r.boost_until?new Date(r.boost_until).getTime():null,
     clubUntil:r.club_until?new Date(r.club_until).getTime():null,
     planTier:r.plan_tier||null,
+    tier3Visible:!!r.tier3_visible,
     expiresAt:r.expires_at?new Date(r.expires_at).getTime():null,
     isMarketing:!!r.is_marketing,
     // rolê de marketing: nunca usa nome/foto reais do dono, mesmo sem override definido —
