@@ -1176,11 +1176,11 @@
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2 id="form-title">Seus dados</h2></div>
     <div class="scroll">
       <div class="field" id="su-name-field"><label><span id="lbl-name">Nome completo</span> <span class="req">*</span></label><input id="su-name" placeholder="Como te chamam?" /></div>
-      <!-- BUSINESS: CNPJ — vira 1º campo (antes do nome) quando "Tenho CNPJ" foi escolhido na tela anterior -->
+      <!-- BUSINESS: CNPJ — opcional, sempre 1º campo (antes do nome) num cadastro de empresa -->
       <div id="biz-cnpj-wrap" class="hide">
         <div id="biz-cnpj-yes">
-          <div class="loc-hint">🏢 Digite o CNPJ que a gente confirma na Receita e já preenche endereço e nicho pra você. O nome público você escolhe no campo abaixo.</div>
-          <div class="field"><label>CNPJ <span class="req">*</span></label><input id="biz-cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" oninput="maskCnpj(this)" /></div>
+          <div class="loc-hint">🏢 Tem CNPJ? A gente confirma na Receita e já preenche endereço e nicho pra você. Não tem? Pode deixar em branco e preencher tudo manualmente abaixo.</div>
+          <div class="field"><label>CNPJ <small style="color:var(--ink-3);font-weight:600;">(opcional)</small></label><input id="biz-cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" oninput="maskCnpj(this)" /></div>
           <div id="biz-cnpj-status" class="geo-status hide"></div>
           <div id="biz-cnpj-suggest" class="hide"></div>
         </div>
@@ -2884,8 +2884,12 @@ async function promoteAdminAccount(){
 }
 function selType(el){document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');signupType=el.dataset.type;}
 function goAfterType(){
-  if(signupType==='business')go('s-biztype');
-  else setupFormAndGo();
+  // fluxo de negócio simplificado (2026-07-27): sem mais pergunta "tem CNPJ?"
+  // nem passar por "Encontre sua empresa" antes — todo cadastro de negócio cai
+  // direto no formulário completo, com CNPJ como campo opcional lá dentro.
+  // s-biztype/s-claim-find continuam no código, só não fazem parte do fluxo
+  // por enquanto (fácil de religar depois).
+  setupFormAndGo();
 }
 function chooseCnpjMode(has,el){
   document.querySelectorAll('#s-biztype .type-card').forEach(c=>c.classList.remove('sel'));
@@ -2910,8 +2914,8 @@ function setupFormAndGo(){
   document.getElementById('form-title').textContent=biz?'Dados da empresa':'Seus dados';
   document.getElementById('personal-gps').classList.toggle('hide',biz);
   const cnpjWrap=document.getElementById('biz-cnpj-wrap'),nameField=document.getElementById('su-name-field');
-  cnpjWrap.classList.toggle('hide',!(biz&&bizHasCnpj));
-  if(biz&&bizHasCnpj)nameField.parentNode.insertBefore(cnpjWrap,nameField);
+  cnpjWrap.classList.toggle('hide',!biz);
+  if(biz)nameField.parentNode.insertBefore(cnpjWrap,nameField);
   else nameField.parentNode.insertBefore(cnpjWrap,nameField.nextSibling);
   document.getElementById('biz-loc').classList.toggle('hide',!biz);
   document.getElementById('biz-segment').classList.toggle('hide',!biz);
@@ -3521,11 +3525,12 @@ function confirmTier3Notice(){tier3Acked=true;closeTier3Notice();doSignup();}
 // (negócio continua exigindo verificação de CNPJ normalmente). Tirar esse bypass assim que o
 // domínio for verificado no Resend e o remetente das Edge Functions for trocado.
 const SKIP_EMAIL_VERIFY_PERSONAL=true;
-// TEMPORÁRIO (2026-07-23): mesmo motivo acima — start-cnpj-verify também manda e-mail via Resend,
-// então a prova de posse do CNPJ também tá travada pra negócios novos. Pula essa etapa (o negócio
-// nasce SEM o selo "Verificado", nunca com ele) até o domínio ser verificado; a partir daí, tirar
-// esse bypass volta a exigir a prova real antes de conceder o selo. Não afeta o fluxo "Encontre a
-// sua empresa" (reivindicação de negócio já catalogado), que é um caminho separado.
+// (2026-07-27) Desde a reforma do cadastro de negócio, doSignup() nem chama mais
+// startCnpjOwnershipVerify() — CNPJ virou campo opcional, sem verificação de posse
+// nesse ponto do fluxo. Essa constante ficou sem uso por enquanto (a tela/Edge
+// Functions de verificação continuam no código, só desconectadas do cadastro),
+// mantida aqui como marcador de que a intenção original ainda existe, pra quando
+// isso for retomado.
 const SKIP_CNPJ_OWNERSHIP_VERIFY=true;
 async function doSignup(){
   const name=document.getElementById('su-name').value.trim();
@@ -3535,14 +3540,17 @@ async function doSignup(){
   if(!name||!email||!pass||!passConfirm){toast('Preencha todos os campos');return;}
   if(pass!==passConfirm){toast('As senhas não são iguais');return;}
   if(signupType==='business'){
-    let cnpj='';
-    if(bizHasCnpj){
-      cnpj=document.getElementById('biz-cnpj').value.trim();
-      const cnpjDigits=cnpj.replace(/\D/g,'');
-      if(cnpjDigits.length!==14||!isValidCNPJ(cnpjDigits)){toast('Informe um CNPJ válido, ou escolha "Não tenho CNPJ"');return;}
-      if(bizCnpjBlocked){toast('Esse CNPJ não foi encontrado como ativo na Receita Federal. Confira os números.');return;}
-      if(!cnpjOwnershipVerified&&!SKIP_CNPJ_OWNERSHIP_VERIFY){startCnpjOwnershipVerify();return;}
-    }
+    // CNPJ agora é opcional (2026-07-27) — sem verificação de posse por e-mail
+    // nesse ponto (fecha a dependência do Resend/Receita por enquanto). Se a
+    // pessoa digitou algo, ainda confere que é um CNPJ real/formatado certo
+    // (evita lixo no banco), mas nunca bloqueia quem deixa em branco.
+    let cnpj=document.getElementById('biz-cnpj').value.trim();
+    const cnpjDigits=cnpj.replace(/\D/g,'');
+    const hasCnpj=cnpjDigits.length>0;
+    if(hasCnpj){
+      if(cnpjDigits.length!==14||!isValidCNPJ(cnpjDigits)){toast('CNPJ inválido — confira os números, ou deixe o campo em branco');return;}
+      if(bizCnpjBlocked){toast('Esse CNPJ não foi encontrado como ativo na Receita Federal. Confira os números, ou deixe o campo em branco.');return;}
+    }else{cnpj='';}
     const cep=document.getElementById('biz-cep').value.trim();
     const rua=document.getElementById('biz-address').value.trim();
     const num=document.getElementById('biz-num').value.trim();
@@ -3552,7 +3560,7 @@ async function doSignup(){
     if(!bizCoords){toast('Confirme a localização do seu negócio no mapa antes de continuar');openLocPicker('biz');return;}
     const fullAddr=[rua+(num?', '+num:''),bairro,city].filter(Boolean).join(' — ')+(cep?'  ·  '+cep:'');
     user={type:'business',name,email,cep,address:fullAddr,coords:bizCoords,
-      segment:bizSeg,emoji:bizEm,cnpj,razaoSocial:bizHasCnpj?bizCnpjRazao:'',verified:bizHasCnpj&&cnpjOwnershipVerified,
+      segment:bizSeg,emoji:bizEm,cnpj,razaoSocial:hasCnpj?bizCnpjRazao:'',verified:false,
       whatsapp:normalizeWhatsapp(document.getElementById('biz-wpp').value),
       instagram:document.getElementById('biz-insta').value.trim(),
       site:document.getElementById('biz-site').value.trim()};
