@@ -1232,7 +1232,7 @@
         <div id="biz-cep-status" class="geo-status hide"></div>
         <div class="field"><label>Endereço</label><input id="biz-address" placeholder="Rua / logradouro" /></div>
         <div class="two-col">
-          <div class="field"><label>Número</label><input id="biz-num" inputmode="numeric" placeholder="Nº" /></div>
+          <div class="field"><label>Número</label><input id="biz-num" inputmode="numeric" placeholder="Nº" oninput="onBizNumInput()" /></div>
           <div class="field"><label>Bairro</label><input id="biz-bairro" placeholder="Bairro" /></div>
         </div>
         <div class="field"><label>Cidade / UF</label><input id="biz-city" placeholder="Cidade - UF" /></div>
@@ -3174,7 +3174,7 @@ async function buscarCnpj(cnpj){
     else if(d.ddd_telefone_2)document.getElementById('biz-wpp').value=d.ddd_telefone_2;
     const cepSt=document.getElementById('biz-cep-status');
     if(cepSt){cepSt.classList.remove('hide');cepSt.style.color='var(--green)';cepSt.textContent='✓ Endereço preenchido pelo CNPJ. Confira o número.';}
-    geocodeBiz({logradouro:d.logradouro,localidade:d.municipio,uf:d.uf});
+    geocodeBiz();
     // sugere o nicho pela atividade econômica (CNAE)
     suggestSegByCnae(d.cnae_fiscal_descricao,d.cnae_fiscal);
     // sugestão de nome público (não sobrescreve sozinho)
@@ -3417,15 +3417,35 @@ async function buscarCep(cep){
     document.getElementById('biz-bairro').value=d.bairro||'';
     document.getElementById('biz-city').value=(d.localidade||'')+(d.uf?' - '+d.uf:'');
     st.style.color='var(--green)';st.textContent='✓ Endereço encontrado! Confira o número.';
-    geocodeBiz(d);
+    geocodeBiz();
   }catch(e){st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra buscar o CEP.';}
 }
-async function geocodeBiz(d){
+let bizNumGeoTimer=null;
+// dispara de novo quando o número é digitado depois do CEP já ter preenchido a
+// rua (o CEP sozinho não vem com número — sem isso, o pin ficava em qualquer
+// ponto da rua, não no endereço certo)
+function onBizNumInput(){
+  clearTimeout(bizNumGeoTimer);
+  bizNumGeoTimer=setTimeout(()=>{
+    if(document.getElementById('biz-address').value.trim())geocodeBiz();
+  },900);
+}
+async function geocodeBiz(){
   const st=document.getElementById('biz-cep-status');
+  const rua=document.getElementById('biz-address').value.trim();
+  if(!rua)return;
+  const num=document.getElementById('biz-num').value.trim();
+  const cityUf=document.getElementById('biz-city').value.trim();
   try{
-    const q=encodeURIComponent([d.logradouro,d.localidade,d.uf,'Brasil'].filter(Boolean).join(', '));
-    const r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+q);
-    const arr=await r.json();
+    const qComNum=encodeURIComponent([num?rua+', '+num:rua,cityUf,'Brasil'].filter(Boolean).join(', '));
+    let r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+qComNum);
+    let arr=await r.json();
+    if((!arr||!arr[0])&&num){
+      // não achou o número exato — tenta só a rua, melhor um ponto aproximado que nada
+      const qSoRua=encodeURIComponent([rua,cityUf,'Brasil'].filter(Boolean).join(', '));
+      r=await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&limit=1&extratags=1&q='+qSoRua);
+      arr=await r.json();
+    }
     if(arr&&arr[0]){
       bizCoords={lat:+arr[0].lat,lng:+arr[0].lon};
       // sugestões via OpenStreetMap (dado aberto, mesma lógica da ferramenta de admin) — aplicadas só na criação da conta, o dono confere depois em Configurações
