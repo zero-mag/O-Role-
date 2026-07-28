@@ -1225,9 +1225,12 @@
         <div class="switch" id="gps-switch"></div>
       </div>
 
-      <!-- BUSINESS: endereço fixo do estabelecimento (via CEP) -->
+      <!-- BUSINESS: endereço fixo do estabelecimento -->
       <div id="biz-loc" class="hide">
-        <div class="loc-hint"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Onde fica o seu estabelecimento? Digite o <b>CEP</b> que a gente completa o resto e fixa seu pin no mapa pros clientes.</div>
+        <div class="loc-hint"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Onde fica o seu estabelecimento? Se você estiver lá agora, é mais rápido usar o GPS; senão, digite o CEP. Nos dois casos você confirma o ponto exato no mapa antes de continuar.</div>
+        <button type="button" class="btn ghost" id="biz-geo-btn" onclick="useCurrentAsBiz()" style="margin-bottom:6px;"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Estou no local agora — usar meu GPS</button>
+        <div id="biz-geo-status" class="geo-status hide"></div>
+        <div class="or-line">ou digite o CEP</div>
         <div class="field"><label>CEP <span class="req">*</span></label><input id="biz-cep" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="maskCep(this)" /></div>
         <div id="biz-cep-status" class="geo-status hide"></div>
         <div class="field"><label>Endereço</label><input id="biz-address" placeholder="Rua / logradouro" /></div>
@@ -1236,10 +1239,6 @@
           <div class="field"><label>Bairro</label><input id="biz-bairro" placeholder="Bairro" /></div>
         </div>
         <div class="field"><label>Cidade / UF</label><input id="biz-city" placeholder="Cidade - UF" /></div>
-        <div class="or-line">ou</div>
-        <button type="button" class="btn ghost" id="biz-geo-btn" onclick="useCurrentAsBiz()" style="margin-bottom:6px;"><svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg> Estou no local agora — usar meu GPS</button>
-        <button type="button" class="btn ghost" onclick="openLocPicker('biz')" style="margin-bottom:6px;">🗺️ Ou confirmar/ajustar no mapa</button>
-        <div id="biz-geo-status" class="geo-status hide"></div>
 
         <label class="blk-label" style="margin-top:16px;">Contatos do perfil <span style="color:var(--ink-3);font-weight:600;">(opcional)</span></label>
         <div class="field"><label>📱 WhatsApp</label><input id="biz-wpp" inputmode="numeric" placeholder="(11) 90000-0000" /></div>
@@ -3173,8 +3172,9 @@ async function buscarCnpj(cnpj){
     if(d.ddd_telefone_1)document.getElementById('biz-wpp').value=d.ddd_telefone_1;
     else if(d.ddd_telefone_2)document.getElementById('biz-wpp').value=d.ddd_telefone_2;
     const cepSt=document.getElementById('biz-cep-status');
-    if(cepSt){cepSt.classList.remove('hide');cepSt.style.color='var(--green)';cepSt.textContent='✓ Endereço preenchido pelo CNPJ. Confira o número.';}
-    geocodeBiz();
+    if(cepSt){cepSt.classList.remove('hide');cepSt.style.color='var(--green)';cepSt.textContent='✓ Endereço preenchido pelo CNPJ.';}
+    await geocodeBiz();
+    openLocPicker('biz'); // sempre mostra o mapa pra confirmar/ajustar o pin, endereço da Receita nem sempre é preciso
     // sugere o nicho pela atividade econômica (CNAE)
     suggestSegByCnae(d.cnae_fiscal_descricao,d.cnae_fiscal);
     // sugestão de nome público (não sobrescreve sozinho)
@@ -3416,8 +3416,9 @@ async function buscarCep(cep){
     document.getElementById('biz-address').value=d.logradouro||'';
     document.getElementById('biz-bairro').value=d.bairro||'';
     document.getElementById('biz-city').value=(d.localidade||'')+(d.uf?' - '+d.uf:'');
-    st.style.color='var(--green)';st.textContent='✓ Endereço encontrado! Confira o número.';
-    geocodeBiz();
+    st.style.color='var(--green)';st.textContent='✓ Endereço encontrado!';
+    await geocodeBiz();
+    openLocPicker('biz'); // CEP sozinho não é preciso o bastante — sempre mostra o mapa pra confirmar/ajustar o pin
   }catch(e){st.style.color='var(--accent-dark)';st.textContent='⚠️ Sem conexão pra buscar o CEP.';}
 }
 let bizNumGeoTimer=null;
@@ -3471,9 +3472,13 @@ async function geocodeBiz(){
 function useCurrentAsBiz(){
   const st=document.getElementById('biz-geo-status');st.classList.remove('hide');st.style.color='var(--amber)';st.textContent='📡 Buscando sua localização…';
   if(navigator.geolocation)navigator.geolocation.getCurrentPosition(
-    p=>{bizCoords={lat:p.coords.latitude,lng:p.coords.longitude};st.style.color='var(--green)';st.textContent='✓ Localização do estabelecimento fixada!';},
-    e=>{st.style.color='var(--amber)';st.textContent='⚠️ Não consegui o GPS. Digite o endereço acima.';}
-  );else{st.textContent='⚠️ GPS indisponível. Digite o endereço acima.';}
+    p=>{
+      bizCoords={lat:p.coords.latitude,lng:p.coords.longitude};
+      st.style.color='var(--green)';st.textContent='✓ Localização encontrada — confirme o pin no mapa.';
+      openLocPicker('biz'); // sempre mostra o mapa pra confirmar/ajustar, nunca aceita a posição às cegas
+    },
+    e=>{st.style.color='var(--amber)';st.textContent='⚠️ Não consegui o GPS. Digite o CEP abaixo.';}
+  );else{st.textContent='⚠️ GPS indisponível. Digite o CEP abaixo.';}
 }
 function askGPS(row){gpsOn=!gpsOn;document.getElementById('gps-switch').classList.toggle('on',gpsOn);
   if(gpsOn){document.getElementById('gps-txt').textContent='Buscando sua localização…';
