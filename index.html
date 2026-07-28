@@ -5824,7 +5824,16 @@ let pendingGoogleOnboarding=false;
 async function bootSequence(){
   if(SUPABASE_READY){
     try{
-      const session=await sbCurrentSession();
+      // ao voltar do redirect do Google, o supabase-js às vezes ainda tá processando
+      // o token da URL bem na hora que a gente confere — sem re-tentar, a pessoa via
+      // a tela de login por engano mesmo já autenticada (a conta já tinha sido criada
+      // de verdade nessa primeira tentativa, só a tela não esperou confirmar).
+      let session=await sbCurrentSession();
+      const voltandoDoOAuth=/[?&#](code|access_token)=/.test(location.href);
+      for(let i=0;i<6&&!session&&voltandoDoOAuth;i++){
+        await new Promise(r=>setTimeout(r,300));
+        session=await sbCurrentSession();
+      }
       if(session){
         const profile=await sbGetProfile(session.user.id);user=profileToUser(profile);save();
         // detecta login social numa conta que acabou de nascer AGORA (criada e
