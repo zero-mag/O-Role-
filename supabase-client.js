@@ -34,10 +34,12 @@ async function sbSignOut() {
 // próprio app, que já detecta a sessão sozinho no boot (supabase-js faz isso
 // automaticamente a partir da URL de retorno).
 async function sbSignInWithOAuth(provider) {
-  const { error } = await sb.auth.signInWithOAuth({
-    provider,
-    options: { redirectTo: location.origin + location.pathname }
-  });
+  const options = { redirectTo: location.origin + location.pathname };
+  // sem isso, o Google pula direto pra sessão já ativa no aparelho/navegador
+  // (ou a última conta usada) sem nunca mostrar a tela de escolher conta —
+  // "prompt=select_account" força ele a sempre perguntar qual conta usar.
+  if (provider === 'google') options.queryParams = { prompt: 'select_account' };
+  const { error } = await sb.auth.signInWithOAuth({ provider, options });
   if (error) throw error;
 }
 
