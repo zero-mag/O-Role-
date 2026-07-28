@@ -5841,10 +5841,11 @@ async function bootSequence(){
         // bem mais recente que a criação) pra saber se mostra termos+escolha
         // de tipo, ou se é alguém voltando (entra direto, sem repetir nada)
         const provider=session.user.app_metadata&&session.user.app_metadata.provider;
-        if(provider&&provider!=='email'&&profile.type==='personal'){
-          const createdMs=new Date(session.user.created_at).getTime();
-          const lastSignInMs=new Date(session.user.last_sign_in_at||session.user.created_at).getTime();
-          if(Math.abs(lastSignInMs-createdMs)<15000)pendingGoogleOnboarding=true;
+        const createdMs=new Date(session.user.created_at).getTime();
+        const lastSignInMs=new Date(session.user.last_sign_in_at||session.user.created_at).getTime();
+        console.log('[google-onboarding-debug]',{provider,type:profile.type,created_at:session.user.created_at,last_sign_in_at:session.user.last_sign_in_at,diffMs:Math.abs(lastSignInMs-createdMs)});
+        if(provider&&provider!=='email'&&profile.type==='personal'&&Math.abs(lastSignInMs-createdMs)<60000){
+          pendingGoogleOnboarding=true;
         }
       }
     }catch(e){/* sem sessão válida, segue fluxo normal de login */}
