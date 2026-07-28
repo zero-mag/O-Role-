@@ -4249,7 +4249,12 @@ function tgSet(el,name){el.classList.toggle('on');toast(name+(el.classList.conta
 /* ============ TERMOS / PRIVACIDADE ============ */
 let termsReturn='s-form',termsAccepted=false,termsAcceptedAt=null,termsGateAction=null;
 function openTerms(which){
-  termsReturn=document.querySelector('.screen.active:not(.leaving)').id;
+  // pode ser chamado logo no boot (onboarding pós-Google), antes de qualquer
+  // tela ter sido marcada como ativa ainda — sem essa checagem, o .id quebrava
+  // em cima de null e o erro (silencioso, pego pelo catch do bootSequence)
+  // jogava a pessoa de volta pro login.
+  const curScreen=document.querySelector('.screen.active:not(.leaving)');
+  termsReturn=curScreen?curScreen.id:'s-app';
   document.getElementById('terms-title').textContent=which==='privacidade'?'Política de Privacidade':'Termos de Uso';
   document.getElementById('terms-body').innerHTML=TERMS_HTML;
   document.getElementById('terms-body').scrollTop=0;
@@ -5843,7 +5848,6 @@ async function bootSequence(){
         const provider=session.user.app_metadata&&session.user.app_metadata.provider;
         const createdMs=new Date(session.user.created_at).getTime();
         const lastSignInMs=new Date(session.user.last_sign_in_at||session.user.created_at).getTime();
-        console.log('[google-onboarding-debug]',{provider,type:profile.type,created_at:session.user.created_at,last_sign_in_at:session.user.last_sign_in_at,diffMs:Math.abs(lastSignInMs-createdMs)});
         if(provider&&provider!=='email'&&profile.type==='personal'&&Math.abs(lastSignInMs-createdMs)<60000){
           pendingGoogleOnboarding=true;
         }
