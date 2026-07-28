@@ -1081,6 +1081,23 @@
     </div>
   </section>
 
+  <!-- ===== PÓS-GOOGLE: PESSOAL OU BUSINESS? (só pra conta que acabou de nascer) ===== -->
+  <section class="screen" id="s-google-type">
+    <div class="appbar"><h2>Bem-vindo(a)!</h2></div>
+    <div class="scroll">
+      <div class="type-explain-box">Sua conta Google já está pronta. Só falta escolher <b>como você vai usar</b> o Rolê+ — cada tipo desbloqueia telas e ferramentas próprias.</div>
+      <div class="type-card" data-type="personal" onclick="pickGoogleType('personal')">
+        <div class="th"><div class="em">🎉</div><div><div class="tt">Pessoal</div><div class="ts">Pra quem quer sair e encontrar gente</div></div><div class="tprice">Grátis</div></div>
+        <p class="tdesc">Vê no mapa o que está rolando <b>agora</b> perto de você e cria seus próprios encontros rápidos. É como sua conta já está agora — só confirmar.</p>
+      </div>
+      <div class="type-card" data-type="business" onclick="pickGoogleType('business')">
+        <div class="th"><div class="em">🏪</div><div><div class="tt">Business · Rolê+</div><div class="ts">Bar, academia, salão, loja, restaurante…</div></div><div class="tprice biz">Grátis</div></div>
+        <p class="tdesc">Sua empresa ganha um <b>ponto fixo no mapa</b>, com vitrine, promoções e métricas. Só falta completar os dados do negócio na próxima tela.</p>
+      </div>
+      <div class="warn-note plain">⚠️ <b>Atenção:</b> essa escolha é permanente e não pode ser trocada depois.</div>
+    </div>
+  </section>
+
   <!-- ===== SIGNUP: BUSINESS — TEM CNPJ? ===== -->
   <section class="screen" id="s-biztype">
     <div class="appbar"><button class="back" onclick="goBack()">‹</button><h2>Seu estabelecimento</h2></div>
@@ -1236,7 +1253,7 @@
         <div class="lgpd-check"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg></div>
         <span>Li e aceito os <b>Termos de Uso</b> e a <b>Política de Privacidade (LGPD)</b>. <u>Toque para ler e aceitar →</u></span>
       </div>
-      <button class="btn" onclick="doSignup()">Criar minha conta</button>
+      <button class="btn" id="s-form-submit-btn" onclick="submitSForm()">Criar minha conta</button>
     </div>
   </section>
 
@@ -2067,7 +2084,7 @@ let user=JSON.parse(lsGet('zona_user')||'null');
 // localStorage e quebrar save() (login, criar rolê, etc.) com um erro genérico
 // que não dizia o motivo real. Limpa o que já tiver acumulado de sessões antigas.
 if(SUPABASE_READY)lsRemove('zona_rooms');
-let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null, mktMode=false, mktDays=1;
+let signupType='personal', gpsOn=false, priv=false, boost=false, durH=1, pendingRoom=null, targetRoom=null, crCover=null, crAvatar=null, mktMode=false, mktDays=1, googleUpgradeMode=false;
 function setMktDays(d){
   const opts=[...document.querySelectorAll('#cr-mkt-dur .opt')];
   let best=opts[0],bestDiff=Infinity;
@@ -2911,8 +2928,18 @@ function chooseCnpjMode(has,el){
   setupFormAndGo();
 }
 function setupFormAndGo(){
+  // sempre reseta o modo "upgrade pós-Google" — garante que o formulário normal
+  // (com e-mail/senha/termos) nunca fica preso escondido por causa de uma
+  // navegação anterior que passou por enterGoogleBusinessUpgrade()
+  googleUpgradeMode=false;
+  document.querySelector('#su-email').closest('.field').classList.remove('hide');
+  document.querySelector('#su-pass').closest('.field').classList.remove('hide');
+  document.querySelector('#su-pass-confirm').closest('.field').classList.remove('hide');
+  document.getElementById('lgpd-row').classList.remove('hide');
+  document.getElementById('s-form-submit-btn').textContent='Criar minha conta';
   const biz=signupType==='business';
   document.getElementById('lbl-name').textContent=biz?'Nome da empresa':'Nome completo';
+  document.getElementById('su-name').value='';
   document.getElementById('su-name').placeholder=biz?'Ex: Bar do Zé':'Como te chamam?';
   document.getElementById('form-title').textContent=biz?'Dados da empresa':'Seus dados';
   document.getElementById('personal-gps').classList.toggle('hide',biz);
@@ -3522,7 +3549,8 @@ async function confirmCancelSignup(){
 }
 function openTier3Notice(){document.getElementById('tier3-notice-modal').classList.add('active');}
 function closeTier3Notice(){document.getElementById('tier3-notice-modal').classList.remove('active');}
-function confirmTier3Notice(){tier3Acked=true;closeTier3Notice();doSignup();}
+function confirmTier3Notice(){tier3Acked=true;closeTier3Notice();if(googleUpgradeMode)finishGoogleBusinessUpgrade();else doSignup();}
+function submitSForm(){if(googleUpgradeMode)finishGoogleBusinessUpgrade();else doSignup();}
 // TEMPORÁRIO (2026-07-20, ampliado pra negócio em 2026-07-28): Resend só manda
 // e-mail pro dono da conta até verificar um domínio, então confirmação de
 // e-mail tá quebrada pra qualquer pessoa nova — pessoal OU negócio (achado ao
@@ -4250,15 +4278,102 @@ function acceptTerms(){
   else goBack();
 }
 function closeTerms(){goBack();}
-// login/cadastro social ainda não passa pela tela de termos do formulário normal (essa só roda
-// dentro do fluxo de e-mail+senha) — sem isso, dava pra criar conta via Google sem nunca ver os
-// termos. Se o navegador já aceitou uma vez, pula direto pro Google; senão mostra os termos antes
-// e só dispara o redirect depois de aceitar.
+// (2026-07-28) Termos e a escolha Pessoal/Business pro login social agora rolam
+// DEPOIS do Google confirmar a conta, não antes — só assim dá pra saber se é
+// alguém logando pela primeira vez (precisa ver os termos e escolher o tipo) ou
+// uma conta que já existia (entra direto, sem repetir nada disso). Ver
+// bootSequence()/startGoogleOnboarding(). Antes disso, o gate rodava aqui com
+// uma flag no localStorage, que não sabia diferenciar as duas situações.
 function googleAuthGate(){
   if(!SUPABASE_READY){toast('Sem conexão com o servidor');return;}
-  if(lsGet('zona_terms_ever_accepted')){loginWithOAuth('google');return;}
-  termsGateAction=()=>loginWithOAuth('google');
+  loginWithOAuth('google');
+}
+// dispara logo depois do boot detectar uma conta que acabou de nascer via
+// login social (ver bootSequence) — termos primeiro, escolha do tipo depois.
+function startGoogleOnboarding(){
+  termsGateAction=()=>go('s-google-type');
   openTerms('uso');
+}
+function pickGoogleType(type){
+  if(type==='personal'){routeAfterAuth();setTimeout(openSharedRoomFromUrl,300);return;}
+  enterGoogleBusinessUpgrade();
+}
+// reusa a tela s-form (mesmos campos de negócio de sempre), só escondendo o
+// que não faz sentido pra quem já tem conta via Google (nome de login,
+// e-mail/senha, termos — já aceitos no passo anterior)
+function enterGoogleBusinessUpgrade(){
+  googleUpgradeMode=true;
+  signupType='business';
+  document.getElementById('form-title').textContent='Complete os dados do seu negócio';
+  document.getElementById('su-name').value=user&&user.name||'';
+  document.querySelector('#su-email').closest('.field').classList.add('hide');
+  document.querySelector('#su-pass').closest('.field').classList.add('hide');
+  document.querySelector('#su-pass-confirm').closest('.field').classList.add('hide');
+  document.getElementById('personal-gps').classList.add('hide');
+  document.getElementById('lgpd-row').classList.add('hide');
+  const cnpjWrap=document.getElementById('biz-cnpj-wrap'),nameField=document.getElementById('su-name-field');
+  cnpjWrap.classList.remove('hide');
+  nameField.parentNode.insertBefore(cnpjWrap,nameField);
+  document.getElementById('biz-loc').classList.remove('hide');
+  document.getElementById('biz-segment').classList.remove('hide');
+  document.getElementById('s-form-submit-btn').textContent='Virar conta Business 🏪';
+  go('s-form');
+}
+// URL provisória — troca pela real assim que a função for deployada (nome
+// aleatório de sempre, confira a coluna URL no painel do Supabase)
+const UPGRADE_TO_BUSINESS_URL='/functions/v1/upgrade-to-business';
+async function finishGoogleBusinessUpgrade(){
+  if(!user||!user.id){toast('Sessão inválida — tente entrar de novo');return;}
+  const name=document.getElementById('su-name').value.trim();
+  if(!name){toast('Dê um nome ao seu negócio');return;}
+  let cnpj=document.getElementById('biz-cnpj').value.trim();
+  const cnpjDigits=cnpj.replace(/\D/g,'');
+  const hasCnpj=cnpjDigits.length>0;
+  if(hasCnpj){
+    if(cnpjDigits.length!==14||!isValidCNPJ(cnpjDigits)){toast('CNPJ inválido — confira os números, ou deixe o campo em branco');return;}
+    if(bizCnpjBlocked){toast('Esse CNPJ não foi encontrado como ativo na Receita Federal. Confira os números, ou deixe o campo em branco.');return;}
+  }else{cnpj='';}
+  const cep=document.getElementById('biz-cep').value.trim();
+  const rua=document.getElementById('biz-address').value.trim();
+  const num=document.getElementById('biz-num').value.trim();
+  const bairro=document.getElementById('biz-bairro').value.trim();
+  const city=document.getElementById('biz-city').value.trim();
+  if(cep.replace('-','').length!==8 && !bizCoords){toast('Informe o CEP do estabelecimento');return;}
+  if(!bizCoords){toast('Confirme a localização do seu negócio no mapa antes de continuar');openLocPicker('biz');return;}
+  if(segTier(bizSeg)===3&&!tier3Acked){openTier3Notice();return;}
+  const fullAddr=[rua+(num?', '+num:''),bairro,city].filter(Boolean).join(' — ')+(cep?'  ·  '+cep:'');
+  showLoading('Transformando sua conta em Business…');
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    const res=await fetch(window.SUPABASE_URL+UPGRADE_TO_BUSINESS_URL,{
+      method:'POST',headers:{'Authorization':'Bearer '+(session&&session.access_token)}
+    });
+    const data=await res.json();
+    if(!res.ok||!data.ok)throw new Error(data.error||'falha ao trocar tipo de conta');
+
+    const horarioFinal=bizSuggestedHorario||defaultHorario();
+    const ofereceFinal=bizSuggestedOferece.slice();
+    const whatsapp=normalizeWhatsapp(document.getElementById('biz-wpp').value);
+    const instagram=document.getElementById('biz-insta').value.trim();
+    const site=document.getElementById('biz-site').value.trim();
+    await sbUpdateProfile(user.id,{
+      segment:bizSeg,emoji:bizEm,cnpj,razao_social:hasCnpj?bizCnpjRazao:'',verified:false,
+      cep,address:fullAddr,lat:bizCoords.lat,lng:bizCoords.lng,
+      whatsapp,instagram,site,horario:horarioFinal
+    });
+    const room=await sbCreateRoom({
+      owner_id:user.id,is_business:true,nome:name,emoji:bizEm,cat:bizSeg,
+      address:fullAddr,lat:bizCoords.lat,lng:bizCoords.lng,whatsapp,instagram,site,
+      verified:false,horario:horarioFinal,oferece:ofereceFinal
+    });
+    user.type='business';user.name=name;user.roomId=room.id;user.segment=bizSeg;user.emoji=bizEm;user.cnpj=cnpj;
+    user.address=fullAddr;user.coords=bizCoords;user.vitrine=[];user.promocoes=[];user.oferece=ofereceFinal;user.horario=horarioFinal;
+    save();
+    googleUpgradeMode=false;
+    toast('Sua conta agora é Business! 🎉');
+    routeAfterAuth(true);
+  }catch(e){const pt=traduzErro(e&&e.message);toastError('Não deu pra concluir agora'+(pt?': '+pt:''));}
+  finally{hideLoading();}
 }
 const TERMS_HTML=`
 <div class="legal">
@@ -5705,11 +5820,24 @@ function hydrateBizUserFromRoom(){
   user.planTier=r.planTier||null;
   user.profileViews=r.profileViews||0;
 }
+let pendingGoogleOnboarding=false;
 async function bootSequence(){
   if(SUPABASE_READY){
     try{
       const session=await sbCurrentSession();
-      if(session){const profile=await sbGetProfile(session.user.id);user=profileToUser(profile);save();}
+      if(session){
+        const profile=await sbGetProfile(session.user.id);user=profileToUser(profile);save();
+        // detecta login social numa conta que acabou de nascer AGORA (criada e
+        // logada quase no mesmo segundo — numa conta antiga o último login é
+        // bem mais recente que a criação) pra saber se mostra termos+escolha
+        // de tipo, ou se é alguém voltando (entra direto, sem repetir nada)
+        const provider=session.user.app_metadata&&session.user.app_metadata.provider;
+        if(provider&&provider!=='email'&&profile.type==='personal'){
+          const createdMs=new Date(session.user.created_at).getTime();
+          const lastSignInMs=new Date(session.user.last_sign_in_at||session.user.created_at).getTime();
+          if(Math.abs(lastSignInMs-createdMs)<15000)pendingGoogleOnboarding=true;
+        }
+      }
     }catch(e){/* sem sessão válida, segue fluxo normal de login */}
     await loadRoomsFromSupabase();
     await hydrateUserFlags();
@@ -5721,7 +5849,8 @@ async function bootSequence(){
   setTimeout(()=>{
     hideSplash();
     try{
-      if(user&&!user.emailVerified&&SKIP_EMAIL_VERIFY){
+      if(pendingGoogleOnboarding){pendingGoogleOnboarding=false;startGoogleOnboarding();}
+      else if(user&&!user.emailVerified&&SKIP_EMAIL_VERIFY){
         user.emailVerified=true;
         if(SUPABASE_READY&&user.id)sbUpdateProfile(user.id,{email_verified:true}).catch(()=>{});
         save();
